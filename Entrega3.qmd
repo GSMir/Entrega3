@@ -1,0 +1,57 @@
+---
+title: "Entrega3"
+author: "Ángel García, Arnau Piferrer y Guillem Serra"
+format: html
+editor: visual
+---
+
+Este es el [repositorio](https://github.com/GSMir/Entrega3), y el data set lo hemos sacado de este [link](https://archive.ics.uci.edu/dataset/162/forest+fires)
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+```{r}
+library(readr)
+forestfire <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/forest-fires/forestfires.csv")
+```
+
+
+Hay `r nrow(forestfire)` visualizaciones de `r ncol(forestfire)` variables.
+
+Veamos cuales son las variables:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
