@@ -5,53 +5,23 @@ format: html
 editor: visual
 ---
 
-Este es el [repositorio](https://github.com/GSMir/Entrega3), y el data set lo hemos sacado de este [link](https://archive.ics.uci.edu/dataset/162/forest+fires)
+Este es el [repositorio](https://github.com/GSMir/Entrega3), y el data set lo hemos sacado de este [link](https://archive.ics.uci.edu/dataset/45/heart+disease)
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-
 ```{r}
 library(readr)
-forestfire <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/forest-fires/forestfires.csv")
+library(tidyverse)
+heartdisease <- read_csv("https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data", col_names = FALSE, show_col_types = FALSE)
 ```
 
+Hay `r nrow(heartdisease)` visualizaciones de `r ncol(heartdisease)` variables.
 
-Hay `r nrow(forestfire)` visualizaciones de `r ncol(forestfire)` variables.
+```{r}
+heartdisease = heartdisease %>% rename(age = X1, sex = X2, cp = X3, trestbps = X4, chol = X5, fbs = X6, restecg = X7, thalac = X8, exang = X9, oldpeak = X10, slope = X11, ca = X12, thal = X13, num = X14)
+heartdisease = heartdisease %>% filter(!str_detect(thal, "\\?") & (!str_detect(ca, "\\?")))
+```
 
-Veamos cuales son las variables:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Hay `r nrow(heartdisease)` visualizaciones de `r ncol(heartdisease)` variables.
