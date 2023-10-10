@@ -67,22 +67,28 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
+<!-- Aixo per fer es beamer https://bookdown.org/yihui/rmarkdown/beamer-presentation.html -->
+<!-- data set original https://archive.ics.uci.edu/dataset/45/heart+disease -->
 <p>Este es el <a href="https://github.com/GSMir/Entrega3">repositorio</a>, y el data set lo hemos sacado de este <a href="https://archive.ics.uci.edu/dataset/45/heart+disease">link</a></p>
-<div class="cell">
-<div class="cell-output cell-output-stderr">
-<pre><code>-- Attaching core tidyverse packages ------------------------ tidyverse 2.0.0 --
-v dplyr     1.1.2     v purrr     1.0.1
-v forcats   1.0.0     v stringr   1.5.0
-v ggplot2   3.4.3     v tibble    3.2.1
-v lubridate 1.9.2     v tidyr     1.3.0
--- Conflicts ------------------------------------------ tidyverse_conflicts() --
-x dplyr::filter() masks stats::filter()
-x dplyr::lag()    masks stats::lag()
-i Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-</div>
-</div>
-<p>Hay 303 visualizaciones de 14 variables.</p>
-<p>Hay 297 visualizaciones de 14 variables.</p>
+<p>El objetivo del estudio original es detectar la presencia de enferemedades del corazón en un paciente. Hay 297 visualizaciones de 14 variables.</p>
+<!-- Cambiar nom de algunes de ses vairiables, perque tenguin mes sentit -->
+<p>Describamos ahora las variables:</p>
+<ul>
+<li><p><strong>age</strong>: Año del paciente, valor entero, con un mínimo de 29 y un máximo de 77 años.</p></li>
+<li><p><strong>sex</strong>: Sexo cromosómico del paciente, variable categórica, toma el valor 0 para el femenino y 1 para el masculino.</p></li>
+<li><p><strong>cp</strong>: “Chest Pain” hace referéncia al tipo de dolor que se sufre en el pecho, es una variable categórica. Toma los valores 1 para angina de pecho típica, 2 para angina de pecho atípica, 3 para dolores que no son de angina de pecho, 4 asintomático.</p></li>
+<li><p><strong>trestbps</strong>: Presión de la sangre en reposo (mm Hg), una variable numérica, con el valor mínimo en 94 y el valor máximo en 200.</p></li>
+<li><p><strong>chol</strong>: Colesterol en sangre (mg/dl), variable numérica con un mínimo de 126 y un máximo de 564.</p></li>
+<li><p><strong>fbs</strong>: Booleano que determina si la cantidad de azúcar en sangre en ayuno es mayor a 120mg/dl, toma el valor 0 para negarlo, y 1 para afirmarlo.</p></li>
+<li><p><strong>restecg</strong>:</p></li>
+<li><p><strong>thalac</strong>:</p></li>
+<li><p><strong>exang</strong>:</p></li>
+<li><p><strong>oldpeak</strong>:</p></li>
+<li><p><strong>slope</strong>:</p></li>
+<li><p><strong>ca</strong>:</p></li>
+<li><p><strong>thal</strong>:</p></li>
+<li><p><strong>num</strong>:</p></li>
+</ul>
 
 </main>
 <!-- /main column -->

@@ -5,23 +5,61 @@ format: html
 editor: visual
 ---
 
+<!-- Aixo per fer es beamer https://bookdown.org/yihui/rmarkdown/beamer-presentation.html -->
+<!-- data set original https://archive.ics.uci.edu/dataset/45/heart+disease -->
+
 Este es el [repositorio](https://github.com/GSMir/Entrega3), y el data set lo hemos sacado de este [link](https://archive.ics.uci.edu/dataset/45/heart+disease)
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-```{r}
+```{r, message = FALSE}
 library(readr)
 library(tidyverse)
-heartdisease <- read_csv("https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data", col_names = FALSE, show_col_types = FALSE)
+heartdisease = read_csv("https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data", col_names = FALSE, show_col_types = FALSE)
 ```
-
-Hay `r nrow(heartdisease)` visualizaciones de `r ncol(heartdisease)` variables.
 
 ```{r}
 heartdisease = heartdisease %>% rename(age = X1, sex = X2, cp = X3, trestbps = X4, chol = X5, fbs = X6, restecg = X7, thalac = X8, exang = X9, oldpeak = X10, slope = X11, ca = X12, thal = X13, num = X14)
 heartdisease = heartdisease %>% filter(!str_detect(thal, "\\?") & (!str_detect(ca, "\\?")))
 ```
 
+El objetivo del estudio original es detectar la presencia de enferemedades del corazón en un paciente.
 Hay `r nrow(heartdisease)` visualizaciones de `r ncol(heartdisease)` variables.
+
+
+
+<!-- Cambiar nom de algunes de ses vairiables, perque tenguin mes sentit -->
+Describamos ahora las variables:
+
+* **age**: Año del paciente, valor entero, con un mínimo de 29 y un máximo de 77 años.
+
+* **sex**: Sexo cromosómico del paciente, variable categórica, toma el valor 0 para el femenino y 1 para el masculino.
+
+* **cp**: "Chest Pain" hace referéncia al tipo de dolor que se sufre en el pecho, es una variable categórica. Toma los valores 1 para angina de pecho típica, 2 para angina de pecho atípica, 3 para dolores que no son de angina de pecho, 4 asintomático.
+
+* **trestbps**: Presión de la sangre en reposo (mm Hg), una variable numérica, con el valor mínimo en 94 y el valor máximo en 200.
+
+* **chol**: Colesterol en sangre (mg/dl), variable numérica con un mínimo de 126 y un máximo de 564.
+
+* **fbs**: Booleano que determina si la cantidad de azúcar en sangre en ayuno es mayor a 120mg/dl, toma el valor 0 para negarlo, y 1 para afirmarlo.
+
+* **restecg**: 
+
+* **thalac**:
+
+* **exang**:
+
+* **oldpeak**:
+
+* **slope**:
+
+* **ca**:
+
+* **thal**:
+
+* **num**:
+
+
+
