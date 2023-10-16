@@ -66,3 +66,9 @@ knitr::include_graphics("SinusRhythmLabels.svg.png")
 -   **tHR**: Variable categória que indica el tipo de ritmo cardíaco. Toma el valor 3 para el ritmo normal, 6 para defecto reparado, y 7 para defecto reversible.
 
 -   **fdiag**: Booleano para el diagnosis de la enfermedad del corazón. Toma el 0 cuando la reducción del diámetro es menor al 50%, y 1 cuando es superior al 50%.
+
+
+
+<!--- a = as.numeric(heartdisease$mves) --->
+
+
