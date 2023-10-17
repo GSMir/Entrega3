@@ -23,6 +23,7 @@ heartdisease = read_csv("https://archive.ics.uci.edu/ml/machine-learning-databas
 
 ```{r}
 heartdisease = heartdisease %>% rename(age = X1, sex = X2, cp = X3, restbp = X4, chol = X5, fbs = X6, restecg = X7, maxHR = X8, exang = X9, expeak = X10, slope = X11, mves = X12, tHR = X13, fdiag = X14)
+
 heartdisease = heartdisease %>% filter(!str_detect(tHR, "\\?") & (!str_detect(mves, "\\?")))
 ```
 
@@ -32,9 +33,8 @@ El objetivo del estudio original es detectar la presencia de enferemedades del c
 
 Describamos ahora las variables:
 
-
-
 <!-- Gráfico de los electrocardiogramas -->
+
 ```{r, fig.cap = "Electrocardiograma", out.width = '50%'}
 knitr::include_graphics("SinusRhythmLabels.svg.png")
 ```
@@ -43,7 +43,7 @@ knitr::include_graphics("SinusRhythmLabels.svg.png")
 
 -   **sex**: Sexo cromosómico del paciente, variable categórica, toma el valor 0 para el femenino y 1 para el masculino.
 
--   **cp**: "Chest Pain" hace referéncia al tipo de dolor que se sufre en el pecho, es una variable categórica. Toma los valores 1 para angina de pecho típica, 2 para angina de pecho atípica, 3 para dolores que no son de angina de pecho, 4 asintomático.
+-   **cp**: "Chest Pain" hace referencia al tipo de dolor que se sufre en el pecho, es una variable categórica. Toma los valores 1 para angina de pecho típica, 2 para angina de pecho atípica, 3 para dolores que no son de angina de pecho, 4 asintomático.
 
 -   **restbp**: Presión de la sangre en reposo (mm Hg), una variable numérica, con el valor mínimo en 94 y el valor máximo en 200.
 
@@ -51,7 +51,7 @@ knitr::include_graphics("SinusRhythmLabels.svg.png")
 
 -   **fbs**: Booleano que determina si la cantidad de azúcar en sangre en ayuno es mayor a 120mg/dl, toma el valor 0 para negarlo, y 1 para afirmarlo.
 
--   **restecg**: Resultados del electrocardiograma en reposo, una variable categórica, que indica unos resultados normales con un 0, con un 1 indica anomalías en el segmento ST-T (inversiones de las ondas T y/o elevaciones o depresiones de las ondas ST superiores a 0.05mV, y con un 2 indica una alta probabilidad o asegura una hypertrofía ventricular izquierda.
+-   **restecg**: Resultados del electrocardiograma en reposo, una variable categórica, que indica unos resultados normales con un 0, con un 1 indica anomalías en el segmento ST-T (inversiones de las ondas T y/o elevaciones o depresiones de las ondas ST superiores a 0.05mV, y con un 2 indica una alta probabilidad o asegura una hipertrofia ventricular izquierda.
 
 -   **maxHR**: Indica el ritmo cardíaco máximo alcanzado, con valor mínimo de 71, y valor máximo de 202.
 
@@ -67,8 +67,4 @@ knitr::include_graphics("SinusRhythmLabels.svg.png")
 
 -   **fdiag**: Booleano para el diagnosis de la enfermedad del corazón. Toma el 0 cuando la reducción del diámetro es menor al 50%, y 1 cuando es superior al 50%.
 
-
-
 <!--- a = as.numeric(heartdisease$mves) --->
-
-
