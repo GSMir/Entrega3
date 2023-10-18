@@ -5,7 +5,6 @@ format: html
 editor: visual
 ---
 
-
 <!-- Aixo per fer es beamer https://bookdown.org/yihui/rmarkdown/beamer-presentation.html -->
 
 <!-- data set original https://archive.ics.uci.edu/dataset/45/heart+disease -->
@@ -28,12 +27,52 @@ heartdisease = heartdisease %>% rename(age = X1, sex = X2, cp = X3, restbp = X4,
 heartdisease = heartdisease %>% filter(!str_detect(tHR, "\\?") & (!str_detect(mves, "\\?")))
 ```
 
-
 ```{r}
 heartdisease <- heartdisease %>%
     mutate(mves2 = as.numeric(heartdisease$mves), .after = mves) %>%
     select(-mves) %>%
     rename(mves = mves2)
+heartdisease <- heartdisease %>%
+    mutate(sex2 = as.factor(heartdisease$sex), .after = sex) %>%
+    select(-sex) %>%
+    rename(sex = sex2)
+heartdisease <- heartdisease %>%
+    mutate(cp2 = as.factor(heartdisease$cp), .after = cp) %>%
+    select(-cp) %>%
+    rename(cp = cp2)
+heartdisease <- heartdisease %>%
+    mutate(fbs2 = as.factor(heartdisease$fbs), .after = fbs) %>%
+    select(-fbs) %>%
+    rename(fbs = fbs2)
+heartdisease <- heartdisease %>%
+    mutate(restecg2 = as.factor(heartdisease$restecg), .after = restecg) %>%
+    select(-restecg) %>%
+    rename(restecg = restecg2)
+heartdisease <- heartdisease %>%
+    mutate(exang2 = as.factor(heartdisease$exang), .after = exang) %>%
+    select(-exang) %>%
+    rename(exang = exang2)
+heartdisease <- heartdisease %>%
+    mutate(slope2 = as.factor(heartdisease$slope), .after = slope) %>%
+    select(-slope) %>%
+    rename(slope = slope2)
+heartdisease = heartdisease %>% 
+    mutate(
+        tHR2 = case_when(
+            tHR == "3.0" ~ "3",
+            tHR == "6.0" ~ "6",
+            tHR == "7.0" ~ "7"),
+        .keep = "all", .after = tHR) %>%
+    select(-tHR) %>%
+    rename(tHR = tHR2)
+heartdisease <- heartdisease %>%
+    mutate(tHR2 = as.factor(heartdisease$tHR), .after = tHR) %>%
+    select(-tHR) %>%
+    rename(tHR = tHR2)
+heartdisease <- heartdisease %>%
+    mutate(fdiag2 = as.factor(heartdisease$fdiag), .after = fdiag) %>%
+    select(-fdiag) %>%
+    rename(fdiag = fdiag2)
 ```
 
 El objetivo del estudio original es detectar la presencia de enferemedades del corazón en un paciente. Hay `r nrow(heartdisease)` visualizaciones de `r ncol(heartdisease)` variables.
@@ -76,8 +115,9 @@ knitr::include_graphics("SinusRhythmLabels.svg.png")
 
 -   **fdiag**: Booleano para el diagnosis de la enfermedad del corazón. Toma el 0 cuando la reducción del diámetro es menor al 50%, y 1 cuando es superior al 50%.
 
-- **mves**: Variable categórica que determina el número de vasos sanguíneos mayores.
+-   **mves**: Variable categórica que determina el número de vasos sanguíneos mayores.
 
+```{=html}
 <!--- COMENTARIOS:
 
 Se deixa sa pregunta per es resultats que es treguin des treball, i la formulam després.
@@ -88,3 +128,7 @@ Se deixa sa pregunta per es resultats que es treguin des treball, i la formulam 
 si en general hi ha mateixes mesures de sa majoria de variables per sexe, o algunes més elevades etc.? 
 
 --->
+```
+
+
+
