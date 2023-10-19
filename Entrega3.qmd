@@ -87,25 +87,25 @@ Describamos ahora las variables:
 knitr::include_graphics("SinusRhythmLabels.svg.png")
 ```
 
--   **age**: Año del paciente, valor entero, con un mínimo de 29 y un máximo de 77 años.
+-   **age**: Año del paciente, valor entero, con un mínimo de 29 y un máximo de 77 años. La media de edad de los pacientes está en los 54.54 años.
 
--   **sex**: Sexo cromosómico del paciente, variable categórica, toma el valor 0 para el femenino y 1 para el masculino.
+-   **sex**: Sexo cromosómico del paciente, variable categórica, toma el valor 0 para el femenino y 1 para el masculino. Encontramos un total de  96 mujeres y 201 hombres.
 
--   **cp**: "Chest Pain" hace referencia al tipo de dolor que se sufre en el pecho, es una variable categórica. Toma los valores 1 para angina de pecho típica, 2 para angina de pecho atípica, 3 para dolores que no son de angina de pecho, 4 asintomático.
+-   **cp**: "Chest Pain" hace referencia al tipo de dolor que se sufre en el pecho, es una variable categórica. Toma los valores 1 para angina de pecho típica, 2 para angina de pecho atípica, 3 para dolores que no son de angina de pecho, 4 asintomático. 
 
--   **restbp**: Presión de la sangre en reposo (mm Hg), una variable numérica, con el valor mínimo en 94 y el valor máximo en 200.
+-   **restbp**: Presión de la sangre en reposo (mm Hg), una variable numérica, con el valor mínimo en 94 y el valor máximo en 200, con valor medio 131.69 mm Hg.
 
--   **chol**: Colesterol en sangre (mg/dl), variable numérica con un mínimo de 126 y un máximo de 564.
+-   **chol**: Colesterol en sangre (mg/dl), variable numérica con un mínimo de 126 y un máximo de 564, siendo el nivel medio de colesterol 247.35 mg/dl.
 
 -   **fbs**: Booleano que determina si la cantidad de azúcar en sangre en ayuno es mayor a 120mg/dl, toma el valor 0 para negarlo, y 1 para afirmarlo.
 
 -   **restecg**: Resultados del electrocardiograma en reposo, una variable categórica, que indica unos resultados normales con un 0, con un 1 indica anomalías en el segmento ST-T (inversiones de las ondas T y/o elevaciones o depresiones de las ondas ST superiores a 0.05mV, y con un 2 indica una alta probabilidad o asegura una hipertrofia ventricular izquierda.
 
--   **maxHR**: Indica el ritmo cardíaco máximo alcanzado, con valor mínimo de 71, y valor máximo de 202.
+-   **maxHR**: Indica el ritmo cardíaco máximo alcanzado, con valor mínimo de 71, y valor máximo de 202. El valor medio de esta variable es 149.60.
 
 -   **exang**: Booleano que indica si la angina se ha inducido por el ejercicio, tomando 1 como si, y 0 como no.
 
--   **expeak**: Indica la depresión en el segmento ST inducida por el ejercicio en relación con el reposo. Con valor mínimmo de 0, y valor máximo de 6.200
+-   **expeak**: Indica la depresión en el segmento ST inducida por el ejercicio en relación con el reposo. Con valor mínimmo de 0, y valor máximo de 6.20.
 
 -   **slope**: Indica la pendiente en la cima del segmento ST de ejercicio. Toma el 0 cuando la pendiente es positiva, 1 cuando la pendiente es nula, y 2 cuando la pendiente es negativa.
 
@@ -220,6 +220,7 @@ ggplot(heartdisease, aes(x = decade, y = restbp, fill = factor(sex))) +
 5) Nube de puntos: con esto podríamos ver si hay (a priori, luego podemos hacer el contraste de correlación oportuno) correlación/covarianza entre las variables maxHR y Colesterol. (La idea sería que las personas con mayor nivel de colesterol suelen estar menos en forma y por ello sus pulsaciones podrían dispararse al hacer ejercicio).
 
 ```{r}
+
 # Carga la biblioteca ggplot2 si aún no lo has hecho
 library(ggplot2)
 
@@ -248,6 +249,150 @@ ggplot(heartdisease, aes(x = chol, y = maxHR)) +
   theme_minimal()
 
 # NOTA: en la línea geom_smooth se hace una regresión lineal en la que se=TRUE o False determina que salga o no la sombra que veis en el gráfico de abajo (indica nivel de confianza... de qué? npi lo podríamos buscar si fuera relevante). No obstante la recta es prácticamente horizontal lo cual no resulta muy interesante
+```
+
+5) Distribución de datos: (para ver de qué hay más)
+
+Mostrar la distribución de las variables numéricas (que son edades, presión arterial, nivel de colesterol y frecuencia cardiaca máxima) para ver cómo están repartidas en nuestro conjunto de datos (si de forma uniforme o no uniforme). 
+
+
+```{r}
+# Esto sirve, en teoría, para hacer gráficas de forma conjunta (vamos, para que salgan 4 gráficas en una misma imagen/figura).
+
+library(patchwork)
+```
+
+
+```{r}
+
+# Crea 4 histogramas
+histogram1 <- heartdisease %>%
+  ggplot(aes(x = age)) +
+  geom_histogram(binwidth = 5, fill = "blue", color = "black") +
+  labs(
+    title = "Histograma 1",
+    x = "Edad",
+    y = "Frecuencia"
+  )
+
+histogram2 <- heartdisease %>%
+  ggplot(aes(x = restbp)) +
+  geom_histogram(binwidth = 5, fill = "green", color = "black") +
+  labs(
+    title = "Presión Arterial en Reposo",
+    x = "Presión Arterial en Reposo",
+    y = "Frecuencia"
+  )
+
+histogram3 <- heartdisease %>%
+  ggplot(aes(x = chol)) +
+  geom_histogram(binwidth = 10, fill = "red", color = "black") +
+  labs(
+    title = "Nivel de colesterol",
+    x = "Colesterol en Sangre (mg/dl)",
+    y = "Frecuencia"
+  )
+
+histogram4 <- heartdisease %>%
+  ggplot(aes(x = maxHR)) +
+  geom_histogram(binwidth = 5, fill = "purple", color = "black") +
+  labs(
+    title = "Frecuencia Cardíaca Máxima",
+    x = "Ritmo Cardíaco Máximo",
+    y = "Frecuencia"
+  )
+
+# Combina los histogramas en una sola figura
+histogram1 + histogram2 + histogram3 + histogram4
+
+
+```
+
+6) Frecuencias de los datos categóricos (saber la cantidad de frecuencias observadas para cada una de las variables factor).
+
+```{r}
+# Carga las bibliotecas necesarias
+library(tidyverse)
+library(patchwork)
+
+# Crea los gráficos de barras para las tres variables categóricas
+plot_sex <- heartdisease %>%
+  count(sex) %>%
+  ggplot(aes(x = factor(sex), y = n)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  labs(
+    title = "Sexo",
+    x = "Género",
+    y = "Frecuencia"
+  )
+
+plot_cp <- heartdisease %>%
+  count(cp) %>%
+  ggplot(aes(x = factor(cp), y = n)) +
+  geom_bar(stat = "identity", fill = "green") +
+  labs(
+    title = "Tipos de Chestpain",
+    x = "Tipo de Dolor en el Pecho",
+    y = "Frecuencia"
+  )
+
+plot_fbs <- heartdisease %>%
+  count(fbs) %>%
+  ggplot(aes(x = factor(fbs), y = n)) +
+  geom_bar(stat = "identity", fill = "red") +
+  labs(
+    title = "Niveles de Azúcar en Sangre en Ayuno",
+    x = "Niveles de Azúcar en Sangre en Ayuno",
+    y = "Frecuencia"
+  )
+
+# Combina los gráficos en una figura en paralelo
+(plot_sex | plot_cp | plot_fbs)
+
+```
+
+
+
+7)
+
+```{r}
+
+# Crea un boxplot de "chol" por "cp"
+heartdisease %>%
+  ggplot(aes(x = factor(cp), y = chol)) +
+  geom_boxplot(fill = "blue") +
+  labs(
+    title = "Colesterol según Dolor en el pecho",
+    x = "Dolor de Pecho",
+    y = "Colesterol"
+  )
+
+```
+
+
+
+
+
+
+
+
+
+Análisis inferencial:
+
+```{r}
+library(corrplot)
+```
+
+Matriz de correlaciones:
+
+```{r}
+
+correlation_matrix <- cor(heartdisease[, c("age", "restbp", "chol", "maxHR", "expeak")])
+
+# Crear el corrplot con los valores de correlación
+corrplot(correlation_matrix, method = "color", addCoef.col = "black")
+
+
 ```
 
 
