@@ -131,4 +131,123 @@ si en general hi ha mateixes mesures de sa majoria de variables per sexe, o algu
 ```
 
 
+Ángel [noche del miércoles al jueves]: voy a ir haciendo gráficos cruzando datos, haré todos los cruces que se me vayan ocurriendo. Luego ya en haber tenido ocasión de charlar los tres podemos decidir cuáles nos parecen más relevantes y cuales no.
+
+
+1) Cruce del nivel de colesterol únicamente según el sexo:
+
+Creo que tiene la pega de que el colesterol puede ser que sea algo que dependa más de la edad y no tanto del sexo. La gente mayor tiene a tener más colesterol que la gente joven. Propongo ahora el mismo gráfico pero teniendo en cuenta franjas de edad.
+
+```{r}
+# Estudiamos la dispersión de los niveles de colesterol según el sexo.
+
+ggplot(heartdisease, aes(x = factor(sex), y = chol, fill = factor(sex))) +
+  geom_boxplot() +
+  labs(
+    title = "Nivel de Colesterol según sexo",
+    x = "Sexo",
+    y = "Nivel de Colesterol (mg/dl)"
+  ) +
+  scale_x_discrete(labels = c("Mujeres", "Hombres")) +
+  theme_minimal() +
+  theme(legend.title = element_blank())  # Oculta el título de la leyenda
+
+```
+
+2) Niveles de colesterol según edad y sexos de los pacientes. He agrupado las edades en franjas que empiezan en el mínimo de la variable "age" y de longitud 10 años.
+
+```{r}
+# Creamos una nueva columna 'decade' que agrupa las edades en décadas
+heartdisease <- heartdisease %>%
+  mutate(decade = cut(age, breaks = seq(29, 80, by = 10), right = FALSE))
+
+# Creamos un diagrama de caja y bigotes:
+
+ggplot(heartdisease, aes(x = decade, y = chol, fill = factor(sex))) +
+  geom_boxplot() +
+  labs(
+    title = "Nivel de Colesterol por Sexo y Década de Edad",
+    x = "Década de Edad",
+    y = "Nivel de Colesterol"
+  ) +
+  scale_fill_discrete(name = "Sexo", labels = c("0" = "Mujer", "1" = "Hombre")) +
+  theme_minimal() +
+  theme(legend.title = element_blank())
+
+```
+
+3) Se replican los gráficos anteriores pero para el nivel de presión sanguínea. 
+
+```{r}
+ggplot(heartdisease, aes(x = factor(sex), y = restbp, fill = factor(sex))) +
+  geom_boxplot() +
+  labs(
+    title = "Nivel de Presión Arterial en Reposo según Sexo",
+    x = "Sexo",
+    y = "Nivel de Presión Arterial en Reposo (mm Hg)"
+  ) +
+  scale_x_discrete(labels = c("Mujeres", "Hombres")) +
+  theme_minimal() +
+  theme(legend.title = element_blank())
+
+```
+
+
+
+4)
+
+
+```{r}
+# Creamos una nueva columna 'decade' que agrupa las edades en décadas
+heartdisease <- heartdisease %>%
+  mutate(decade = cut(age, breaks = seq(29, 80, by = 10), right = FALSE))
+
+# Creamos un diagrama de caja y bigotes para 'restbp':
+ggplot(heartdisease, aes(x = decade, y = restbp, fill = factor(sex))) +
+  geom_boxplot() +
+  labs(
+    title = "Nivel de Presión Arterial en Reposo por Sexo y Década de Edad",
+    x = "Década de Edad",
+    y = "Nivel de Presión Arterial en Reposo (mm Hg)"
+  ) +
+  scale_fill_discrete(name = "Sexo", labels = c("0" = "Mujer", "1" = "Hombre")) +
+  theme_minimal() +
+  theme(legend.title = element_blank())
+
+```
+
+
+5) Nube de puntos: con esto podríamos ver si hay (a priori, luego podemos hacer el contraste de correlación oportuno) correlación/covarianza entre las variables maxHR y Colesterol. (La idea sería que las personas con mayor nivel de colesterol suelen estar menos en forma y por ello sus pulsaciones podrían dispararse al hacer ejercicio).
+
+```{r}
+# Carga la biblioteca ggplot2 si aún no lo has hecho
+library(ggplot2)
+
+# Crea un scatter plot de chol y maxHR
+ggplot(heartdisease, aes(x = chol, y = maxHR)) +
+  geom_point() +
+  labs(
+    title = "Nube de Puntos de Colesterol vs. Frecuencia Cardíaca Máxima",
+    x = "Colesterol",
+    y = "Frecuencia Cardíaca Máxima"
+  ) +
+  theme_minimal()
+
+```
+
+```{r}
+# Crea un scatter plot de chol y maxHR con una recta de regresión
+ggplot(heartdisease, aes(x = chol, y = maxHR)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE, color = "blue") +
+  labs(
+    title = "Nube de Puntos de Colesterol vs. Frecuencia Cardíaca Máxima con Recta de Regresión",
+    x = "Colesterol",
+    y = "Frecuencia Cardíaca Máxima"
+  ) +
+  theme_minimal()
+
+# NOTA: en la línea geom_smooth se hace una regresión lineal en la que se=TRUE o False determina que salga o no la sombra que veis en el gráfico de abajo (indica nivel de confianza... de qué? npi lo podríamos buscar si fuera relevante). No obstante la recta es prácticamente horizontal lo cual no resulta muy interesante
+```
+
 
