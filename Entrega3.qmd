@@ -224,15 +224,17 @@ ggplot(heartdisease, aes(x = decade, y = restbp, fill = factor(sex))) +
 # Carga la biblioteca ggplot2 si aún no lo has hecho
 library(ggplot2)
 
-# Crea un scatter plot de chol y maxHR
-ggplot(heartdisease, aes(x = chol, y = maxHR)) +
+# Crea un scatter plot de chol y maxHR con colores por género
+ggplot(heartdisease, aes(x = chol, y = maxHR, color = factor(sex))) +
   geom_point() +
   labs(
     title = "Nube de Puntos de Colesterol vs. Frecuencia Cardíaca Máxima",
     x = "Colesterol",
     y = "Frecuencia Cardíaca Máxima"
   ) +
+  scale_color_manual(values = c("blue", "red"), labels = c("Mujer", "Hombre")) +
   theme_minimal()
+
 
 ```
 
@@ -369,7 +371,44 @@ heartdisease %>%
 
 ```
 
+Distribución del nivel de colesterol según el tipo de dolor en el pecho:
 
+
+```{r}
+# Crea un gráfico de distribuciones de colesterol por género
+heartdisease %>%
+  ggplot(aes(x = chol, fill = factor(sex))) +
+  geom_density(alpha = 0.5) +
+  labs(
+    title = "Distribución de Colesterol por Género",
+    x = "Colesterol",
+    y = "Densidad"
+  ) +
+  scale_fill_manual(values = c("blue", "red"), labels = c("Mujer", "Hombre")) +
+  theme_minimal()
+
+
+
+```
+
+
+```{r}
+# Carga la biblioteca tidyverse si aún no lo has hecho
+library(tidyverse)
+
+# Crea un gráfico de distribuciones de maxHR por género
+heartdisease %>%
+  ggplot(aes(x = maxHR, fill = factor(sex))) +
+  geom_density(alpha = 0.5) +
+  labs(
+    title = "Distribución de Frecuencia Cardíaca Máxima por Género",
+    x = "Frecuencia Cardíaca Máxima",
+    y = "Densidad"
+  ) +
+  scale_fill_manual(values = c("blue", "red"), labels = c("Mujer", "Hombre")) +
+  theme_minimal()
+
+```
 
 
 
