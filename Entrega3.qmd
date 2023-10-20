@@ -18,6 +18,10 @@ knitr::opts_chunk$set(echo = FALSE)
 ```{r, message = FALSE}
 library(readr)
 library(tidyverse)
+library(MVA)
+library(GGally)
+library("aplpack")
+
 heartdisease = read_csv("https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data", col_names = FALSE, show_col_types = FALSE)
 ```
 
@@ -26,6 +30,9 @@ heartdisease = heartdisease %>% rename(age = X1, sex = X2, cp = X3, restbp = X4,
 
 heartdisease = heartdisease %>% filter(!str_detect(tHR, "\\?") & (!str_detect(mves, "\\?")))
 ```
+
+
+Antes de empezar con el análisis multivariante, vamos a limpiar el dataset. Primero hemos canviado el nombre de todas las variables, ya que ellas venian con X1,X2, etc, para las que enunciaremos después. A continuación hemos pasado a factor las variables que lo era. Y por último, como teníamos un número pequeño de muestras a las que les faltaban algunos datos, 6, las hemos eliminado. Cabe remarcar que la falta de datos estabe puesta con un interrogante, '?', en vez del típico 'NA'.
 
 ```{r}
 heartdisease <- heartdisease %>%
@@ -89,9 +96,9 @@ knitr::include_graphics("SinusRhythmLabels.svg.png")
 
 -   **age**: Año del paciente, valor entero, con un mínimo de 29 y un máximo de 77 años. La media de edad de los pacientes está en los 54.54 años.
 
--   **sex**: Sexo cromosómico del paciente, variable categórica, toma el valor 0 para el femenino y 1 para el masculino. Encontramos un total de  96 mujeres y 201 hombres.
+-   **sex**: Sexo cromosómico del paciente, variable categórica, toma el valor 0 para el femenino y 1 para el masculino. Encontramos un total de 96 mujeres y 201 hombres.
 
--   **cp**: "Chest Pain" hace referencia al tipo de dolor que se sufre en el pecho, es una variable categórica. Toma los valores 1 para angina de pecho típica, 2 para angina de pecho atípica, 3 para dolores que no son de angina de pecho, 4 asintomático. 
+-   **cp**: "Chest Pain" hace referencia al tipo de dolor que se sufre en el pecho, es una variable categórica. Toma los valores 1 para angina de pecho típica, 2 para angina de pecho atípica, 3 para dolores que no son de angina de pecho, 4 asintomático.
 
 -   **restbp**: Presión de la sangre en reposo (mm Hg), una variable numérica, con el valor mínimo en 94 y el valor máximo en 200, con valor medio 131.69 mm Hg.
 
@@ -129,12 +136,9 @@ si en general hi ha mateixes mesures de sa majoria de variables per sexe, o algu
 
 --->
 ```
+Ángel \[noche del miércoles al jueves\]: voy a ir haciendo gráficos cruzando datos, haré todos los cruces que se me vayan ocurriendo. Luego ya en haber tenido ocasión de charlar los tres podemos decidir cuáles nos parecen más relevantes y cuales no.
 
-
-Ángel [noche del miércoles al jueves]: voy a ir haciendo gráficos cruzando datos, haré todos los cruces que se me vayan ocurriendo. Luego ya en haber tenido ocasión de charlar los tres podemos decidir cuáles nos parecen más relevantes y cuales no.
-
-
-1) Cruce del nivel de colesterol únicamente según el sexo:
+1)  Cruce del nivel de colesterol únicamente según el sexo:
 
 Creo que tiene la pega de que el colesterol puede ser que sea algo que dependa más de la edad y no tanto del sexo. La gente mayor tiene a tener más colesterol que la gente joven. Propongo ahora el mismo gráfico pero teniendo en cuenta franjas de edad.
 
@@ -154,7 +158,7 @@ ggplot(heartdisease, aes(x = factor(sex), y = chol, fill = factor(sex))) +
 
 ```
 
-2) Niveles de colesterol según edad y sexos de los pacientes. He agrupado las edades en franjas que empiezan en el mínimo de la variable "age" y de longitud 10 años.
+2)  Niveles de colesterol según edad y sexos de los pacientes. He agrupado las edades en franjas que empiezan en el mínimo de la variable "age" y de longitud 10 años.
 
 ```{r}
 # Creamos una nueva columna 'decade' que agrupa las edades en décadas
@@ -176,7 +180,7 @@ ggplot(heartdisease, aes(x = decade, y = chol, fill = factor(sex))) +
 
 ```
 
-3) Se replican los gráficos anteriores pero para el nivel de presión sanguínea. 
+3)  Se replican los gráficos anteriores pero para el nivel de presión sanguínea.
 
 ```{r}
 ggplot(heartdisease, aes(x = factor(sex), y = restbp, fill = factor(sex))) +
@@ -192,10 +196,7 @@ ggplot(heartdisease, aes(x = factor(sex), y = restbp, fill = factor(sex))) +
 
 ```
 
-
-
-4)
-
+4)  
 
 ```{r}
 # Creamos una nueva columna 'decade' que agrupa las edades en décadas
@@ -216,8 +217,7 @@ ggplot(heartdisease, aes(x = decade, y = restbp, fill = factor(sex))) +
 
 ```
 
-
-5) Nube de puntos: con esto podríamos ver si hay (a priori, luego podemos hacer el contraste de correlación oportuno) correlación/covarianza entre las variables maxHR y Colesterol. (La idea sería que las personas con mayor nivel de colesterol suelen estar menos en forma y por ello sus pulsaciones podrían dispararse al hacer ejercicio).
+5)  Nube de puntos: con esto podríamos ver si hay (a priori, luego podemos hacer el contraste de correlación oportuno) correlación/covarianza entre las variables maxHR y Colesterol. (La idea sería que las personas con mayor nivel de colesterol suelen estar menos en forma y por ello sus pulsaciones podrían dispararse al hacer ejercicio).
 
 ```{r}
 
@@ -253,17 +253,15 @@ ggplot(heartdisease, aes(x = chol, y = maxHR)) +
 # NOTA: en la línea geom_smooth se hace una regresión lineal en la que se=TRUE o False determina que salga o no la sombra que veis en el gráfico de abajo (indica nivel de confianza... de qué? npi lo podríamos buscar si fuera relevante). No obstante la recta es prácticamente horizontal lo cual no resulta muy interesante
 ```
 
-5) Distribución de datos: (para ver de qué hay más)
+5)  Distribución de datos: (para ver de qué hay más)
 
-Mostrar la distribución de las variables numéricas (que son edades, presión arterial, nivel de colesterol y frecuencia cardiaca máxima) para ver cómo están repartidas en nuestro conjunto de datos (si de forma uniforme o no uniforme). 
-
+Mostrar la distribución de las variables numéricas (que son edades, presión arterial, nivel de colesterol y frecuencia cardiaca máxima) para ver cómo están repartidas en nuestro conjunto de datos (si de forma uniforme o no uniforme).
 
 ```{r}
 # Esto sirve, en teoría, para hacer gráficas de forma conjunta (vamos, para que salgan 4 gráficas en una misma imagen/figura).
 
 library(patchwork)
 ```
-
 
 ```{r}
 
@@ -310,7 +308,7 @@ histogram1 + histogram2 + histogram3 + histogram4
 
 ```
 
-6) Frecuencias de los datos categóricos (saber la cantidad de frecuencias observadas para cada una de las variables factor).
+6)  Frecuencias de los datos categóricos (saber la cantidad de frecuencias observadas para cada una de las variables factor).
 
 ```{r}
 # Carga las bibliotecas necesarias
@@ -353,9 +351,7 @@ plot_fbs <- heartdisease %>%
 
 ```
 
-
-
-7)
+7)  
 
 ```{r}
 
@@ -372,7 +368,6 @@ heartdisease %>%
 ```
 
 Distribución del nivel de colesterol según el tipo de dolor en el pecho:
-
 
 ```{r}
 # Crea un gráfico de distribuciones de colesterol por género
@@ -391,7 +386,6 @@ heartdisease %>%
 
 ```
 
-
 ```{r}
 # Carga la biblioteca tidyverse si aún no lo has hecho
 library(tidyverse)
@@ -409,12 +403,6 @@ heartdisease %>%
   theme_minimal()
 
 ```
-
-
-
-
-
-
 
 Análisis inferencial:
 
@@ -443,7 +431,7 @@ avrg_restbp = mean(heartdisease$restbp)
 
 Contrastes de correlación:
 
-1) Contraste Edad, Máx Heart Rate: 
+1)  Contraste Edad, Máx Heart Rate:
 
 Confirmamos que en la *población* grande (no en nuestra muestra) la edad y el número máximo de pulsaciones tienen correlación negativa. Esto significa que, a mayor edad se espera que disminuya el número máximo de pulsaciones por minuto.
 
@@ -454,10 +442,71 @@ cor.test(heartdisease$maxHR, heartdisease$age, alternative = "less")
 
 ```
 
-2) Contraste de correlación expeak () vs maxHR:
+2)  Contraste de correlación expeak () vs maxHR:
 
 ```{r}
 # expeak: Indica la depresión en el segmento ST inducida por el ejercicio en relación con el reposo. Con valor mínimmo de 0, y valor máximo de 6.20.
+cor.test(heartdisease$maxHR, heartdisease$expeak, alternative = "less")
+
+```
+
+Gráfico para datos bivariantes:
+
+El boxplot bivariante es un gráfico de dispersión que incluye dos elipses estimadas, la interior que contiene aproximadamente el 50% de los datos y la exterior que contiene aproximadamente el 95% de los datos. Este tipo de gráficos nos ayuda a localizar datos atípicos. Veamos un ejemplo con los datos de los pingüinos.
+
+
+
+```{r}
+
+a2<- heartdisease %>%
+  select(maxHR,expeak) %>%
+  as.matrix()
+
+bvbox(a2,xlab = " Ritmo cardíaco máximo en pulsasiones por minuto", 
+           ylab = " Indica la depresión en el segmento ST",
+      pch = 19, cex = 1.25, col = "red")
+```
+Matrices de dispersión:
+
+
+```{r}
+a<-heartdisease %>%
+  select(sex,age,restbp,chol, maxHR, expeak)
+
+pairs(a,
+      col = c("red", "blue")[as.integer(a$sex)], 
+      pch = 18)
+```
+
+
+```{r}
+ggpairs(a)
+```
+
+```{r}
+stars(a[,1:4], key.loc = c(44, 1.5),cex=0.45,
+      labels=row.names(a[,1:4]), draw.segments=TRUE)
+```
+
+
+Caras de Chernoff:
+
+
+```{r}
+b<- heartdisease %>% 
+      filter(cp=='2', 
+             fbs=='1',
+             sex=="0",
+             restecg=='1',
+             exang=='0',
+             slope=='1',
+             mves=='1',
+             tHR=='6',
+             fdiag=='1'
+             )
+
+#faces(b[,1:6],face.type = 1, scale =TRUE,print.info = TRUE)
+
 ```
 
 

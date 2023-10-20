@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.269">
+<meta name="generator" content="quarto-1.2.475">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -72,36 +72,19 @@ ul.task-list li input[type="checkbox"] {
 <p>Este es el <a href="https://github.com/GSMir/Entrega3">repositorio</a>, y el data set lo hemos sacado de este <a href="https://archive.ics.uci.edu/dataset/45/heart+disease">link</a></p>
 <div class="cell">
 <div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'readr' was built under R version 4.2.3</code></pre>
+<pre><code>Warning: package 'MVA' was built under R version 4.3.1</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'tidyverse' was built under R version 4.2.3</code></pre>
+<pre><code>Warning: package 'HSAUR2' was built under R version 4.3.1</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'ggplot2' was built under R version 4.2.3</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'tibble' was built under R version 4.2.3</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'tidyr' was built under R version 4.2.3</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'purrr' was built under R version 4.2.3</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'dplyr' was built under R version 4.2.3</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'forcats' was built under R version 4.2.3</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'lubridate' was built under R version 4.2.3</code></pre>
+<pre><code>Warning: package 'GGally' was built under R version 4.3.1</code></pre>
 </div>
 </div>
 <div class="cell">
 
 </div>
+<p>Antes de empezar con el análisis multivariante, vamos a limpiar el dataset. Primero hemos canviado el nombre de todas las variables, ya que ellas venian con X1,X2, etc, para las que enunciaremos después. A continuación hemos pasado a factor las variables que lo era. Y por último, como teníamos un número pequeño de muestras a las que les faltaban algunos datos, 6, las hemos eliminado. Cabe remarcar que la falta de datos estabe puesta con un interrogante, ‘?’, en vez del típico ‘NA’.</p>
 <div class="cell">
 
 </div>
@@ -201,9 +184,7 @@ si en general hi ha mateixes mesures de sa majoria de variables per sexe, o algu
 </ol>
 <p>Mostrar la distribución de las variables numéricas (que son edades, presión arterial, nivel de colesterol y frecuencia cardiaca máxima) para ver cómo están repartidas en nuestro conjunto de datos (si de forma uniforme o no uniforme).</p>
 <div class="cell">
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'patchwork' was built under R version 4.2.3</code></pre>
-</div>
+
 </div>
 <div class="cell">
 <div class="cell-output-display">
@@ -240,7 +221,7 @@ si en general hi ha mateixes mesures de sa majoria de variables per sexe, o algu
 <p>Análisis inferencial:</p>
 <div class="cell">
 <div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'corrplot' was built under R version 4.2.3</code></pre>
+<pre><code>Warning: package 'corrplot' was built under R version 4.3.1</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>corrplot 0.92 loaded</code></pre>
@@ -279,6 +260,52 @@ sample estimates:
 <ol start="2" type="1">
 <li>Contraste de correlación expeak () vs maxHR:</li>
 </ol>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's product-moment correlation
+
+data:  heartdisease$maxHR and heartdisease$expeak
+t = -6.3681, df = 295, p-value = 3.66e-10
+alternative hypothesis: true correlation is less than 0
+95 percent confidence interval:
+ -1.0000000 -0.2606699
+sample estimates:
+     cor 
+-0.34764 </code></pre>
+</div>
+</div>
+<p>Gráfico para datos bivariantes:</p>
+<p>El boxplot bivariante es un gráfico de dispersión que incluye dos elipses estimadas, la interior que contiene aproximadamente el 50% de los datos y la exterior que contiene aproximadamente el 95% de los datos. Este tipo de gráficos nos ayuda a localizar datos atípicos. Veamos un ejemplo con los datos de los pingüinos.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Matrices de dispersión:</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Caras de Chernoff:</p>
 <div class="cell">
 
 </div>
