@@ -431,7 +431,33 @@ correlation_matrix <- cor(heartdisease[, c("age", "restbp", "chol", "maxHR", "ex
 # Crear el corrplot con los valores de correlación
 corrplot(correlation_matrix, method = "color", addCoef.col = "black")
 
+```
 
+Vector de medias de las variables cuantitativas:
+
+```{r}
+avrg_chol = mean(heartdisease$chol)
+avrg_HR = mean(heartdisease$maxHR)
+avrg_restbp = mean(heartdisease$restbp)
+```
+
+Contrastes de correlación:
+
+1) Contraste Edad, Máx Heart Rate: 
+
+Confirmamos que en la *población* grande (no en nuestra muestra) la edad y el número máximo de pulsaciones tienen correlación negativa. Esto significa que, a mayor edad se espera que disminuya el número máximo de pulsaciones por minuto.
+
+```{r}
+
+cor.test(heartdisease$maxHR, heartdisease$age, alternative = "less")
+
+
+```
+
+2) Contraste de correlación expeak () vs maxHR:
+
+```{r}
+# expeak: Indica la depresión en el segmento ST inducida por el ejercicio en relación con el reposo. Con valor mínimmo de 0, y valor máximo de 6.20.
 ```
 
 

@@ -252,6 +252,36 @@ si en general hi ha mateixes mesures de sa majoria de variables per sexe, o algu
 <p><img src="Entrega3_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>Vector de medias de las variables cuantitativas:</p>
+<div class="cell">
+
+</div>
+<p>Contrastes de correlación:</p>
+<ol type="1">
+<li>Contraste Edad, Máx Heart Rate:</li>
+</ol>
+<p>Confirmamos que en la <em>población</em> grande (no en nuestra muestra) la edad y el número máximo de pulsaciones tienen correlación negativa. Esto significa que, a mayor edad se espera que disminuya el número máximo de pulsaciones por minuto.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's product-moment correlation
+
+data:  heartdisease$maxHR and heartdisease$age
+t = -7.3752, df = 295, p-value = 8.351e-13
+alternative hypothesis: true correlation is less than 0
+95 percent confidence interval:
+ -1.0000000 -0.3106485
+sample estimates:
+       cor 
+-0.3945629 </code></pre>
+</div>
+</div>
+<ol start="2" type="1">
+<li>Contraste de correlación expeak () vs maxHR:</li>
+</ol>
+<div class="cell">
+
+</div>
 
 </main>
 <!-- /main column -->
