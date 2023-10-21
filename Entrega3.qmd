@@ -19,6 +19,8 @@ knitr::opts_chunk$set(echo = FALSE)
 library(readr)
 library(tidyverse)
 library(MVA)
+library(corrplot)
+library(graphics)
 library(GGally)
 library("aplpack")
 
@@ -31,8 +33,7 @@ heartdisease = heartdisease %>% rename(age = X1, sex = X2, cp = X3, restbp = X4,
 heartdisease = heartdisease %>% filter(!str_detect(tHR, "\\?") & (!str_detect(mves, "\\?")))
 ```
 
-
-Antes de empezar con el análisis multivariante, vamos a limpiar el dataset. Primero hemos canviado el nombre de todas las variables, ya que ellas venian con X1,X2, etc, para las que enunciaremos después. A continuación hemos pasado a factor las variables que lo era. Y por último, como teníamos un número pequeño de muestras a las que les faltaban algunos datos, 6, las hemos eliminado. Cabe remarcar que la falta de datos estabe puesta con un interrogante, '?', en vez del típico 'NA'.
+Antes de empezar con el análisis multivariante, vamos a limpiar el dataset. Primero hemos cambiado el nombre de todas las variables, ya que ellas venian con X1,X2, etc, para las que enunciaremos después. A continuación hemos pasado a factor las variables que deberían serlo y no venían dadas como factor incialmente. Por último, como teníamos un número pequeño de muestras a las que les faltaban algunos datos, 6, las hemos eliminado. Cabe remarcar que la falta de datos estaba puesta con un interrogante, '?', en vez del típico 'NA'.
 
 ```{r}
 heartdisease <- heartdisease %>%
@@ -121,8 +122,6 @@ knitr::include_graphics("SinusRhythmLabels.svg.png")
 -   **tHR**: Variable categória que indica el tipo de ritmo cardíaco. Toma el valor 3 para el ritmo normal, 6 para defecto reparado, y 7 para defecto reversible.
 
 -   **fdiag**: Booleano para el diagnosis de la enfermedad del corazón. Toma el 0 cuando la reducción del diámetro es menor al 50%, y 1 cuando es superior al 50%.
-
--   **mves**: Variable categórica que determina el número de vasos sanguíneos mayores.
 
 ```{=html}
 <!--- COMENTARIOS:
@@ -238,20 +237,6 @@ ggplot(heartdisease, aes(x = chol, y = maxHR, color = factor(sex))) +
 
 ```
 
-```{r}
-# Crea un scatter plot de chol y maxHR con una recta de regresión
-ggplot(heartdisease, aes(x = chol, y = maxHR)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = TRUE, color = "blue") +
-  labs(
-    title = "Nube de Puntos de Colesterol vs. Frecuencia Cardíaca Máxima con Recta de Regresión",
-    x = "Colesterol",
-    y = "Frecuencia Cardíaca Máxima"
-  ) +
-  theme_minimal()
-
-# NOTA: en la línea geom_smooth se hace una regresión lineal en la que se=TRUE o False determina que salga o no la sombra que veis en el gráfico de abajo (indica nivel de confianza... de qué? npi lo podríamos buscar si fuera relevante). No obstante la recta es prácticamente horizontal lo cual no resulta muy interesante
-```
 
 5)  Distribución de datos: (para ver de qué hay más)
 
@@ -406,15 +391,13 @@ heartdisease %>%
 
 Análisis inferencial:
 
-```{r}
-library(corrplot)
-```
+
 
 Matriz de correlaciones:
 
 ```{r}
 
-correlation_matrix <- cor(heartdisease[, c("age", "restbp", "chol", "maxHR", "expeak")])
+correlation_matrix <- cor(heartdisease[, c("age", "restbp", "chol", "maxHR", "expeak", "mves")])
 
 # Crear el corrplot con los valores de correlación
 corrplot(correlation_matrix, method = "color", addCoef.col = "black")
@@ -454,8 +437,6 @@ Gráfico para datos bivariantes:
 
 El boxplot bivariante es un gráfico de dispersión que incluye dos elipses estimadas, la interior que contiene aproximadamente el 50% de los datos y la exterior que contiene aproximadamente el 95% de los datos. Este tipo de gráficos nos ayuda a localizar datos atípicos. Veamos un ejemplo con los datos de los pingüinos.
 
-
-
 ```{r}
 
 a2<- heartdisease %>%
@@ -466,18 +447,19 @@ bvbox(a2,xlab = " Ritmo cardíaco máximo en pulsasiones por minuto",
            ylab = " Indica la depresión en el segmento ST",
       pch = 19, cex = 1.25, col = "red")
 ```
-Matrices de dispersión:
 
+Matrices de dispersión:
 
 ```{r}
 a<-heartdisease %>%
-  select(sex,age,restbp,chol, maxHR, expeak)
+  select(age,restbp,chol,maxHR, expeak, mves)
 
 pairs(a,
-      col = c("red", "blue")[as.integer(a$sex)], 
+      col = c("red", "blue")[as.integer(heartdisease$sex)], 
       pch = 18)
-```
 
+
+```
 
 ```{r}
 ggpairs(a)
@@ -488,9 +470,7 @@ stars(a[,1:4], key.loc = c(44, 1.5),cex=0.45,
       labels=row.names(a[,1:4]), draw.segments=TRUE)
 ```
 
-
 Caras de Chernoff:
-
 
 ```{r}
 b<- heartdisease %>% 
@@ -508,5 +488,7 @@ b<- heartdisease %>%
 #faces(b[,1:6],face.type = 1, scale =TRUE,print.info = TRUE)
 
 ```
+
+
 
 
