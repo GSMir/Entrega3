@@ -466,26 +466,25 @@ ggpairs(a)
 ```
 
 ```{r}
-stars(a[,1:4], key.loc = c(44, 1.5),cex=0.45,
+stars(a[,1:6], key.loc = c(44, 1.5),cex=0.45,
       labels=row.names(a[,1:4]), draw.segments=TRUE)
 ```
 
 Caras de Chernoff:
 
 ```{r}
-b<- heartdisease %>% 
-      filter(cp=='2', 
-             fbs=='1',
-             sex=="0",
-             restecg=='1',
-             exang=='0',
-             slope=='1',
-             mves=='1',
-             tHR=='6',
-             fdiag=='1'
-             )
+b<-heartdisease %>%
+  select(sex,cp,fbs,restecg, exang, slope,tHR,fdiag)
 
-#faces(b[,1:6],face.type = 1, scale =TRUE,print.info = TRUE)
+b<- b %>% 
+      filter(sex==1,
+             cp==2, 
+             fbs==0
+             )
+summary(heartdisease)
+view(b)
+
+#faces(b[,1:8],face.type = 1, scale =TRUE,print.info = TRUE)
 
 ```
 
