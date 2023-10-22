@@ -300,6 +300,7 @@ ggplot(heartdisease, aes(x = decade, y = chol, fill = factor(sex))) +
   theme(legend.title = element_blank())
 
 ```
+Se puede observar que, sin tener en cuenta la última franja de edad, a medida que crece la edad, también crece la dispersion. Una de las posibles razones de porque no se cumple esto en la última franja, se puede deber a la pequeña muestra que tenemos de ella.
 
 ## 5)  Se replican los gráficos anteriores pero para el nivel de presión sanguínea.
 
@@ -316,7 +317,7 @@ ggplot(heartdisease, aes(x = factor(sex), y = restbp, fill = factor(sex))) +
   theme(legend.title = element_blank())
 
 ```
-
+No se puede observar diferencias entre hombres y mujeres referente al nivel de presión arterial en reposo.
 4)  
 
 ```{r}
@@ -337,6 +338,29 @@ ggplot(heartdisease, aes(x = decade, y = restbp, fill = factor(sex))) +
   theme(legend.title = element_blank())
 
 ```
+En cambio si se puede observar que a medida que va aumentando la edad, tambien crece la dispersión del nivel de presión arterial en reposo. Se puede destacar que todos los puntos outliers estan en la misma franja de edad.
+
+Matrices de dispersión:
+
+```{r}
+a<-heartdisease %>%
+  select(age,restbp,chol,maxHR, expeak)
+
+pairs(a,
+      col = c("red", "blue")[as.integer(heartdisease$sex)], 
+      pch = 18)
+
+
+```
+
+```{r}
+a<-heartdisease %>%
+  select(age,restbp,chol,maxHR, expeak,mves)
+
+ggpairs(a, mapping = aes(color = heartdisease$sex))
+
+
+```
 
 5)  Nube de puntos: con esto podríamos ver si hay (a priori, luego podemos hacer el contraste de correlación oportuno) correlación/covarianza entre las variables maxHR y Colesterol. (La idea sería que las personas con mayor nivel de colesterol suelen estar menos en forma y por ello sus pulsaciones podrían dispararse al hacer ejercicio).
 
@@ -346,11 +370,11 @@ ggplot(heartdisease, aes(x = decade, y = restbp, fill = factor(sex))) +
 library(ggplot2)
 
 # Crea un scatter plot de chol y maxHR con colores por género
-ggplot(heartdisease, aes(x = chol, y = maxHR, color = factor(sex))) +
+ggplot(heartdisease, aes(x = age, y = maxHR, color = factor(sex))) +
   geom_point() +
   labs(
-    title = "Nube de Puntos de Colesterol vs. Frecuencia Cardíaca Máxima",
-    x = "Colesterol",
+    title = "Nube de Puntos de Edad vs. Frecuencia Cardíaca Máxima",
+    x = "Edad",
     y = "Frecuencia Cardíaca Máxima"
   ) +
   scale_color_manual(values = c("blue", "red"), labels = c("Mujer", "Hombre")) +
@@ -450,11 +474,26 @@ cor.test(heartdisease$maxHR, heartdisease$age, alternative = "less")
 
 2)  Contraste de correlación expeak () vs maxHR:
 
+Confirmamos que en la *población* grande (no en nuestra muestra) el número máximo de pulsaciones y el expeak tienen correlación negativa. Esto significa que, a mayor edad, la depresión en el segmento ST inducida por el ejercicio en relación con el reposo es menor.
+
 ```{r}
 # expeak: Indica la depresión en el segmento ST inducida por el ejercicio en relación con el reposo. Con valor mínimmo de 0, y valor máximo de 6.20.
 cor.test(heartdisease$maxHR, heartdisease$expeak, alternative = "less")
 
 ```
+
+3)  Contraste de correlación Edad vs mves():
+
+Confirmamos que en la *población* grande (no en nuestra muestra) la edad y la variable mves(), tienen correlación negativa. Esto significa que, a mayor edad, el número de vasos principales coloreados por fluoroscopía es menor.
+
+```{r}
+# expeak: Indica la depresión en el segmento ST inducida por el ejercicio en relación con el reposo. Con valor mínimmo de 0, y valor máximo de 6.20.
+cor.test(heartdisease$age, heartdisease$mves, alternative = "less")
+
+```
+
+
+
 
 Gráfico para datos bivariantes:
 
@@ -471,24 +510,7 @@ bvbox(a2,xlab = " Ritmo cardíaco máximo en pulsasiones por minuto",
       pch = 19, cex = 1.25, col = "red")
 ```
 
-Matrices de dispersión:
 
-```{r}
-a<-heartdisease %>%
-  select(age,restbp,chol,maxHR, expeak, mves)
-
-pairs(a,
-      col = c("red", "blue")[as.integer(heartdisease$sex)], 
-      pch = 18)
-
-
-```
-
-```{r}
-
-ggpairs(a)
-
-```
 
 ```{r}
 stars(a[,1:6], key.loc = c(44, 1.5),cex=0.45,
