@@ -9,7 +9,7 @@ editor: visual
 
 <!-- data set original https://archive.ics.uci.edu/dataset/45/heart+disease -->
 
-Este es el [repositorio](https://github.com/GSMir/Entrega3), y el data set lo hemos sacado de este [link](https://archive.ics.uci.edu/dataset/45/heart+disease)
+Este es el [repositorio](https://github.com/GSMir/Entrega3) de GitHub en el que alojaremos todos los archivos relacionados con esta entrega. Para consultar la fuente de la que se ha extraído nuestro Dataset consulta el siguiente [link](https://archive.ics.uci.edu/dataset/45/heart+disease).
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
@@ -18,6 +18,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ```{r, message = FALSE}
 library(readr)
 library(tidyverse)
+library(patchwork)
 library(MVA)
 library(corrplot)
 library(graphics)
@@ -27,15 +28,25 @@ library("aplpack")
 heartdisease = read_csv("https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data", col_names = FALSE, show_col_types = FALSE)
 ```
 
+
+
+Antes de empezar con el análisis multivariante se realizará una primera limpieza del Dataset. En primer lugar, renombramos las variables para hacerlas más acordes a aquello que representan (en el archivo inicial estaban nombradas como $X_1$, $X_2$, $...$, $X_{14}$). A continuación, pasamos a factor las variables categóricas (hemos encontrado que muchas no venían dadas como factor incialmente). Por último, dado que tenemos un número pequeño de muestras a las que les falta algún dato (concretamente 6), las hemos eliminado. Recalcar que los datos ausentes venían dados por interrogantes en lugar de NA's.
+
+
 ```{r}
+# Renombramos las variables:
 heartdisease = heartdisease %>% rename(age = X1, sex = X2, cp = X3, restbp = X4, chol = X5, fbs = X6, restecg = X7, maxHR = X8, exang = X9, expeak = X10, slope = X11, mves = X12, tHR = X13, fdiag = X14)
 
+# Se eliminan las entradas con valor '?'
 heartdisease = heartdisease %>% filter(!str_detect(tHR, "\\?") & (!str_detect(mves, "\\?")))
 ```
 
-Antes de empezar con el análisis multivariante, vamos a limpiar el dataset. Primero hemos cambiado el nombre de todas las variables, ya que ellas venian con X1,X2, etc, para las que enunciaremos después. A continuación hemos pasado a factor las variables que deberían serlo y no venían dadas como factor incialmente. Por último, como teníamos un número pequeño de muestras a las que les faltaban algunos datos, 6, las hemos eliminado. Cabe remarcar que la falta de datos estaba puesta con un interrogante, '?', en vez del típico 'NA'.
+
 
 ```{r}
+
+# ESTA CHUNK HAY QUE LIMPIARLA
+
 heartdisease <- heartdisease %>%
     mutate(mves2 = as.numeric(heartdisease$mves), .after = mves) %>%
     select(-mves) %>%
@@ -77,69 +88,176 @@ heartdisease <- heartdisease %>%
     mutate(tHR2 = as.factor(heartdisease$tHR), .after = tHR) %>%
     select(-tHR) %>%
     rename(tHR = tHR2)
+
+# Ángel: he comentado esta última porque la última variable (X14 o num) representa si el paciente ha padecido o no alguna enfermedad del corazón (lo miré en la documentación y abriendo el Dataset en Python, que incluía algún comentario sobre las variables también).
+
+# (Lo dejo por aquí pero creo que podría quitarse)
+
+# heartdisease <- heartdisease %>%
+#     mutate(fdiag2 = as.factor(heartdisease$fdiag), .after = fdiag) %>%
+#     select(-fdiag) %>%
+#     rename(fdiag = fdiag2)
+
+heartdisease = heartdisease %>%
+    mutate(
+        fdiag2 = case_when(
+            fdiag == "0" ~ "0",
+            fdiag == "1" ~ "1",
+            fdiag == "2" ~ "1",
+            fdiag == "3" ~ "1",
+            fdiag == "4" ~ "1"),
+        .keep = "all", .after = fdiag) %>%
+    select(-fdiag) %>%
+    rename(fdiag = fdiag2)
 heartdisease <- heartdisease %>%
     mutate(fdiag2 = as.factor(heartdisease$fdiag), .after = fdiag) %>%
     select(-fdiag) %>%
     rename(fdiag = fdiag2)
+
 ```
 
-El objetivo del estudio original es detectar la presencia de enferemedades del corazón en un paciente. Hay `r nrow(heartdisease)` visualizaciones de `r ncol(heartdisease)` variables.
 
-<!-- Cambiar nom de algunes de ses vairiables, perque tenguin mes sentit -->
+El objetivo del estudio original tenía como principal objetivo comparar dos modelos estadísticos (uno antiguo y otro novedoso) que proporcioban estimaciones de la probabilidad de enfermedad coronaria en pacientes que presentaban dolencias en el pecho. Se tomaron las medidas que se detallan en el Dataset a un total de 303 pacientes de Cleveland (Ohio) y se aplicaron otros tres grupos de Hungría, California y Suiza. Nuestro objetivo en esta entrega será determinar los rasgos más significativo del Dataset, así como las relaciones que puedan resultar de mayor interés desde el punto de vista clínico.
 
-Describamos ahora las variables:
 
-<!-- Gráfico de los electrocardiogramas -->
+En este conjunto de datos encontramos `r nrow(heartdisease)` visualizaciones de `r ncol(heartdisease)` variables. Se describen a continuación las variables del mismo:
 
-```{r, fig.cap = "Electrocardiograma", out.width = '50%'}
+
+```{r, fig.cap = "Electrocardiograma", out.width = '60%'}
 knitr::include_graphics("SinusRhythmLabels.svg.png")
 ```
 
--   **age**: Año del paciente, valor entero, con un mínimo de 29 y un máximo de 77 años. La media de edad de los pacientes está en los 54.54 años.
+- **age**: Edad del paciente. Número entero. El conjunto de edades de los sujetos obersvados está comprendido entre los 29 y los 77 años. La media de edad de los pacientes está en los 54.54 años.
 
--   **sex**: Sexo cromosómico del paciente, variable categórica, toma el valor 0 para el femenino y 1 para el masculino. Encontramos un total de 96 mujeres y 201 hombres.
+- **sex**: Sexo cromosómico del paciente. Variable categórica que toma el valor 0 para el sexo femenino y 1 para el masculino. Encontramos un total de 96 mujeres y 201 hombres.
 
--   **cp**: "Chest Pain" hace referencia al tipo de dolor que se sufre en el pecho, es una variable categórica. Toma los valores 1 para angina de pecho típica, 2 para angina de pecho atípica, 3 para dolores que no son de angina de pecho, 4 asintomático.
+- **cp**: (del inglés *"Chest Pain"*). Hace referencia al tipo de dolor que se sufre el paciente en el pecho. Se trata de una variable categórica que toma los valores 1 para angina de pecho típica, 2 para angina de pecho atípica, 3 para dolores que no son de angina de pecho y 4 para asintomático.
 
--   **restbp**: Presión de la sangre en reposo (mm Hg), una variable numérica, con el valor mínimo en 94 y el valor máximo en 200, con valor medio 131.69 mm Hg.
+- **restbp**: Presión sanguínea medida en reposo (mm Hg). Es una variable numérica con valor mínimo 94 y valor máximo 200. La presión media del grupo de pacientes es de 131.69 mm Hg.
 
--   **chol**: Colesterol en sangre (mg/dl), variable numérica con un mínimo de 126 y un máximo de 564, siendo el nivel medio de colesterol 247.35 mg/dl.
+- **chol**: Nivel de colesterol en sangre (mg/dl). Variable numérica con mínimo de 126 mg/dl y máximo de 564 mg/dl, siendo el nivel medio de colesterol 247.35 mg/dl.
 
--   **fbs**: Booleano que determina si la cantidad de azúcar en sangre en ayuno es mayor a 120mg/dl, toma el valor 0 para negarlo, y 1 para afirmarlo.
+- **fbs**: Booleano que determina si la cantidad de azúcar en sangre en ayuno es mayor a 120mg/dl. Toma el valor 0 para negarlo, y 1 para afirmarlo.
 
--   **restecg**: Resultados del electrocardiograma en reposo, una variable categórica, que indica unos resultados normales con un 0, con un 1 indica anomalías en el segmento ST-T (inversiones de las ondas T y/o elevaciones o depresiones de las ondas ST superiores a 0.05mV, y con un 2 indica una alta probabilidad o asegura una hipertrofia ventricular izquierda.
+- **restecg**: Resultados del electrocardiograma en reposo. Se trata de una variable categórica. Los resultados normales vienen dados por 0, con un 1 se indican aquellos pacientes con anomalías en el segmento ST-T (que pueden ser inversiones de las ondas T y/o elevaciones o depresiones de las ondas ST superiores a 0.05mV). Finalmente, aquellos pacientes con un 2 se caracterizan por tener una alta probabilidad (o segura) una hipertrofia ventricular.
 
--   **maxHR**: Indica el ritmo cardíaco máximo alcanzado, con valor mínimo de 71, y valor máximo de 202. El valor medio de esta variable es 149.60.
+- **maxHR**: Indica el ritmo cardíaco máximo alcanzado en una prueba de esfuerzo. Es una variable numérica con valor mínimo de 71, y valor máximo de 202. El valor medio de esta variable es 149.60.
 
--   **exang**: Booleano que indica si la angina se ha inducido por el ejercicio, tomando 1 como si, y 0 como no.
+- **exang**: Booleano que indica si la angina se ha inducido por el ejercicio, tomando 1 cuando la respuesta sea afirmativa y 0 en caso contrario.
 
--   **expeak**: Indica la depresión en el segmento ST inducida por el ejercicio en relación con el reposo. Con valor mínimmo de 0, y valor máximo de 6.20.
+- **expeak**: Indica la depresión en el segmento ST inducida por el ejercicio en relación con el reposo. Es una variable numérica con valor mínimo de 0 y valor máximo de 6.20.
 
--   **slope**: Indica la pendiente en la cima del segmento ST de ejercicio. Toma el 0 cuando la pendiente es positiva, 1 cuando la pendiente es nula, y 2 cuando la pendiente es negativa.
+- **slope**: Indica la pendiente en la cima del segmento ST de ejercicio. Es una variable de tipo factor que toma el valor 0 cuando la pendiente es positiva, 1 cuando la pendiente es nula y 2 cuando la pendiente es negativa.
 
--   **mves**: Número de vasos principales coloreados por fluoroscopía. Toma valores enteros entre 0 y 3, inclusive.
+- **mves**: Número de vasos principales coloreados por fluoroscopía. Toma valores enteros entre 0 y 3, inclusive.
 
--   **tHR**: Variable categória que indica el tipo de ritmo cardíaco. Toma el valor 3 para el ritmo normal, 6 para defecto reparado, y 7 para defecto reversible.
+- **tHR**: Variable categórica que indica el tipo de ritmo cardíaco. Toma el valor 3 para el ritmo normal, 6 para defecto reparado, y 7 para defecto reversible.
 
--   **fdiag**: Booleano para el diagnosis de la enfermedad del corazón. Toma el 0 cuando la reducción del diámetro es menor al 50%, y 1 cuando es superior al 50%.
+- **fdiag**: Booleano para el diagnosis de la enfermedad del corazón. Se comenta en la fuente que toma los valores enteros comprendidos entre 0 y 4 (ambos incluidos). No se especifica si se trata del número exacto de patologías diagnosticadas a cada paciente, pero sí que se menciona que el valor 0 se asigna únicamente a aquellos pacientes a los que no se les ha diagnosticado ninguna enfermedad y el resto de valores se atribuyen a los que sí tienen (o han tenido) alguna patología cardíaca. Nosotros la hemos transformado en una variable de tipo factor (0 = "libre enfermedad" y 1 = "diagnosticado").
 
-```{=html}
-<!--- COMENTARIOS:
 
-Se deixa sa pregunta per es resultats que es treguin des treball, i la formulam després.
+<!-- Toma el 0 cuando la reducción del diámetro es menor al 50%, y 1 cuando es superior al 50%. -->
 
-1) fdiag és correcte?
-2) augmenten amb es anys?
-3) diferencies de sexe?
-si en general hi ha mateixes mesures de sa majoria de variables per sexe, o algunes més elevades etc.? 
 
---->
+# Análisis exploratorio del conjunto de datos:
+
+
+##  1) Distribución de los datos numéricos:
+
+Mostramos en primer lugar la distribución de las variables numéricas (que son edad, presión arterial, nivel de colesterol y frecuencia cardiaca máxima) para ver cómo están repartidas en nuestro conjunto de datos (si de forma uniforme o no uniforme).
+
+
+```{r}
+
+# Creamos 4 histogramas:
+
+histogram1 <- heartdisease %>%
+  ggplot(aes(x = age)) +
+  geom_histogram(binwidth = 5, fill = "blue", color = "black") +
+  labs(
+    title = "Distribución edades pacientes",
+    x = "Edad",
+    y = "Frecuencia"
+  )
+
+histogram2 <- heartdisease %>%
+  ggplot(aes(x = restbp)) +
+  geom_histogram(binwidth = 5, fill = "green", color = "black") +
+  labs(
+    title = "Niveles de presión arterial",
+    x = "Presión arterial (reposo)",
+    y = "Frecuencia"
+  )
+
+histogram3 <- heartdisease %>%
+  ggplot(aes(x = chol)) +
+  geom_histogram(binwidth = 10, fill = "red", color = "black") +
+  labs(
+    title = "Niveles de colesterol",
+    x = "Colesterol en sangre (mg/dl)",
+    y = "Frecuencia"
+  )
+
+histogram4 <- heartdisease %>%
+  ggplot(aes(x = maxHR)) +
+  geom_histogram(binwidth = 5, fill = "purple", color = "black") +
+  labs(
+    title = "Frecuencia cardíaca máxima",
+    x = "Ritmo cardíaco máximo",
+    y = "Frecuencia"
+  )
+
+# Combinamos para acabar los 4 histogramas en una sola figura:
+histogram1 + histogram2 + histogram3 + histogram4
+
 ```
-Ángel \[noche del miércoles al jueves\]: voy a ir haciendo gráficos cruzando datos, haré todos los cruces que se me vayan ocurriendo. Luego ya en haber tenido ocasión de charlar los tres podemos decidir cuáles nos parecen más relevantes y cuales no.
 
-1)  Cruce del nivel de colesterol únicamente según el sexo:
+## 2) Frecuencias de los datos categóricos:
 
-Creo que tiene la pega de que el colesterol puede ser que sea algo que dependa más de la edad y no tanto del sexo. La gente mayor tiene a tener más colesterol que la gente joven. Propongo ahora el mismo gráfico pero teniendo en cuenta franjas de edad.
+```{r}
+
+plot_sex <- heartdisease %>%
+  count(sex) %>%
+  ggplot(aes(x = factor(sex), y = n)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  labs(
+    title = "Sexo",
+    x = "",
+    y = "Frecuencia") +
+  scale_x_discrete(labels = c("Mujer", "Hombre"))
+
+
+plot_cp <- heartdisease %>%
+  count(cp) %>%
+  ggplot(aes(x = factor(cp), y = n)) +
+  geom_bar(stat = "identity", fill = "green") +
+  labs(
+    title = "Dolores de pecho",
+    x = "",
+    y = "Frecuencia") +
+    scale_x_discrete(labels = c("Típica", "Atípica", "No", "Asínt."))
+
+plot_fbs <- heartdisease %>%
+  count(fbs) %>%
+  ggplot(aes(x = factor(fbs), y = n)) +
+  geom_bar(stat = "identity", fill = "red") +
+  labs(
+    title = "Azúcar en sangre",
+    x = "" ,
+    y = "Frecuencia"
+  ) +   scale_x_discrete(labels = c("No supera", "Supera"))
+
+
+# Combina los gráficos en una figura en paralelo
+(plot_sex | plot_cp | plot_fbs)
+
+```
+
+
+## 3)  Cruce del nivel de colesterol únicamente según el sexo:
+
+Observamos que el nivel de colesterol de las mujeres del grupo estudiado es más variado (disperso) que el de los hombres. Esto se aprecia en la amplitud de la caja del diagrama y, se confirma con el *outlier* que supera los 550mg/dl.  
+
 
 ```{r}
 # Estudiamos la dispersión de los niveles de colesterol según el sexo.
@@ -147,20 +265,24 @@ Creo que tiene la pega de que el colesterol puede ser que sea algo que dependa m
 ggplot(heartdisease, aes(x = factor(sex), y = chol, fill = factor(sex))) +
   geom_boxplot() +
   labs(
-    title = "Nivel de Colesterol según sexo",
+    title = "Niveles de colesterol según el sexo del paciente",
     x = "Sexo",
-    y = "Nivel de Colesterol (mg/dl)"
+    y = "Colesterol en sangre (mg/dl)"
   ) +
-  scale_x_discrete(labels = c("Mujeres", "Hombres")) +
+  scale_x_discrete(labels = c("Mujer", "Hombre")) +
   theme_minimal() +
-  theme(legend.title = element_blank())  # Oculta el título de la leyenda
+  theme(legend.title = element_blank(), legend.position = "none")  # Oculta el título de la leyenda
+
 
 ```
 
-2)  Niveles de colesterol según edad y sexos de los pacientes. He agrupado las edades en franjas que empiezan en el mínimo de la variable "age" y de longitud 10 años.
+## 4)  Niveles de colesterol según edad y sexos de los pacientes.
+
+Nos parece relevante adquirir una información más desglosada sobre la dispersión de los niveles de colesterol según la edad y sexo del paciente. Para ello, hemos optado por clasificar por grupos de edad y repetir el mismo gráfico de antes. En esta nueva versión podemos observar una tendencia creciente en los niveles de colesterol de las mujeres hasta los 69 años, así como un mayor grado de dispersión. En los hombres también se observa esta tendencia al alza, aunque más atenuada.
+
 
 ```{r}
-# Creamos una nueva columna 'decade' que agrupa las edades en décadas
+# Creamos una nueva columna 'decade' que agrupa las edades en décadas:
 heartdisease <- heartdisease %>%
   mutate(decade = cut(age, breaks = seq(29, 80, by = 10), right = FALSE))
 
@@ -169,9 +291,9 @@ heartdisease <- heartdisease %>%
 ggplot(heartdisease, aes(x = decade, y = chol, fill = factor(sex))) +
   geom_boxplot() +
   labs(
-    title = "Nivel de Colesterol por Sexo y Década de Edad",
-    x = "Década de Edad",
-    y = "Nivel de Colesterol"
+    title = "Colesterol según sexo (por franjas de edad)",
+    x = "Franjas de edad",
+    y = "Nivel de Colesterol (mg/dl)"
   ) +
   scale_fill_discrete(name = "Sexo", labels = c("0" = "Mujer", "1" = "Hombre")) +
   theme_minimal() +
@@ -179,7 +301,7 @@ ggplot(heartdisease, aes(x = decade, y = chol, fill = factor(sex))) +
 
 ```
 
-3)  Se replican los gráficos anteriores pero para el nivel de presión sanguínea.
+## 5)  Se replican los gráficos anteriores pero para el nivel de presión sanguínea.
 
 ```{r}
 ggplot(heartdisease, aes(x = factor(sex), y = restbp, fill = factor(sex))) +
@@ -238,103 +360,6 @@ ggplot(heartdisease, aes(x = chol, y = maxHR, color = factor(sex))) +
 ```
 
 
-5)  Distribución de datos: (para ver de qué hay más)
-
-Mostrar la distribución de las variables numéricas (que son edades, presión arterial, nivel de colesterol y frecuencia cardiaca máxima) para ver cómo están repartidas en nuestro conjunto de datos (si de forma uniforme o no uniforme).
-
-```{r}
-# Esto sirve, en teoría, para hacer gráficas de forma conjunta (vamos, para que salgan 4 gráficas en una misma imagen/figura).
-
-library(patchwork)
-```
-
-```{r}
-
-# Crea 4 histogramas
-histogram1 <- heartdisease %>%
-  ggplot(aes(x = age)) +
-  geom_histogram(binwidth = 5, fill = "blue", color = "black") +
-  labs(
-    title = "Histograma 1",
-    x = "Edad",
-    y = "Frecuencia"
-  )
-
-histogram2 <- heartdisease %>%
-  ggplot(aes(x = restbp)) +
-  geom_histogram(binwidth = 5, fill = "green", color = "black") +
-  labs(
-    title = "Presión Arterial en Reposo",
-    x = "Presión Arterial en Reposo",
-    y = "Frecuencia"
-  )
-
-histogram3 <- heartdisease %>%
-  ggplot(aes(x = chol)) +
-  geom_histogram(binwidth = 10, fill = "red", color = "black") +
-  labs(
-    title = "Nivel de colesterol",
-    x = "Colesterol en Sangre (mg/dl)",
-    y = "Frecuencia"
-  )
-
-histogram4 <- heartdisease %>%
-  ggplot(aes(x = maxHR)) +
-  geom_histogram(binwidth = 5, fill = "purple", color = "black") +
-  labs(
-    title = "Frecuencia Cardíaca Máxima",
-    x = "Ritmo Cardíaco Máximo",
-    y = "Frecuencia"
-  )
-
-# Combina los histogramas en una sola figura
-histogram1 + histogram2 + histogram3 + histogram4
-
-
-```
-
-6)  Frecuencias de los datos categóricos (saber la cantidad de frecuencias observadas para cada una de las variables factor).
-
-```{r}
-# Carga las bibliotecas necesarias
-library(tidyverse)
-library(patchwork)
-
-# Crea los gráficos de barras para las tres variables categóricas
-plot_sex <- heartdisease %>%
-  count(sex) %>%
-  ggplot(aes(x = factor(sex), y = n)) +
-  geom_bar(stat = "identity", fill = "blue") +
-  labs(
-    title = "Sexo",
-    x = "Género",
-    y = "Frecuencia"
-  )
-
-plot_cp <- heartdisease %>%
-  count(cp) %>%
-  ggplot(aes(x = factor(cp), y = n)) +
-  geom_bar(stat = "identity", fill = "green") +
-  labs(
-    title = "Tipos de Chestpain",
-    x = "Tipo de Dolor en el Pecho",
-    y = "Frecuencia"
-  )
-
-plot_fbs <- heartdisease %>%
-  count(fbs) %>%
-  ggplot(aes(x = factor(fbs), y = n)) +
-  geom_bar(stat = "identity", fill = "red") +
-  labs(
-    title = "Niveles de Azúcar en Sangre en Ayuno",
-    x = "Niveles de Azúcar en Sangre en Ayuno",
-    y = "Frecuencia"
-  )
-
-# Combina los gráficos en una figura en paralelo
-(plot_sex | plot_cp | plot_fbs)
-
-```
 
 7)  
 
@@ -390,8 +415,6 @@ heartdisease %>%
 ```
 
 Análisis inferencial:
-
-
 
 Matriz de correlaciones:
 
@@ -462,7 +485,9 @@ pairs(a,
 ```
 
 ```{r}
+
 ggpairs(a)
+
 ```
 
 ```{r}
@@ -487,7 +512,3 @@ view(b)
 #faces(b[,1:8],face.type = 1, scale =TRUE,print.info = TRUE)
 
 ```
-
-
-
-

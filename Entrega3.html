@@ -35,6 +35,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="Entrega3_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="Entrega3_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 </head>
 
@@ -69,7 +70,7 @@ ul.task-list li input[type="checkbox"] {
 
 <!-- Aixo per fer es beamer https://bookdown.org/yihui/rmarkdown/beamer-presentation.html -->
 <!-- data set original https://archive.ics.uci.edu/dataset/45/heart+disease -->
-<p>Este es el <a href="https://github.com/GSMir/Entrega3">repositorio</a>, y el data set lo hemos sacado de este <a href="https://archive.ics.uci.edu/dataset/45/heart+disease">link</a></p>
+<p>Este es el <a href="https://github.com/GSMir/Entrega3">repositorio</a> de GitHub en el que alojaremos todos los archivos relacionados con esta entrega. Para consultar la fuente de la que se ha extraído nuestro Dataset consulta el siguiente <a href="https://archive.ics.uci.edu/dataset/45/heart+disease">link</a>.</p>
 <div class="cell">
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: package 'readr' was built under R version 4.2.3</code></pre>
@@ -99,6 +100,9 @@ ul.task-list li input[type="checkbox"] {
 <pre><code>Warning: package 'lubridate' was built under R version 4.2.3</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'patchwork' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
 <pre><code>Warning: package 'MVA' was built under R version 4.2.3</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
@@ -111,77 +115,84 @@ ul.task-list li input[type="checkbox"] {
 <pre><code>Warning: package 'GGally' was built under R version 4.2.3</code></pre>
 </div>
 </div>
+<p>Antes de empezar con el análisis multivariante se realizará una primera limpieza del Dataset. En primer lugar, renombramos las variables para hacerlas más acordes a aquello que representan (en el archivo inicial estaban nombradas como <span class="math inline">\(X_1\)</span>, <span class="math inline">\(X_2\)</span>, <span class="math inline">\(...\)</span>, <span class="math inline">\(X_{14}\)</span>). A continuación, pasamos a factor las variables categóricas (hemos encontrado que muchas no venían dadas como factor incialmente). Por último, dado que tenemos un número pequeño de muestras a las que les falta algún dato (concretamente 6), las hemos eliminado. Recalcar que los datos ausentes venían dados por interrogantes en lugar de NA’s.</p>
 <div class="cell">
 
 </div>
-<p>Antes de empezar con el análisis multivariante, vamos a limpiar el dataset. Primero hemos cambiado el nombre de todas las variables, ya que ellas venian con X1,X2, etc, para las que enunciaremos después. A continuación hemos pasado a factor las variables que deberían serlo y no venían dadas como factor incialmente. Por último, como teníamos un número pequeño de muestras a las que les faltaban algunos datos, 6, las hemos eliminado. Cabe remarcar que la falta de datos estaba puesta con un interrogante, ‘?’, en vez del típico ‘NA’.</p>
 <div class="cell">
 
 </div>
-<p>El objetivo del estudio original es detectar la presencia de enferemedades del corazón en un paciente. Hay 297 visualizaciones de 14 variables.</p>
-<!-- Cambiar nom de algunes de ses vairiables, perque tenguin mes sentit -->
-<p>Describamos ahora las variables:</p>
-<!-- Gráfico de los electrocardiogramas -->
+<p>El objetivo del estudio original tenía como principal objetivo comparar dos modelos estadísticos (uno antiguo y otro novedoso) que proporcioban estimaciones de la probabilidad de enfermedad coronaria en pacientes que presentaban dolencias en el pecho. Se tomaron las medidas que se detallan en el Dataset a un total de 303 pacientes de Cleveland (Ohio) y se aplicaron otros tres grupos de Hungría, California y Suiza. Nuestro objetivo en esta entrega será determinar los rasgos más significativo del Dataset, así como las relaciones que puedan resultar de mayor interés desde el punto de vista clínico.</p>
+<p>En este conjunto de datos encontramos 297 visualizaciones de 14 variables. Se describen a continuación las variables del mismo:</p>
 <div class="cell">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="SinusRhythmLabels.svg.png" class="img-fluid figure-img" style="width:50.0%"></p>
+<p><img src="SinusRhythmLabels.svg.png" class="img-fluid figure-img" style="width:60.0%"></p>
 <p></p><figcaption class="figure-caption">Electrocardiograma</figcaption><p></p>
 </figure>
 </div>
 </div>
 </div>
 <ul>
-<li><p><strong>age</strong>: Año del paciente, valor entero, con un mínimo de 29 y un máximo de 77 años. La media de edad de los pacientes está en los 54.54 años.</p></li>
-<li><p><strong>sex</strong>: Sexo cromosómico del paciente, variable categórica, toma el valor 0 para el femenino y 1 para el masculino. Encontramos un total de 96 mujeres y 201 hombres.</p></li>
-<li><p><strong>cp</strong>: “Chest Pain” hace referencia al tipo de dolor que se sufre en el pecho, es una variable categórica. Toma los valores 1 para angina de pecho típica, 2 para angina de pecho atípica, 3 para dolores que no son de angina de pecho, 4 asintomático.</p></li>
-<li><p><strong>restbp</strong>: Presión de la sangre en reposo (mm Hg), una variable numérica, con el valor mínimo en 94 y el valor máximo en 200, con valor medio 131.69 mm Hg.</p></li>
-<li><p><strong>chol</strong>: Colesterol en sangre (mg/dl), variable numérica con un mínimo de 126 y un máximo de 564, siendo el nivel medio de colesterol 247.35 mg/dl.</p></li>
-<li><p><strong>fbs</strong>: Booleano que determina si la cantidad de azúcar en sangre en ayuno es mayor a 120mg/dl, toma el valor 0 para negarlo, y 1 para afirmarlo.</p></li>
-<li><p><strong>restecg</strong>: Resultados del electrocardiograma en reposo, una variable categórica, que indica unos resultados normales con un 0, con un 1 indica anomalías en el segmento ST-T (inversiones de las ondas T y/o elevaciones o depresiones de las ondas ST superiores a 0.05mV, y con un 2 indica una alta probabilidad o asegura una hipertrofia ventricular izquierda.</p></li>
-<li><p><strong>maxHR</strong>: Indica el ritmo cardíaco máximo alcanzado, con valor mínimo de 71, y valor máximo de 202. El valor medio de esta variable es 149.60.</p></li>
-<li><p><strong>exang</strong>: Booleano que indica si la angina se ha inducido por el ejercicio, tomando 1 como si, y 0 como no.</p></li>
-<li><p><strong>expeak</strong>: Indica la depresión en el segmento ST inducida por el ejercicio en relación con el reposo. Con valor mínimmo de 0, y valor máximo de 6.20.</p></li>
-<li><p><strong>slope</strong>: Indica la pendiente en la cima del segmento ST de ejercicio. Toma el 0 cuando la pendiente es positiva, 1 cuando la pendiente es nula, y 2 cuando la pendiente es negativa.</p></li>
+<li><p><strong>age</strong>: Edad del paciente. Número entero. El conjunto de edades de los sujetos obersvados está comprendido entre los 29 y los 77 años. La media de edad de los pacientes está en los 54.54 años.</p></li>
+<li><p><strong>sex</strong>: Sexo cromosómico del paciente. Variable categórica que toma el valor 0 para el sexo femenino y 1 para el masculino. Encontramos un total de 96 mujeres y 201 hombres.</p></li>
+<li><p><strong>cp</strong>: (del inglés <em>“Chest Pain”</em>). Hace referencia al tipo de dolor que se sufre el paciente en el pecho. Se trata de una variable categórica que toma los valores 1 para angina de pecho típica, 2 para angina de pecho atípica, 3 para dolores que no son de angina de pecho y 4 para asintomático.</p></li>
+<li><p><strong>restbp</strong>: Presión sanguínea medida en reposo (mm Hg). Es una variable numérica con valor mínimo 94 y valor máximo 200. La presión media del grupo de pacientes es de 131.69 mm Hg.</p></li>
+<li><p><strong>chol</strong>: Nivel de colesterol en sangre (mg/dl). Variable numérica con mínimo de 126 mg/dl y máximo de 564 mg/dl, siendo el nivel medio de colesterol 247.35 mg/dl.</p></li>
+<li><p><strong>fbs</strong>: Booleano que determina si la cantidad de azúcar en sangre en ayuno es mayor a 120mg/dl. Toma el valor 0 para negarlo, y 1 para afirmarlo.</p></li>
+<li><p><strong>restecg</strong>: Resultados del electrocardiograma en reposo. Se trata de una variable categórica. Los resultados normales vienen dados por 0, con un 1 se indican aquellos pacientes con anomalías en el segmento ST-T (que pueden ser inversiones de las ondas T y/o elevaciones o depresiones de las ondas ST superiores a 0.05mV). Finalmente, aquellos pacientes con un 2 se caracterizan por tener una alta probabilidad (o segura) una hipertrofia ventricular.</p></li>
+<li><p><strong>maxHR</strong>: Indica el ritmo cardíaco máximo alcanzado en una prueba de esfuerzo. Es una variable numérica con valor mínimo de 71, y valor máximo de 202. El valor medio de esta variable es 149.60.</p></li>
+<li><p><strong>exang</strong>: Booleano que indica si la angina se ha inducido por el ejercicio, tomando 1 cuando la respuesta sea afirmativa y 0 en caso contrario.</p></li>
+<li><p><strong>expeak</strong>: Indica la depresión en el segmento ST inducida por el ejercicio en relación con el reposo. Es una variable numérica con valor mínimo de 0 y valor máximo de 6.20.</p></li>
+<li><p><strong>slope</strong>: Indica la pendiente en la cima del segmento ST de ejercicio. Es una variable de tipo factor que toma el valor 0 cuando la pendiente es positiva, 1 cuando la pendiente es nula y 2 cuando la pendiente es negativa.</p></li>
 <li><p><strong>mves</strong>: Número de vasos principales coloreados por fluoroscopía. Toma valores enteros entre 0 y 3, inclusive.</p></li>
-<li><p><strong>tHR</strong>: Variable categória que indica el tipo de ritmo cardíaco. Toma el valor 3 para el ritmo normal, 6 para defecto reparado, y 7 para defecto reversible.</p></li>
-<li><p><strong>fdiag</strong>: Booleano para el diagnosis de la enfermedad del corazón. Toma el 0 cuando la reducción del diámetro es menor al 50%, y 1 cuando es superior al 50%.</p></li>
+<li><p><strong>tHR</strong>: Variable categórica que indica el tipo de ritmo cardíaco. Toma el valor 3 para el ritmo normal, 6 para defecto reparado, y 7 para defecto reversible.</p></li>
+<li><p><strong>fdiag</strong>: Booleano para el diagnosis de la enfermedad del corazón. Se comenta en la fuente que toma los valores enteros comprendidos entre 0 y 4 (ambos incluidos). No se especifica si se trata del número exacto de patologías diagnosticadas a cada paciente, pero sí que se menciona que el valor 0 se asigna únicamente a aquellos pacientes a los que no se les ha diagnosticado ninguna enfermedad y el resto de valores se atribuyen a los que sí tienen (o han tenido) alguna patología cardíaca. Nosotros la hemos transformado en una variable de tipo factor (0 = “libre enfermedad” y 1 = “diagnosticado”).</p></li>
 </ul>
-<!--- COMENTARIOS:
-
-Se deixa sa pregunta per es resultats que es treguin des treball, i la formulam després.
-
-1) fdiag és correcte?
-2) augmenten amb es anys?
-3) diferencies de sexe?
-si en general hi ha mateixes mesures de sa majoria de variables per sexe, o algunes més elevades etc.? 
-
---->
-<p>Ángel [noche del miércoles al jueves]: voy a ir haciendo gráficos cruzando datos, haré todos los cruces que se me vayan ocurriendo. Luego ya en haber tenido ocasión de charlar los tres podemos decidir cuáles nos parecen más relevantes y cuales no.</p>
-<ol type="1">
-<li>Cruce del nivel de colesterol únicamente según el sexo:</li>
-</ol>
-<p>Creo que tiene la pega de que el colesterol puede ser que sea algo que dependa más de la edad y no tanto del sexo. La gente mayor tiene a tener más colesterol que la gente joven. Propongo ahora el mismo gráfico pero teniendo en cuenta franjas de edad.</p>
+<!-- Toma el 0 cuando la reducción del diámetro es menor al 50%, y 1 cuando es superior al 50%. -->
+<section id="análisis-exploratorio-del-conjunto-de-datos" class="level1">
+<h1>Análisis exploratorio del conjunto de datos:</h1>
+<section id="distribución-de-los-datos-numéricos" class="level2">
+<h2 class="anchored" data-anchor-id="distribución-de-los-datos-numéricos">1) Distribución de los datos numéricos:</h2>
+<p>Mostramos en primer lugar la distribución de las variables numéricas (que son edad, presión arterial, nivel de colesterol y frecuencia cardiaca máxima) para ver cómo están repartidas en nuestro conjunto de datos (si de forma uniforme o no uniforme).</p>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="Entrega3_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<ol start="2" type="1">
-<li>Niveles de colesterol según edad y sexos de los pacientes. He agrupado las edades en franjas que empiezan en el mínimo de la variable “age” y de longitud 10 años.</li>
-</ol>
+</section>
+<section id="frecuencias-de-los-datos-categóricos" class="level2">
+<h2 class="anchored" data-anchor-id="frecuencias-de-los-datos-categóricos">2) Frecuencias de los datos categóricos:</h2>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="Entrega3_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<ol start="3" type="1">
-<li>Se replican los gráficos anteriores pero para el nivel de presión sanguínea.</li>
-</ol>
+</section>
+<section id="cruce-del-nivel-de-colesterol-únicamente-según-el-sexo" class="level2">
+<h2 class="anchored" data-anchor-id="cruce-del-nivel-de-colesterol-únicamente-según-el-sexo">3) Cruce del nivel de colesterol únicamente según el sexo:</h2>
+<p>Observamos que el nivel de colesterol de las mujeres del grupo estudiado es más variado (disperso) que el de los hombres. Esto se aprecia en la amplitud de la caja del diagrama y, se confirma con el <em>outlier</em> que supera los 550mg/dl.</p>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="Entrega3_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="niveles-de-colesterol-según-edad-y-sexos-de-los-pacientes." class="level2">
+<h2 class="anchored" data-anchor-id="niveles-de-colesterol-según-edad-y-sexos-de-los-pacientes.">4) Niveles de colesterol según edad y sexos de los pacientes.</h2>
+<p>Nos parece relevante adquirir una información más desglosada sobre la dispersión de los niveles de colesterol según la edad y sexo del paciente. Para ello, hemos optado por clasificar por grupos de edad y repetir el mismo gráfico de antes. En esta nueva versión podemos observar una tendencia creciente en los niveles de colesterol de las mujeres hasta los 69 años, así como un mayor grado de dispersión. En los hombres también se observa esta tendencia al alza, aunque más atenuada.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="se-replican-los-gráficos-anteriores-pero-para-el-nivel-de-presión-sanguínea." class="level2">
+<h2 class="anchored" data-anchor-id="se-replican-los-gráficos-anteriores-pero-para-el-nivel-de-presión-sanguínea.">5) Se replican los gráficos anteriores pero para el nivel de presión sanguínea.</h2>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <ol start="4" type="1">
@@ -189,7 +200,7 @@ si en general hi ha mateixes mesures de sa majoria de variables per sexe, o algu
 </ol>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <ol start="5" type="1">
@@ -197,29 +208,7 @@ si en general hi ha mateixes mesures de sa majoria de variables per sexe, o algu
 </ol>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<ol start="5" type="1">
-<li>Distribución de datos: (para ver de qué hay más)</li>
-</ol>
-<p>Mostrar la distribución de las variables numéricas (que son edades, presión arterial, nivel de colesterol y frecuencia cardiaca máxima) para ver cómo están repartidas en nuestro conjunto de datos (si de forma uniforme o no uniforme).</p>
-<div class="cell">
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'patchwork' was built under R version 4.2.3</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="cell-output-display">
 <p><img src="Entrega3_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<ol start="6" type="1">
-<li>Frecuencias de los datos categóricos (saber la cantidad de frecuencias observadas para cada una de las variables factor).</li>
-</ol>
-<div class="cell">
-<div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <ol start="7" type="1">
@@ -227,25 +216,25 @@ si en general hi ha mateixes mesures de sa majoria de variables per sexe, o algu
 </ol>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>Distribución del nivel de colesterol según el tipo de dolor en el pecho:</p>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>Análisis inferencial:</p>
 <p>Matriz de correlaciones:</p>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>Vector de medias de las variables cuantitativas:</p>
@@ -294,10 +283,15 @@ sample estimates:
 <p>El boxplot bivariante es un gráfico de dispersión que incluye dos elipses estimadas, la interior que contiene aproximadamente el 50% de los datos y la exterior que contiene aproximadamente el 95% de los datos. Este tipo de gráficos nos ayuda a localizar datos atípicos. Veamos un ejemplo con los datos de los pingüinos.</p>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="672"></p>
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>Matrices de dispersión:</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="Entrega3_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="672"></p>
@@ -306,11 +300,6 @@ sample estimates:
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="Entrega3_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<div class="cell">
-<div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>Caras de Chernoff:</p>
@@ -332,13 +321,15 @@ sample estimates:
          Max.   :202.0           Max.   :6.200           Max.   :3.0000  
  tHR     fdiag       decade   
  3:164   0:160   [29,39): 10  
- 6: 18   1: 54   [39,49): 70  
- 7:115   2: 35   [49,59):112  
-         3: 35   [59,69): 92  
-         4: 13   [69,79): 13  
+ 6: 18   1:137   [39,49): 70  
+ 7:115           [49,59):112  
+                 [59,69): 92  
+                 [69,79): 13  
                               </code></pre>
 </div>
 </div>
+</section>
+</section>
 
 </main>
 <!-- /main column -->
