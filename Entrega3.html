@@ -8,7 +8,7 @@
 
 <meta name="author" content="Ángel García, Arnau Piferrer y Guillem Serra">
 
-<title>Entrega3</title>
+<title>Entrega 3</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -47,7 +47,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Entrega3</h1>
+<h1 class="title">Entrega 3</h1>
 </div>
 
 
@@ -74,7 +74,8 @@ ul.task-list li input[type="checkbox"] {
 <div class="cell">
 
 </div>
-<p>Antes de empezar con el análisis multivariante se realizará una primera limpieza del Dataset. En primer lugar, renombramos las variables para hacerlas más acordes a aquello que representan (en el archivo inicial estaban nombradas como <span class="math inline">\(X_1\)</span>, <span class="math inline">\(X_2\)</span>, <span class="math inline">\(...\)</span>, <span class="math inline">\(X_{14}\)</span>). A continuación, pasamos a factor las variables categóricas (hemos encontrado que muchas no venían dadas como factor incialmente). Por último, dado que tenemos un número pequeño de muestras a las que les falta algún dato (concretamente 6), las hemos eliminado. Recalcar que los datos ausentes venían dados por interrogantes en lugar de NA’s.</p>
+<p>Antes de empezar con el análisis multivariante se realizará una primera limpieza del Dataset. En primer lugar, renombramos las variables para hacerlas más acordes a aquello que representan (en el archivo inicial estaban nombradas como <span class="math inline">\(X_1\)</span>, <span class="math inline">\(X_2\)</span>, <span class="math inline">\(...\)</span>, <span class="math inline">\(X_{14}\)</span>). A continuación, pasamos a factor las variables categóricas (hemos encontrado que muchas no venían dadas como factor incialmente).</p>
+<p>Por último, dado que tenemos un número pequeño de muestras a las que les falta algún dato (concretamente 6), las hemos eliminado. Recalcar que los datos ausentes venían dados por interrogantes en lugar de NA’s.</p>
 <div class="cell">
 
 </div>
@@ -119,16 +120,31 @@ ul.task-list li input[type="checkbox"] {
 <div class="cell-output-display">
 <p><img src="Entrega3_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
 </div>
+<div class="cell-output-display">
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-5-3.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Mostramos también el vector de medias de las variables cuantitativas:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 6
+    age restbp  chol maxHR expeak  mves
+  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;
+1  54.5   132.  247.  150.   1.06 0.677</code></pre>
+</div>
 </div>
 </section>
 <section id="frecuencias-de-los-datos-categóricos" class="level2">
 <h2 class="anchored" data-anchor-id="frecuencias-de-los-datos-categóricos">2) Frecuencias de los datos categóricos:</h2>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
 </div>
 <div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-6-2.png" class="img-fluid" width="672"></p>
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-7-2.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section>
@@ -137,7 +153,7 @@ ul.task-list li input[type="checkbox"] {
 <p>Observamos que el nivel de colesterol de las mujeres del grupo estudiado es más variado (disperso) que el de los hombres. Esto se aprecia en la amplitud de la caja del diagrama y, se confirma con el <em>outlier</em> que supera los 550mg/dl.</p>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section>
@@ -146,7 +162,7 @@ ul.task-list li input[type="checkbox"] {
 <p>Nos parece relevante adquirir una información más desglosada sobre la dispersión de los niveles de colesterol según la edad y sexo del paciente. Para ello, hemos optado por clasificar por grupos de edad y repetir el mismo gráfico de antes. En esta nueva versión podemos observar una tendencia creciente en los niveles de colesterol de las mujeres hasta los 69 años, así como un mayor grado de dispersión. En los hombres también se observa esta tendencia al alza, aunque más atenuada.</p>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>Se puede observar que, sin tener en cuenta la última franja de edad, a medida que crece la edad, también crece la dispersion. Una de las posibles razones de porque no se cumple esto en la última franja, se puede deber a la pequeña muestra que tenemos de ella.</p>
@@ -155,52 +171,62 @@ ul.task-list li input[type="checkbox"] {
 <h2 class="anchored" data-anchor-id="se-replican-los-gráficos-anteriores-pero-para-el-nivel-de-presión-sanguínea.">5) Se replican los gráficos anteriores pero para el nivel de presión sanguínea.</h2>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>No se observan diferencias signficativas entre hombres y mujeres referente al nivel de presión arterial en reposo. En cambio, si volvemos a realizar el análisis según las franjas de edad de los pacientes, obtenemos el siguiente resultado:</p>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>A diferencia del gráfico anterior, en este, sí se observa que, a medida que va aumentando la edad de los sujetos, también crece la dispersión del nivel de presión arterial en reposo. Téngase en cuenta que, dada la escasez de individuos de mayor edad, los resultados obtenidos para la dispersión de la última franja no son concluyentes. Se puede destacar también que todos los puntos <em>outliers</em> estan en la franja de [49,59) años.</p>
+<p>A diferencia del gráfico anterior, en este, sí se observa que, a medida que va aumentando la edad de los sujetos, también crece la dispersión del nivel de presión arterial en reposo. Téngase en cuenta que, dada la escasez de individuos de mayor edad, los resultados obtenidos para la dispersión de la última franja no son concluyentes. Se puede destacar también que todos los puntos <em>outliers</em> estan en la franja de <span class="math inline">\([49,59)\)</span> años.</p>
+<p>#Análisis inferencial:</p>
 </section>
-</section>
-<section id="análisis-inferencial" class="level1">
-<h1>Análisis inferencial:</h1>
 <section id="cruces-de-variables-cuantitativas" class="level2">
 <h2 class="anchored" data-anchor-id="cruces-de-variables-cuantitativas">Cruces de variables cuantitativas:</h2>
 <p>Representamos el gráfico <em>ggpairs</em> para obtener una visión general de la relación entre todos los pares de variables cuantitativas (y además teniendo el cuenta la variable sexo) y así poder luego focalizar el estudio en aquellas en las que pueda haber mayor nivel de correlación o interés.</p>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<ol type="1">
-<li>maxHR vs Age</li>
-<li>maxHR vs expeak</li>
-<li>restbp vs age</li>
-<li>chol vs age</li>
-<li>expeak vs restbp (POR SEXOS para ver difeerncias)</li>
-<li>Comentar la NO CORR entre Chol y MaxHR</li>
-</ol>
+<section id="distribuciones-de-probabilidad" class="level3">
+<h3 class="anchored" data-anchor-id="distribuciones-de-probabilidad">Distribuciones de probabilidad:</h3>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Dichas densidades parecen ser Gaussianas, y la correspondiente a los hombres presenta una media ligeramente más alta que la de las mujeres, sin embargo la superposición de ambas densidades indica que no hay diferencias significativas.</p>
+<p>Cuando comparamos las densidades para hombres y mujeres, esta vez ambas densidades presentan el mismo valor de tendencia central pero, la cola superior de las mujeres es más ancha. A pesar de lo anterior, esta superposición nos permite afirmar que no hay diferencias significativas entre las notas de los hombres y las mujeres en las áreas del examen de redacción y escritura.</p>
+</section>
 </section>
 <section id="contraste-frecuencia-máxima-ppm-contra-edad" class="level2">
 <h2 class="anchored" data-anchor-id="contraste-frecuencia-máxima-ppm-contra-edad">1) Contraste Frecuencia máxima PPM contra edad:</h2>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 8.350624e-13</code></pre>
+<pre><code>
+    Pearson's product-moment correlation
+
+data:  heartdisease$maxHR and heartdisease$age
+t = -7.3752, df = 295, p-value = 8.351e-13
+alternative hypothesis: true correlation is less than 0
+95 percent confidence interval:
+ -1.0000000 -0.3106485
+sample estimates:
+       cor 
+-0.3945629 </code></pre>
 </div>
 </div>
-<p>Confirmamos que en la <em>población</em> de individuos con síntomas de dolor en el pecho (a la que, a partir de ahora nos referiremos como población “grande”), no en la muestral, la edad y el número máximo de pulsaciones tienen correlación negativa dado que se ha obtenido un pvalor inferior a <code>cor.test(heartdisease$maxHR, heartdisease$age, alternative = "less")$p.value</code>. Esto significa que, a mayor edad se espera que disminuya el número máximo de pulsaciones por minuto.</p>
-<ol start="2" type="1">
-<li>Contraste de correlación expeak () vs maxHR:</li>
-</ol>
-<p>Confirmamos que en la <em>población</em> grande (no en nuestra muestra) el número máximo de pulsaciones y el expeak tienen correlación negativa. Esto significa que, a mayor edad, la depresión en el segmento ST inducida por el ejercicio en relación con el reposo es menor.</p>
+<p>Confirmamos que en la población de individuos con síntomas de dolor en el pecho (a la que, a partir de ahora nos referiremos como población “grande”), no en la muestral, la edad y el número máximo de pulsaciones tienen correlación negativa dado que se ha obtenido un p-valor de <span class="math inline">\(8.351·10^{-13} &lt; 0.05\)</span>. Esto significa que, a mayor edad se espera que disminuya el número máximo de pulsaciones por minuto en individuos de la población grande.</p>
+<p>Este razonamiento será análogo en los ejemplos que siguen a continuación.</p>
+</section>
+<section id="contraste-de-correlación-frecuencia-máxima-ppm-contra-depresión-del-segmento-st" class="level2">
+<h2 class="anchored" data-anchor-id="contraste-de-correlación-frecuencia-máxima-ppm-contra-depresión-del-segmento-st">2) Contraste de correlación Frecuencia máxima PPM contra depresión del segmento ST:</h2>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -216,68 +242,97 @@ sample estimates:
 -0.34764 </code></pre>
 </div>
 </div>
-<ol start="3" type="1">
-<li>Contraste de correlación Edad vs mves():</li>
-</ol>
-<p>Confirmamos que en la <em>población</em> grande (no en nuestra muestra) la edad y la variable mves(), tienen correlación negativa. Esto significa que, a mayor edad, el número de vasos principales coloreados por fluoroscopía es menor.</p>
+<p>Confirmamos que en la población grande el número máximo de pulsaciones por minuto durante una prueba de esfuerzo y <em>expeak</em> tienen correlación negativa. Esto significa que, a mayor grado de depresión del segmento ST (inducido por el ejercicio en relación con el reposo) menor es las pulsaciones máximas por minuto.</p>
+</section>
+<section id="contraste-de-correlación-edad-contra-presión-sanguínea-en-reposo" class="level2">
+<h2 class="anchored" data-anchor-id="contraste-de-correlación-edad-contra-presión-sanguínea-en-reposo">3) Contraste de correlación edad contra presión sanguínea en reposo:</h2>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>
     Pearson's product-moment correlation
 
-data:  heartdisease$age and heartdisease$mves
-t = 6.6744, df = 295, p-value = 1
-alternative hypothesis: true correlation is less than 0
+data:  heartdisease$restbp and heartdisease$age
+t = 5.2139, df = 295, p-value = 1.742e-07
+alternative hypothesis: true correlation is greater than 0
 95 percent confidence interval:
- -1.0000000  0.4425179
+ 0.200407 1.000000
 sample estimates:
       cor 
-0.3622103 </code></pre>
+0.2904763 </code></pre>
 </div>
 </div>
-<ol start="5" type="1">
-<li>Nube de puntos: con esto podríamos ver si hay (a priori, luego podemos hacer el contraste de correlación oportuno) correlación/covarianza entre las variables maxHR y Colesterol. (La idea sería que las personas con mayor nivel de colesterol suelen estar menos en forma y por ello sus pulsaciones podrían dispararse al hacer ejercicio).</li>
-</ol>
+<p>Confirmamos que en la población grande la edad y la presión sanguínea de un individuo que se encuentra en reposo tienen correlación positiva. Esto significa que, a mayor edad, la presión tiende a ser mayor.</p>
+</section>
+<section id="contraste-de-correlación-edad-contra-colesterol-en-sangre" class="level2">
+<h2 class="anchored" data-anchor-id="contraste-de-correlación-edad-contra-colesterol-en-sangre">4) Contraste de correlación edad contra colesterol en sangre:</h2>
 <div class="cell">
-<div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<ol start="7" type="1">
-<li></li>
-</ol>
-<div class="cell">
-<div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<p>Distribución del nivel de colesterol según el tipo de dolor en el pecho:</p>
-<div class="cell">
-<div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<div class="cell">
-<div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<p>Análisis inferencial:</p>
-<p>Vector de medias de las variables cuantitativas:</p>
-<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's product-moment correlation
 
+data:  heartdisease$chol and heartdisease$age
+t = 3.5543, df = 295, p-value = 0.0002206
+alternative hypothesis: true correlation is greater than 0
+95 percent confidence interval:
+ 0.1091217 1.0000000
+sample estimates:
+      cor 
+0.2026435 </code></pre>
 </div>
-<p>Gráfico para datos bivariantes:</p>
-<p>El boxplot bivariante es un gráfico de dispersión que incluye dos elipses estimadas, la interior que contiene aproximadamente el 50% de los datos y la exterior que contiene aproximadamente el 95% de los datos. Este tipo de gráficos nos ayuda a localizar datos atípicos. Veamos un ejemplo con los datos de los pingüinos.</p>
+</div>
+<p>Confirmamos que en la población grande la edad y el nivel de colesterol en sangre tienen correlación positiva. Esto significa que, a mayor edad, mayor tiende a ser el nivel de colesterol en sangre.</p>
+</section>
+<section id="contraste-de-depresión-del-segmento-st-contra-presión-sanguínea-en-reposo-por-sexos" class="level2">
+<h2 class="anchored" data-anchor-id="contraste-de-depresión-del-segmento-st-contra-presión-sanguínea-en-reposo-por-sexos">5) Contraste de depresión del segmento ST contra presión sanguínea en reposo por sexos:</h2>
+<p>Se han observado diferencias significativas de correlación de estas variables según el sexo. Estudiemos este fenómeno más en detalle:</p>
 <div class="cell">
-<div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="672"></p>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's product-moment correlation
+
+data:  femenino$expeak and femenino$restbp
+t = 3.8918, df = 94, p-value = 9.29e-05
+alternative hypothesis: true correlation is greater than 0
+95 percent confidence interval:
+ 0.2172635 1.0000000
+sample estimates:
+      cor 
+0.3725197 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's product-moment correlation
+
+data:  masculino$expeak and masculino$restbp
+t = 1.5825, df = 199, p-value = 0.05756
+alternative hypothesis: true correlation is greater than 0
+95 percent confidence interval:
+ -0.004949651  1.000000000
+sample estimates:
+      cor 
+0.1114797 </code></pre>
 </div>
 </div>
-<!-- ```{r} -->
-<!-- stars(a[,1:6], key.loc = c(44, 1.5),cex=0.45, -->
-<!--       labels=row.names(a[,1:4]), draw.segments=TRUE) -->
-<!-- ``` -->
+<p>Los dos contrastes de hipótesis planteados nos confirman que, se puede asegurar que existe una correlación positiva entre la depresión del segmento ST y la presión sanguínea en reposo en mujeres. Sin embargo, no podemos confirmarlo en el caso de los hombres, dado que el p-valor resulta ser superior a <span class="math inline">\(0.05\)</span>.</p>
+</section>
+<section id="no-correlación-entre-niveles-de-colesterol-y-la-frecuencia-máxima-cardíaca." class="level2">
+<h2 class="anchored" data-anchor-id="no-correlación-entre-niveles-de-colesterol-y-la-frecuencia-máxima-cardíaca.">6) (No) correlación entre niveles de colesterol y la frecuencia máxima cardíaca.</h2>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's product-moment correlation
+
+data:  heartdisease$chol and heartdisease$maxHR
+t = -0.0012807, df = 295, p-value = 0.999
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.1138858  0.1137386
+sample estimates:
+          cor 
+-7.456799e-05 </code></pre>
+</div>
+</div>
+<p>Uno de los cruces que nos parecía obvio que, a priori, en el que tendría que haber algún tipo de correlación es entre el nivel de colesterol y las pulsaciones máximas por minuto. Sin embargo, con este contraste, vemos que no podemos desmentir la hipótesis de que estas dos variables sean incorreladas.</p>
 </section>
 </section>
 

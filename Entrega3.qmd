@@ -1,5 +1,5 @@
 ---
-title: "Entrega3"
+title: "Entrega 3"
 author: "Ángel García, Arnau Piferrer y Guillem Serra"
 format: html
 editor: visual
@@ -28,7 +28,9 @@ library("aplpack")
 heartdisease = read_csv("https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data", col_names = FALSE, show_col_types = FALSE)
 ```
 
-Antes de empezar con el análisis multivariante se realizará una primera limpieza del Dataset. En primer lugar, renombramos las variables para hacerlas más acordes a aquello que representan (en el archivo inicial estaban nombradas como $X_1$, $X_2$, $...$, $X_{14}$). A continuación, pasamos a factor las variables categóricas (hemos encontrado que muchas no venían dadas como factor incialmente). Por último, dado que tenemos un número pequeño de muestras a las que les falta algún dato (concretamente 6), las hemos eliminado. Recalcar que los datos ausentes venían dados por interrogantes en lugar de NA's.
+Antes de empezar con el análisis multivariante se realizará una primera limpieza del Dataset. En primer lugar, renombramos las variables para hacerlas más acordes a aquello que representan (en el archivo inicial estaban nombradas como $X_1$, $X_2$, $...$, $X_{14}$). A continuación, pasamos a factor las variables categóricas (hemos encontrado que muchas no venían dadas como factor incialmente). 
+
+Por último, dado que tenemos un número pequeño de muestras a las que les falta algún dato (concretamente 6), las hemos eliminado. Recalcar que los datos ausentes venían dados por interrogantes en lugar de NA's.
 
 ```{r}
 # Renombramos las variables:
@@ -195,10 +197,42 @@ histogram4 <- heartdisease %>%
     y = "Frecuencia"
   )
 
+histogram5 <- heartdisease %>%
+  ggplot(aes(x = expeak)) +
+  geom_histogram(binwidth = 0.5, fill = "orange", color = "black") +
+  labs(
+    title = "Depresión segmento ST",
+    x = "Nivel de depresión",
+    y = "Frecuencia"
+  )
+
+
+bar6 <- heartdisease %>%
+  ggplot(aes(x = mves)) +
+  geom_histogram(binwidth = 1, fill = "yellow", color = "black") +
+  labs(
+    title = "Vasos sanguíneos fluoroscopia",
+    x = "Número de vasos mayores",
+    y = "Frecuencia"
+  )
+
 # Combinamos para acabar los 4 histogramas en una sola figura:
-histogram1 + histogram2 + histogram3 + histogram4
+histogram1 + histogram2
+histogram3 + histogram4
+histogram5 + bar6
 
 ```
+
+Mostramos también el vector de medias de las variables cuantitativas:
+
+
+```{r}
+heartdisease_numeric <- heartdisease %>%
+  select_if(is.numeric)
+heartdisease_numeric %>%
+  summarise_all(.funs = mean, na.rm = TRUE)
+```
+
 
 ## 2) Frecuencias de los datos categóricos:
 
@@ -328,7 +362,7 @@ ggplot(heartdisease, aes(x = decade, y = restbp, fill = factor(sex))) +
   geom_boxplot() +
   labs(
     title = "Nivel de presión arterial en reposo por sexo y edad",
-    x = "Franja de Edad",
+    x = "Franja de edad",
     y = "Nivel de presión arterial en reposo (mm Hg)"
   ) +
   scale_fill_discrete(name = "Sexo", labels = c("0" = "Mujer", "1" = "Hombre")) +
@@ -337,9 +371,13 @@ ggplot(heartdisease, aes(x = decade, y = restbp, fill = factor(sex))) +
 
 ```
 
-A diferencia del gráfico anterior, en este, sí se observa que, a medida que va aumentando la edad de los sujetos, también crece la dispersión del nivel de presión arterial en reposo. Téngase en cuenta que, dada la escasez de individuos de mayor edad, los resultados obtenidos para la dispersión de la última franja no son concluyentes. Se puede destacar también que todos los puntos *outliers* estan en la franja de \[49,59) años.
+A diferencia del gráfico anterior, en este, sí se observa que, a medida que va aumentando la edad de los sujetos, también crece la dispersión del nivel de presión arterial en reposo. Téngase en cuenta que, dada la escasez de individuos de mayor edad, los resultados obtenidos para la dispersión de la última franja no son concluyentes. Se puede destacar también que todos los puntos *outliers* estan en la franja de $[49,59)$ años.
 
-# Análisis inferencial:
+
+
+#Análisis inferencial:
+
+
 
 ## Cruces de variables cuantitativas:
 
@@ -354,12 +392,78 @@ ggpairs(a, mapping = aes(color = heartdisease$sex))
 
 ```
 
-1)  maxHR vs Age
-2)  maxHR vs expeak
-3)  restbp vs age
-4)  chol vs age
-5)  expeak vs restbp (POR SEXOS para ver difeerncias)
-6)  Comentar la NO CORR entre Chol y MaxHR
+
+### Distribuciones de probabilidad:
+
+
+
+```{r}
+
+# Creamos gráficas para las distribuciones de probabilidad de las variables numéricas:
+
+dens1 <- heartdisease %>%
+  ggplot(aes(x = age, fill = sex)) +
+  geom_density(alpha = 0.5) +
+  labs(
+    title = "Distribución de edades",
+    x = "Edad",
+    y = "Densidad"
+  ) +
+  scale_fill_manual(values = c("red", "blue"), labels = c("Mujer", "Hombre"), name = NULL) +
+  theme_minimal()
+
+
+dens2 <-heartdisease %>%
+  ggplot(aes(x = restbp, fill = sex)) +
+  geom_density(alpha = 0.5) +
+  labs(
+    title = "Distribución de la presión sanguínea",
+    x = "Presión (mm HG)",
+    y = "Densidad"
+  ) +
+  scale_fill_manual(values = c("red", "blue"), labels = c("Mujer", "Hombre"), name = NULL) +
+  theme_minimal()
+
+dens3 <- heartdisease %>%
+  ggplot(aes(x = chol, fill = sex)) +
+  geom_density(alpha = 0.5) +
+  labs(
+    title = "Distribución de colesterol",
+    x = "Colesterol (mg/dl)",
+    y = "Densidad"
+  ) +
+  scale_fill_manual(values = c("red", "blue"), labels = c("Mujer", "Hombre"), name = NULL) +
+  theme_minimal()
+
+dens4 <-heartdisease %>%
+  ggplot(aes(x = maxHR, fill = sex)) +
+  geom_density(alpha = 0.5) +
+  labs(
+    title = "Distribución del ritmo cardíaco",
+    x = "Frecuencia cardíaca máxima (PPM)",
+    y = "Densidad"
+  ) +
+  scale_fill_manual(values = c("red", "blue"), labels = c("Mujer", "Hombre"), name = NULL) +
+  theme_minimal()
+
+dens1 + dens2 + dens3 + dens4
+
+```
+
+
+Dichas densidades
+parecen ser Gaussianas, y la correspondiente a los hombres presenta una media ligeramente más alta que la
+de las mujeres, sin embargo la superposición de ambas densidades indica que no hay diferencias significativas.
+
+
+
+Cuando comparamos las densidades para hombres y
+mujeres, esta vez ambas densidades presentan el mismo valor de tendencia central pero, la cola superior de las
+mujeres es más ancha. A pesar de lo anterior, esta superposición nos permite afirmar que no hay diferencias
+significativas entre las notas de los hombres y las mujeres en las áreas del examen de redacción y escritura.
+
+
+
 
 ## 1) Contraste Frecuencia máxima PPM contra edad:
 
@@ -368,139 +472,85 @@ ggpairs(a, mapping = aes(color = heartdisease$sex))
 ggplot(heartdisease, aes(x = age, y = maxHR, color = factor(sex))) +
   geom_point() +
   labs(
-    title = "Nube de Puntos de Edad vs. Frecuencia Cardíaca Máxima",
+    title = "Nube de puntos de edad contra frecuencia cardíaca máxima",
     x = "Edad",
     y = "Frecuencia Cardíaca Máxima"
   ) +
   scale_color_manual(values = c("red", "blue"), labels = c("Mujer", "Hombre")) +
   theme_minimal()
 
-cor.test(heartdisease$maxHR, heartdisease$age, alternative = "less")$p.value
+cor.test(heartdisease$maxHR, heartdisease$age, alternative = "less")
 
 ```
 
-Confirmamos que en la *población* de individuos con síntomas de dolor en el pecho (a la que, a partir de ahora nos referiremos como población "grande"), no en la muestral, la edad y el número máximo de pulsaciones tienen correlación negativa dado que se ha obtenido un pvalor inferior a `cor.test(heartdisease$maxHR, heartdisease$age, alternative = "less")$p.value`. Esto significa que, a mayor edad se espera que disminuya el número máximo de pulsaciones por minuto.
+Confirmamos que en la población de individuos con síntomas de dolor en el pecho (a la que, a partir de ahora nos referiremos como población "grande"), no en la muestral, la edad y el número máximo de pulsaciones tienen correlación negativa dado que se ha obtenido un p-valor de $8.351·10^{-13} < 0.05$. Esto significa que, a mayor edad se espera que disminuya el número máximo de pulsaciones por minuto en individuos de la población grande. 
 
-2)  Contraste de correlación expeak () vs maxHR:
+Este razonamiento será análogo en los ejemplos que siguen a continuación.
 
-Confirmamos que en la *población* grande (no en nuestra muestra) el número máximo de pulsaciones y el expeak tienen correlación negativa. Esto significa que, a mayor edad, la depresión en el segmento ST inducida por el ejercicio en relación con el reposo es menor.
+
+## 2)  Contraste de correlación Frecuencia máxima PPM contra depresión del segmento ST:
+
 
 ```{r}
-# expeak: Indica la depresión en el segmento ST inducida por el ejercicio en relación con el reposo. Con valor mínimmo de 0, y valor máximo de 6.20.
+# Recordemos que expeak: Indica la depresión en el segmento ST inducida por el ejercicio en relación con el reposo. Con valor mínimmo de 0, y valor máximo de 6.20.
+
 cor.test(heartdisease$maxHR, heartdisease$expeak, alternative = "less")
 
 ```
 
-3)  Contraste de correlación Edad vs mves():
+Confirmamos que en la población grande el número máximo de pulsaciones por minuto durante una prueba de esfuerzo y *expeak* tienen correlación negativa. Esto significa que, a mayor grado de depresión del segmento ST (inducido por el ejercicio en relación con el reposo) menor es las pulsaciones máximas por minuto.
 
-Confirmamos que en la *población* grande (no en nuestra muestra) la edad y la variable mves(), tienen correlación negativa. Esto significa que, a mayor edad, el número de vasos principales coloreados por fluoroscopía es menor.
+
+## 3)  Contraste de correlación edad contra presión sanguínea en reposo:
+
 
 ```{r}
-# expeak: Indica la depresión en el segmento ST inducida por el ejercicio en relación con el reposo. Con valor mínimmo de 0, y valor máximo de 6.20.
-cor.test(heartdisease$age, heartdisease$mves, alternative = "less")
-
+cor.test(heartdisease$restbp, heartdisease$age, alternative = "greater")
 ```
 
-5)  Nube de puntos: con esto podríamos ver si hay (a priori, luego podemos hacer el contraste de correlación oportuno) correlación/covarianza entre las variables maxHR y Colesterol. (La idea sería que las personas con mayor nivel de colesterol suelen estar menos en forma y por ello sus pulsaciones podrían dispararse al hacer ejercicio).
+Confirmamos que en la población grande la edad y la presión sanguínea de un individuo que se encuentra en reposo tienen correlación positiva. Esto significa que, a mayor edad, la presión tiende a ser mayor.
+
+
+
+## 4)  Contraste de correlación edad contra colesterol en sangre:
+
 
 ```{r}
-
-# Carga la biblioteca ggplot2 si aún no lo has hecho
-library(ggplot2)
-
-# Crea un scatter plot de chol y maxHR con colores por género
-ggplot(heartdisease, aes(x = age, y = maxHR, color = factor(sex))) +
-  geom_point() +
-  labs(
-    title = "Nube de Puntos de Edad vs. Frecuencia Cardíaca Máxima",
-    x = "Edad",
-    y = "Frecuencia Cardíaca Máxima"
-  ) +
-  scale_color_manual(values = c("blue", "red"), labels = c("Mujer", "Hombre")) +
-  theme_minimal()
-
-
+cor.test(heartdisease$chol, heartdisease$age, alternative = "greater")
 ```
 
-7)  
+Confirmamos que en la población grande la edad y el nivel de colesterol en sangre tienen correlación positiva. Esto significa que, a mayor edad, mayor tiende a ser el nivel de colesterol en sangre.
+
+
+
+## 5)  Contraste de depresión del segmento ST contra presión sanguínea en reposo por sexos:
+
+Se han observado diferencias significativas de correlación de estas variables según el sexo. Estudiemos este fenómeno más en detalle:
 
 ```{r}
 
-# Crea un boxplot de "chol" por "cp"
-heartdisease %>%
-  ggplot(aes(x = factor(cp), y = chol)) +
-  geom_boxplot(fill = "blue") +
-  labs(
-    title = "Colesterol según Dolor en el pecho",
-    x = "Dolor de Pecho",
-    y = "Colesterol"
-  )
+masculino <- heartdisease %>%
+  filter(sex==1)
+femenino <- heartdisease %>%
+  filter(sex == 0)
+
+cor.test(femenino$expeak, femenino$restbp, alternative = "greater")
+cor.test(masculino$expeak, masculino$restbp, alternative = "greater")
 
 ```
 
-Distribución del nivel de colesterol según el tipo de dolor en el pecho:
+Los dos contrastes de hipótesis planteados nos confirman que, se puede asegurar que existe una correlación positiva entre la depresión del segmento ST y la presión sanguínea en reposo en mujeres. Sin embargo, no podemos confirmarlo en el caso de los hombres, dado que el p-valor resulta ser superior a $0.05$.
+
+
+## 6) (No) correlación entre niveles de colesterol y la frecuencia máxima cardíaca. 
 
 ```{r}
-# Crea un gráfico de distribuciones de colesterol por género
-heartdisease %>%
-  ggplot(aes(x = chol, fill = factor(sex))) +
-  geom_density(alpha = 0.5) +
-  labs(
-    title = "Distribución de Colesterol por Género",
-    x = "Colesterol",
-    y = "Densidad"
-  ) +
-  scale_fill_manual(values = c("blue", "red"), labels = c("Mujer", "Hombre")) +
-  theme_minimal()
-
-
-
+cor.test(heartdisease$chol, heartdisease$maxHR, alternative = "two.sided")
 ```
 
-```{r}
-# Carga la biblioteca tidyverse si aún no lo has hecho
-library(tidyverse)
+Uno de los cruces que nos parecía obvio que, a priori, en el que tendría que haber algún tipo de correlación es entre el nivel de colesterol y las pulsaciones máximas por minuto. Sin embargo, con este contraste, vemos que no podemos desmentir la hipótesis de que estas dos variables sean incorreladas.
 
-# Crea un gráfico de distribuciones de maxHR por género
-heartdisease %>%
-  ggplot(aes(x = maxHR, fill = factor(sex))) +
-  geom_density(alpha = 0.5) +
-  labs(
-    title = "Distribución de Frecuencia Cardíaca Máxima por Género",
-    x = "Frecuencia Cardíaca Máxima",
-    y = "Densidad"
-  ) +
-  scale_fill_manual(values = c("blue", "red"), labels = c("Mujer", "Hombre")) +
-  theme_minimal()
 
-```
 
-Análisis inferencial:
 
-Vector de medias de las variables cuantitativas:
 
-```{r}
-avrg_chol = mean(heartdisease$chol)
-avrg_HR = mean(heartdisease$maxHR)
-avrg_restbp = mean(heartdisease$restbp)
-```
-
-Gráfico para datos bivariantes:
-
-El boxplot bivariante es un gráfico de dispersión que incluye dos elipses estimadas, la interior que contiene aproximadamente el 50% de los datos y la exterior que contiene aproximadamente el 95% de los datos. Este tipo de gráficos nos ayuda a localizar datos atípicos. Veamos un ejemplo con los datos de los pingüinos.
-
-```{r}
-
-a2<- heartdisease %>%
-  select(maxHR,expeak) %>%
-  as.matrix()
-
-bvbox(a2,xlab = " Ritmo cardíaco máximo en pulsasiones por minuto", 
-           ylab = " Indica la depresión en el segmento ST",
-      pch = 19, cex = 1.25, col = "red")
-```
-
-<!-- ```{r} -->
-<!-- stars(a[,1:6], key.loc = c(44, 1.5),cex=0.45, -->
-<!--       labels=row.names(a[,1:4]), draw.segments=TRUE) -->
-<!-- ``` -->
