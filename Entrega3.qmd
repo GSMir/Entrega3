@@ -15,7 +15,7 @@ Este es el [repositorio](https://github.com/GSMir/Entrega3) de GitHub en el que 
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-```{r, message = FALSE}
+```{r, message = FALSE,warning=FALSE}
 library(readr)
 library(tidyverse)
 library(patchwork)
@@ -28,10 +28,7 @@ library("aplpack")
 heartdisease = read_csv("https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data", col_names = FALSE, show_col_types = FALSE)
 ```
 
-
-
 Antes de empezar con el análisis multivariante se realizará una primera limpieza del Dataset. En primer lugar, renombramos las variables para hacerlas más acordes a aquello que representan (en el archivo inicial estaban nombradas como $X_1$, $X_2$, $...$, $X_{14}$). A continuación, pasamos a factor las variables categóricas (hemos encontrado que muchas no venían dadas como factor incialmente). Por último, dado que tenemos un número pequeño de muestras a las que les falta algún dato (concretamente 6), las hemos eliminado. Recalcar que los datos ausentes venían dados por interrogantes en lugar de NA's.
-
 
 ```{r}
 # Renombramos las variables:
@@ -40,8 +37,6 @@ heartdisease = heartdisease %>% rename(age = X1, sex = X2, cp = X3, restbp = X4,
 # Se eliminan las entradas con valor '?'
 heartdisease = heartdisease %>% filter(!str_detect(tHR, "\\?") & (!str_detect(mves, "\\?")))
 ```
-
-
 
 ```{r}
 
@@ -116,56 +111,49 @@ heartdisease <- heartdisease %>%
 
 ```
 
-
 El objetivo del estudio original tenía como principal objetivo comparar dos modelos estadísticos (uno antiguo y otro novedoso) que proporcioban estimaciones de la probabilidad de enfermedad coronaria en pacientes que presentaban dolencias en el pecho. Se tomaron las medidas que se detallan en el Dataset a un total de 303 pacientes de Cleveland (Ohio) y se aplicaron otros tres grupos de Hungría, California y Suiza. Nuestro objetivo en esta entrega será determinar los rasgos más significativo del Dataset, así como las relaciones que puedan resultar de mayor interés desde el punto de vista clínico.
 
-
 En este conjunto de datos encontramos `r nrow(heartdisease)` visualizaciones de `r ncol(heartdisease)` variables. Se describen a continuación las variables del mismo:
-
 
 ```{r, fig.cap = "Electrocardiograma", out.width = '60%'}
 knitr::include_graphics("SinusRhythmLabels.svg.png")
 ```
 
-- **age**: Edad del paciente. Número entero. El conjunto de edades de los sujetos obersvados está comprendido entre los 29 y los 77 años. La media de edad de los pacientes está en los 54.54 años.
+-   **age**: Edad del paciente. Número entero. El conjunto de edades de los sujetos obersvados está comprendido entre los 29 y los 77 años. La media de edad de los pacientes está en los 54.54 años.
 
-- **sex**: Sexo cromosómico del paciente. Variable categórica que toma el valor 0 para el sexo femenino y 1 para el masculino. Encontramos un total de 96 mujeres y 201 hombres.
+-   **sex**: Sexo cromosómico del paciente. Variable categórica que toma el valor 0 para el sexo femenino y 1 para el masculino. Encontramos un total de 96 mujeres y 201 hombres.
 
-- **cp**: (del inglés *"Chest Pain"*). Hace referencia al tipo de dolor que se sufre el paciente en el pecho. Se trata de una variable categórica que toma los valores 1 para angina de pecho típica, 2 para angina de pecho atípica, 3 para dolores que no son de angina de pecho y 4 para asintomático.
+-   **cp**: (del inglés *"Chest Pain"*). Hace referencia al tipo de dolor que se sufre el paciente en el pecho. Se trata de una variable categórica que toma los valores 1 para angina de pecho típica, 2 para angina de pecho atípica, 3 para dolores que no son de angina de pecho y 4 para asintomático.
 
-- **restbp**: Presión sanguínea medida en reposo (mm Hg). Es una variable numérica con valor mínimo 94 y valor máximo 200. La presión media del grupo de pacientes es de 131.69 mm Hg.
+-   **restbp**: Presión sanguínea medida en reposo (mm Hg). Es una variable numérica con valor mínimo 94 y valor máximo 200. La presión media del grupo de pacientes es de 131.69 mm Hg.
 
-- **chol**: Nivel de colesterol en sangre (mg/dl). Variable numérica con mínimo de 126 mg/dl y máximo de 564 mg/dl, siendo el nivel medio de colesterol 247.35 mg/dl.
+-   **chol**: Nivel de colesterol en sangre (mg/dl). Variable numérica con mínimo de 126 mg/dl y máximo de 564 mg/dl, siendo el nivel medio de colesterol 247.35 mg/dl.
 
-- **fbs**: Booleano que determina si la cantidad de azúcar en sangre en ayuno es mayor a 120mg/dl. Toma el valor 0 para negarlo, y 1 para afirmarlo.
+-   **fbs**: Booleano que determina si la cantidad de azúcar en sangre en ayuno es mayor a 120mg/dl. Toma el valor 0 para negarlo, y 1 para afirmarlo.
 
-- **restecg**: Resultados del electrocardiograma en reposo. Se trata de una variable categórica. Los resultados normales vienen dados por 0, con un 1 se indican aquellos pacientes con anomalías en el segmento ST-T (que pueden ser inversiones de las ondas T y/o elevaciones o depresiones de las ondas ST superiores a 0.05mV). Finalmente, aquellos pacientes con un 2 se caracterizan por tener una alta probabilidad (o segura) una hipertrofia ventricular.
+-   **restecg**: Resultados del electrocardiograma en reposo. Se trata de una variable categórica. Los resultados normales vienen dados por 0, con un 1 se indican aquellos pacientes con anomalías en el segmento ST-T (que pueden ser inversiones de las ondas T y/o elevaciones o depresiones de las ondas ST superiores a 0.05mV). Finalmente, aquellos pacientes con un 2 se caracterizan por tener una alta probabilidad (o segura) una hipertrofia ventricular.
 
-- **maxHR**: Indica el ritmo cardíaco máximo alcanzado en una prueba de esfuerzo. Es una variable numérica con valor mínimo de 71, y valor máximo de 202. El valor medio de esta variable es 149.60.
+-   **maxHR**: Indica el ritmo cardíaco máximo alcanzado en una prueba de esfuerzo. Es una variable numérica con valor mínimo de 71, y valor máximo de 202. El valor medio de esta variable es 149.60.
 
-- **exang**: Booleano que indica si la angina se ha inducido por el ejercicio, tomando 1 cuando la respuesta sea afirmativa y 0 en caso contrario.
+-   **exang**: Booleano que indica si la angina se ha inducido por el ejercicio, tomando 1 cuando la respuesta sea afirmativa y 0 en caso contrario.
 
-- **expeak**: Indica la depresión en el segmento ST inducida por el ejercicio en relación con el reposo. Es una variable numérica con valor mínimo de 0 y valor máximo de 6.20.
+-   **expeak**: Indica la depresión en el segmento ST inducida por el ejercicio en relación con el reposo. Es una variable numérica con valor mínimo de 0 y valor máximo de 6.20.
 
-- **slope**: Indica la pendiente en la cima del segmento ST de ejercicio. Es una variable de tipo factor que toma el valor 0 cuando la pendiente es positiva, 1 cuando la pendiente es nula y 2 cuando la pendiente es negativa.
+-   **slope**: Indica la pendiente en la cima del segmento ST de ejercicio. Es una variable de tipo factor que toma el valor 0 cuando la pendiente es positiva, 1 cuando la pendiente es nula y 2 cuando la pendiente es negativa.
 
-- **mves**: Número de vasos principales coloreados por fluoroscopía. Toma valores enteros entre 0 y 3, inclusive.
+-   **mves**: Número de vasos principales coloreados por fluoroscopía. Toma valores enteros entre 0 y 3, inclusive.
 
-- **tHR**: Variable categórica que indica el tipo de ritmo cardíaco. Toma el valor 3 para el ritmo normal, 6 para defecto reparado, y 7 para defecto reversible.
+-   **tHR**: Variable categórica que indica el tipo de ritmo cardíaco. Toma el valor 3 para el ritmo normal, 6 para defecto reparado, y 7 para defecto reversible.
 
-- **fdiag**: Booleano para el diagnosis de la enfermedad del corazón. Se comenta en la fuente que toma los valores enteros comprendidos entre 0 y 4 (ambos incluidos). No se especifica si se trata del número exacto de patologías diagnosticadas a cada paciente, pero sí que se menciona que el valor 0 se asigna únicamente a aquellos pacientes a los que no se les ha diagnosticado ninguna enfermedad y el resto de valores se atribuyen a los que sí tienen (o han tenido) alguna patología cardíaca. Nosotros la hemos transformado en una variable de tipo factor (0 = "libre enfermedad" y 1 = "diagnosticado").
-
+-   **fdiag**: Booleano para el diagnosis de la enfermedad del corazón. Se comenta en la fuente que toma los valores enteros comprendidos entre 0 y 4 (ambos incluidos). No se especifica si se trata del número exacto de patologías diagnosticadas a cada paciente, pero sí que se menciona que el valor 0 se asigna únicamente a aquellos pacientes a los que no se les ha diagnosticado ninguna enfermedad y el resto de valores se atribuyen a los que sí tienen (o han tenido) alguna patología cardíaca. Nosotros la hemos transformado en una variable de tipo factor (0 = "libre enfermedad" y 1 = "diagnosticado").
 
 <!-- Toma el 0 cuando la reducción del diámetro es menor al 50%, y 1 cuando es superior al 50%. -->
 
-
 # Análisis exploratorio del conjunto de datos:
 
-
-##  1) Distribución de los datos numéricos:
+## 1) Distribución de los datos numéricos:
 
 Mostramos en primer lugar la distribución de las variables numéricas (que son edad, presión arterial, nivel de colesterol y frecuencia cardiaca máxima) para ver cómo están repartidas en nuestro conjunto de datos (si de forma uniforme o no uniforme).
-
 
 ```{r}
 
@@ -253,11 +241,9 @@ plot_fbs <- heartdisease %>%
 
 ```
 
+## 3) Cruce del nivel de colesterol únicamente según el sexo:
 
-## 3)  Cruce del nivel de colesterol únicamente según el sexo:
-
-Observamos que el nivel de colesterol de las mujeres del grupo estudiado es más variado (disperso) que el de los hombres. Esto se aprecia en la amplitud de la caja del diagrama y, se confirma con el *outlier* que supera los 550mg/dl.  
-
+Observamos que el nivel de colesterol de las mujeres del grupo estudiado es más variado (disperso) que el de los hombres. Esto se aprecia en la amplitud de la caja del diagrama y, se confirma con el *outlier* que supera los 550mg/dl.
 
 ```{r}
 # Estudiamos la dispersión de los niveles de colesterol según el sexo.
@@ -276,10 +262,9 @@ ggplot(heartdisease, aes(x = factor(sex), y = chol, fill = factor(sex))) +
 
 ```
 
-## 4)  Niveles de colesterol según edad y sexos de los pacientes.
+## 4) Niveles de colesterol según edad y sexos de los pacientes.
 
 Nos parece relevante adquirir una información más desglosada sobre la dispersión de los niveles de colesterol según la edad y sexo del paciente. Para ello, hemos optado por clasificar por grupos de edad y repetir el mismo gráfico de antes. En esta nueva versión podemos observar una tendencia creciente en los niveles de colesterol de las mujeres hasta los 69 años, así como un mayor grado de dispersión. En los hombres también se observa esta tendencia al alza, aunque más atenuada.
-
 
 ```{r}
 # Creamos una nueva columna 'decade' que agrupa las edades en décadas:
@@ -300,9 +285,10 @@ ggplot(heartdisease, aes(x = decade, y = chol, fill = factor(sex))) +
   theme(legend.title = element_blank())
 
 ```
+
 Se puede observar que, sin tener en cuenta la última franja de edad, a medida que crece la edad, también crece la dispersion. Una de las posibles razones de porque no se cumple esto en la última franja, se puede deber a la pequeña muestra que tenemos de ella.
 
-## 5)  Se replican los gráficos anteriores pero para el nivel de presión sanguínea.
+## 5) Se replican los gráficos anteriores pero para el nivel de presión sanguínea.
 
 ```{r}
 ggplot(heartdisease, aes(x = factor(sex), y = restbp, fill = factor(sex))) +
@@ -317,8 +303,8 @@ ggplot(heartdisease, aes(x = factor(sex), y = restbp, fill = factor(sex))) +
   theme(legend.title = element_blank())
 
 ```
-No se puede observar diferencias entre hombres y mujeres referente al nivel de presión arterial en reposo.
-4)  
+
+No se puede observar diferencias entre hombres y mujeres referente al nivel de presión arterial en reposo. 4)
 
 ```{r}
 # Creamos una nueva columna 'decade' que agrupa las edades en décadas
@@ -338,6 +324,7 @@ ggplot(heartdisease, aes(x = decade, y = restbp, fill = factor(sex))) +
   theme(legend.title = element_blank())
 
 ```
+
 En cambio si se puede observar que a medida que va aumentando la edad, tambien crece la dispersión del nivel de presión arterial en reposo. Se puede destacar que todos los puntos outliers estan en la misma franja de edad.
 
 Matrices de dispersión:
@@ -382,8 +369,6 @@ ggplot(heartdisease, aes(x = age, y = maxHR, color = factor(sex))) +
 
 
 ```
-
-
 
 7)  
 
@@ -492,9 +477,6 @@ cor.test(heartdisease$age, heartdisease$mves, alternative = "less")
 
 ```
 
-
-
-
 Gráfico para datos bivariantes:
 
 El boxplot bivariante es un gráfico de dispersión que incluye dos elipses estimadas, la interior que contiene aproximadamente el 50% de los datos y la exterior que contiene aproximadamente el 95% de los datos. Este tipo de gráficos nos ayuda a localizar datos atípicos. Veamos un ejemplo con los datos de los pingüinos.
@@ -509,8 +491,6 @@ bvbox(a2,xlab = " Ritmo cardíaco máximo en pulsasiones por minuto",
            ylab = " Indica la depresión en el segmento ST",
       pch = 19, cex = 1.25, col = "red")
 ```
-
-
 
 ```{r}
 stars(a[,1:6], key.loc = c(44, 1.5),cex=0.45,
