@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.475">
+<meta name="generator" content="quarto-1.2.269">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -70,7 +70,7 @@ ul.task-list li input[type="checkbox"] {
 
 <!-- Aixo per fer es beamer https://bookdown.org/yihui/rmarkdown/beamer-presentation.html -->
 <!-- data set original https://archive.ics.uci.edu/dataset/45/heart+disease -->
-<p>Este es el <a href="https://github.com/GSMir/Entrega3">repositorio</a> de GitHub en el que alojaremos todos los archivos relacionados con esta entrega. Para consultar la fuente de la que se ha extraído nuestro Dataset consulta el siguiente <a href="https://archive.ics.uci.edu/dataset/45/heart+disease">link</a>.</p>
+<p>Este es el <a href="https://github.com/GSMir/Entrega3">repositorio</a> de GitHub en el que alojaremos todos los archivos relacionados con esta entrega. Para consultar la fuente de la que se ha extraído nuestro Dataset consulta el siguiente <a href="https://archive.ics.uci.edu/dataset/45/heart+disease">link</a>. Nuestro Dataset ha sido publicado por la Universidad de California de Irvine.</p>
 <div class="cell">
 
 </div>
@@ -127,6 +127,9 @@ ul.task-list li input[type="checkbox"] {
 <div class="cell-output-display">
 <p><img src="Entrega3_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
 </div>
+<div class="cell-output-display">
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-6-2.png" class="img-fluid" width="672"></p>
+</div>
 </div>
 </section>
 <section id="cruce-del-nivel-de-colesterol-únicamente-según-el-sexo" class="level2">
@@ -155,82 +158,45 @@ ul.task-list li input[type="checkbox"] {
 <p><img src="Entrega3_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>No se puede observar diferencias entre hombres y mujeres referente al nivel de presión arterial en reposo. 4)</p>
+<p>No se observan diferencias signficativas entre hombres y mujeres referente al nivel de presión arterial en reposo. En cambio, si volvemos a realizar el análisis según las franjas de edad de los pacientes, obtenemos el siguiente resultado:</p>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="Entrega3_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>En cambio si se puede observar que a medida que va aumentando la edad, tambien crece la dispersión del nivel de presión arterial en reposo. Se puede destacar que todos los puntos outliers estan en la misma franja de edad.</p>
-<p>Matrices de dispersión:</p>
+<p>A diferencia del gráfico anterior, en este, sí se observa que, a medida que va aumentando la edad de los sujetos, también crece la dispersión del nivel de presión arterial en reposo. Téngase en cuenta que, dada la escasez de individuos de mayor edad, los resultados obtenidos para la dispersión de la última franja no son concluyentes. Se puede destacar también que todos los puntos <em>outliers</em> estan en la franja de [49,59) años.</p>
+</section>
+</section>
+<section id="análisis-inferencial" class="level1">
+<h1>Análisis inferencial:</h1>
+<section id="cruces-de-variables-cuantitativas" class="level2">
+<h2 class="anchored" data-anchor-id="cruces-de-variables-cuantitativas">Cruces de variables cuantitativas:</h2>
+<p>Representamos el gráfico <em>ggpairs</em> para obtener una visión general de la relación entre todos los pares de variables cuantitativas (y además teniendo el cuenta la variable sexo) y así poder luego focalizar el estudio en aquellas en las que pueda haber mayor nivel de correlación o interés.</p>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="Entrega3_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ol type="1">
+<li>maxHR vs Age</li>
+<li>maxHR vs expeak</li>
+<li>restbp vs age</li>
+<li>chol vs age</li>
+<li>expeak vs restbp (POR SEXOS para ver difeerncias)</li>
+<li>Comentar la NO CORR entre Chol y MaxHR</li>
+</ol>
+</section>
+<section id="contraste-frecuencia-máxima-ppm-contra-edad" class="level2">
+<h2 class="anchored" data-anchor-id="contraste-frecuencia-máxima-ppm-contra-edad">1) Contraste Frecuencia máxima PPM contra edad:</h2>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="Entrega3_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
 </div>
-</div>
-<ol start="5" type="1">
-<li>Nube de puntos: con esto podríamos ver si hay (a priori, luego podemos hacer el contraste de correlación oportuno) correlación/covarianza entre las variables maxHR y Colesterol. (La idea sería que las personas con mayor nivel de colesterol suelen estar menos en forma y por ello sus pulsaciones podrían dispararse al hacer ejercicio).</li>
-</ol>
-<div class="cell">
-<div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<ol start="7" type="1">
-<li></li>
-</ol>
-<div class="cell">
-<div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<p>Distribución del nivel de colesterol según el tipo de dolor en el pecho:</p>
-<div class="cell">
-<div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<div class="cell">
-<div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<p>Análisis inferencial:</p>
-<p>Matriz de correlaciones:</p>
-<div class="cell">
-<div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<p>Vector de medias de las variables cuantitativas:</p>
-<div class="cell">
-
-</div>
-<p>Contrastes de correlación:</p>
-<ol type="1">
-<li>Contraste Edad, Máx Heart Rate:</li>
-</ol>
-<p>Confirmamos que en la <em>población</em> grande (no en nuestra muestra) la edad y el número máximo de pulsaciones tienen correlación negativa. Esto significa que, a mayor edad se espera que disminuya el número máximo de pulsaciones por minuto.</p>
-<div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>
-    Pearson's product-moment correlation
-
-data:  heartdisease$maxHR and heartdisease$age
-t = -7.3752, df = 295, p-value = 8.351e-13
-alternative hypothesis: true correlation is less than 0
-95 percent confidence interval:
- -1.0000000 -0.3106485
-sample estimates:
-       cor 
--0.3945629 </code></pre>
+<pre><code>[1] 8.350624e-13</code></pre>
 </div>
 </div>
+<p>Confirmamos que en la <em>población</em> de individuos con síntomas de dolor en el pecho (a la que, a partir de ahora nos referiremos como población “grande”), no en la muestral, la edad y el número máximo de pulsaciones tienen correlación negativa dado que se ha obtenido un pvalor inferior a <code>cor.test(heartdisease$maxHR, heartdisease$age, alternative = "less")$p.value</code>. Esto significa que, a mayor edad se espera que disminuya el número máximo de pulsaciones por minuto.</p>
 <ol start="2" type="1">
 <li>Contraste de correlación expeak () vs maxHR:</li>
 </ol>
@@ -269,44 +235,49 @@ sample estimates:
 0.3622103 </code></pre>
 </div>
 </div>
+<ol start="5" type="1">
+<li>Nube de puntos: con esto podríamos ver si hay (a priori, luego podemos hacer el contraste de correlación oportuno) correlación/covarianza entre las variables maxHR y Colesterol. (La idea sería que las personas con mayor nivel de colesterol suelen estar menos en forma y por ello sus pulsaciones podrían dispararse al hacer ejercicio).</li>
+</ol>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<ol start="7" type="1">
+<li></li>
+</ol>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Distribución del nivel de colesterol según el tipo de dolor en el pecho:</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Análisis inferencial:</p>
+<p>Vector de medias de las variables cuantitativas:</p>
+<div class="cell">
+
+</div>
 <p>Gráfico para datos bivariantes:</p>
 <p>El boxplot bivariante es un gráfico de dispersión que incluye dos elipses estimadas, la interior que contiene aproximadamente el 50% de los datos y la exterior que contiene aproximadamente el 95% de los datos. Este tipo de gráficos nos ayuda a localizar datos atípicos. Veamos un ejemplo con los datos de los pingüinos.</p>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid" width="672"></p>
+<p><img src="Entrega3_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<div class="cell">
-<div class="cell-output-display">
-<p><img src="Entrega3_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<p>Caras de Chernoff:</p>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>      age        sex     cp          restbp           chol       fbs    
- Min.   :29.00   0: 96   1: 23   Min.   : 94.0   Min.   :126.0   0:254  
- 1st Qu.:48.00   1:201   2: 49   1st Qu.:120.0   1st Qu.:211.0   1: 43  
- Median :56.00           3: 83   Median :130.0   Median :243.0          
- Mean   :54.54           4:142   Mean   :131.7   Mean   :247.4          
- 3rd Qu.:61.00                   3rd Qu.:140.0   3rd Qu.:276.0          
- Max.   :77.00                   Max.   :200.0   Max.   :564.0          
- restecg     maxHR       exang       expeak      slope        mves       
- 0:147   Min.   : 71.0   0:200   Min.   :0.000   1:139   Min.   :0.0000  
- 1:  4   1st Qu.:133.0   1: 97   1st Qu.:0.000   2:137   1st Qu.:0.0000  
- 2:146   Median :153.0           Median :0.800   3: 21   Median :0.0000  
-         Mean   :149.6           Mean   :1.056           Mean   :0.6768  
-         3rd Qu.:166.0           3rd Qu.:1.600           3rd Qu.:1.0000  
-         Max.   :202.0           Max.   :6.200           Max.   :3.0000  
- tHR     fdiag       decade   
- 3:164   0:160   [29,39): 10  
- 6: 18   1:137   [39,49): 70  
- 7:115           [49,59):112  
-                 [59,69): 92  
-                 [69,79): 13  
-                              </code></pre>
-</div>
-</div>
+<!-- ```{r} -->
+<!-- stars(a[,1:6], key.loc = c(44, 1.5),cex=0.45, -->
+<!--       labels=row.names(a[,1:4]), draw.segments=TRUE) -->
+<!-- ``` -->
 </section>
 </section>
 

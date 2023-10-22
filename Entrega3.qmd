@@ -9,7 +9,7 @@ editor: visual
 
 <!-- data set original https://archive.ics.uci.edu/dataset/45/heart+disease -->
 
-Este es el [repositorio](https://github.com/GSMir/Entrega3) de GitHub en el que alojaremos todos los archivos relacionados con esta entrega. Para consultar la fuente de la que se ha extraído nuestro Dataset consulta el siguiente [link](https://archive.ics.uci.edu/dataset/45/heart+disease).
+Este es el [repositorio](https://github.com/GSMir/Entrega3) de GitHub en el que alojaremos todos los archivos relacionados con esta entrega. Para consultar la fuente de la que se ha extraído nuestro Dataset consulta el siguiente [link](https://archive.ics.uci.edu/dataset/45/heart+disease). Nuestro Dataset ha sido publicado por la Universidad de California de Irvine.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
@@ -228,7 +228,7 @@ plot_cp <- heartdisease %>%
 plot_fbs <- heartdisease %>%
   count(fbs) %>%
   ggplot(aes(x = factor(fbs), y = n)) +
-  geom_bar(stat = "identity", fill = "red") +
+  geom_bar(stat = "identity", fill = "yellow") +
   labs(
     title = "Azúcar en sangre",
     x = "" ,
@@ -236,8 +236,20 @@ plot_fbs <- heartdisease %>%
   ) +   scale_x_discrete(labels = c("No supera", "Supera"))
 
 
+plot_fdiag <- heartdisease %>%
+  count(fdiag) %>%
+  ggplot(aes(x = factor(fdiag), y = n)) +
+  geom_bar(stat = "identity", fill = "red") +
+  labs(
+    title = "Resultados diagnósticos",
+    x = "" ,
+    y = "Frecuencia"
+  ) +   scale_x_discrete(labels = c("Sano", "Diagnosticado"))
+
+
 # Combina los gráficos en una figura en paralelo
-(plot_sex | plot_cp | plot_fbs)
+(plot_sex | plot_cp)
+(plot_fbs | plot_fdiag)
 
 ```
 
@@ -294,17 +306,17 @@ Se puede observar que, sin tener en cuenta la última franja de edad, a medida q
 ggplot(heartdisease, aes(x = factor(sex), y = restbp, fill = factor(sex))) +
   geom_boxplot() +
   labs(
-    title = "Nivel de Presión Arterial en Reposo según Sexo",
+    title = "Nivel de presión arterial en reposo según sexo",
     x = "Sexo",
-    y = "Nivel de Presión Arterial en Reposo (mm Hg)"
+    y = "Presión arterial en reposo (mm Hg)"
   ) +
   scale_x_discrete(labels = c("Mujeres", "Hombres")) +
   theme_minimal() +
-  theme(legend.title = element_blank())
+  theme(legend.title = element_blank(), legend.position = "none")
 
 ```
 
-No se puede observar diferencias entre hombres y mujeres referente al nivel de presión arterial en reposo. 4)
+No se observan diferencias signficativas entre hombres y mujeres referente al nivel de presión arterial en reposo. En cambio, si volvemos a realizar el análisis según las franjas de edad de los pacientes, obtenemos el siguiente resultado:
 
 ```{r}
 # Creamos una nueva columna 'decade' que agrupa las edades en décadas
@@ -315,9 +327,9 @@ heartdisease <- heartdisease %>%
 ggplot(heartdisease, aes(x = decade, y = restbp, fill = factor(sex))) +
   geom_boxplot() +
   labs(
-    title = "Nivel de Presión Arterial en Reposo por Sexo y Década de Edad",
-    x = "Década de Edad",
-    y = "Nivel de Presión Arterial en Reposo (mm Hg)"
+    title = "Nivel de presión arterial en reposo por sexo y edad",
+    x = "Franja de Edad",
+    y = "Nivel de presión arterial en reposo (mm Hg)"
   ) +
   scale_fill_discrete(name = "Sexo", labels = c("0" = "Mujer", "1" = "Hombre")) +
   theme_minimal() +
@@ -325,27 +337,67 @@ ggplot(heartdisease, aes(x = decade, y = restbp, fill = factor(sex))) +
 
 ```
 
-En cambio si se puede observar que a medida que va aumentando la edad, tambien crece la dispersión del nivel de presión arterial en reposo. Se puede destacar que todos los puntos outliers estan en la misma franja de edad.
+A diferencia del gráfico anterior, en este, sí se observa que, a medida que va aumentando la edad de los sujetos, también crece la dispersión del nivel de presión arterial en reposo. Téngase en cuenta que, dada la escasez de individuos de mayor edad, los resultados obtenidos para la dispersión de la última franja no son concluyentes. Se puede destacar también que todos los puntos *outliers* estan en la franja de \[49,59) años.
 
-Matrices de dispersión:
+# Análisis inferencial:
 
-```{r}
+## Cruces de variables cuantitativas:
+
+Representamos el gráfico *ggpairs* para obtener una visión general de la relación entre todos los pares de variables cuantitativas (y además teniendo el cuenta la variable sexo) y así poder luego focalizar el estudio en aquellas en las que pueda haber mayor nivel de correlación o interés.
+
+```{r, message = FALSE,warning=FALSE}
+
 a<-heartdisease %>%
   select(age,restbp,chol,maxHR, expeak)
 
-pairs(a,
-      col = c("red", "blue")[as.integer(heartdisease$sex)], 
-      pch = 18)
-
+ggpairs(a, mapping = aes(color = heartdisease$sex))
 
 ```
 
+1)  maxHR vs Age
+2)  maxHR vs expeak
+3)  restbp vs age
+4)  chol vs age
+5)  expeak vs restbp (POR SEXOS para ver difeerncias)
+6)  Comentar la NO CORR entre Chol y MaxHR
+
+## 1) Contraste Frecuencia máxima PPM contra edad:
+
 ```{r}
-a<-heartdisease %>%
-  select(age,restbp,chol,maxHR, expeak,mves)
 
-ggpairs(a, mapping = aes(color = heartdisease$sex))
+ggplot(heartdisease, aes(x = age, y = maxHR, color = factor(sex))) +
+  geom_point() +
+  labs(
+    title = "Nube de Puntos de Edad vs. Frecuencia Cardíaca Máxima",
+    x = "Edad",
+    y = "Frecuencia Cardíaca Máxima"
+  ) +
+  scale_color_manual(values = c("red", "blue"), labels = c("Mujer", "Hombre")) +
+  theme_minimal()
 
+cor.test(heartdisease$maxHR, heartdisease$age, alternative = "less")$p.value
+
+```
+
+Confirmamos que en la *población* de individuos con síntomas de dolor en el pecho (a la que, a partir de ahora nos referiremos como población "grande"), no en la muestral, la edad y el número máximo de pulsaciones tienen correlación negativa dado que se ha obtenido un pvalor inferior a `cor.test(heartdisease$maxHR, heartdisease$age, alternative = "less")$p.value`. Esto significa que, a mayor edad se espera que disminuya el número máximo de pulsaciones por minuto.
+
+2)  Contraste de correlación expeak () vs maxHR:
+
+Confirmamos que en la *población* grande (no en nuestra muestra) el número máximo de pulsaciones y el expeak tienen correlación negativa. Esto significa que, a mayor edad, la depresión en el segmento ST inducida por el ejercicio en relación con el reposo es menor.
+
+```{r}
+# expeak: Indica la depresión en el segmento ST inducida por el ejercicio en relación con el reposo. Con valor mínimmo de 0, y valor máximo de 6.20.
+cor.test(heartdisease$maxHR, heartdisease$expeak, alternative = "less")
+
+```
+
+3)  Contraste de correlación Edad vs mves():
+
+Confirmamos que en la *población* grande (no en nuestra muestra) la edad y la variable mves(), tienen correlación negativa. Esto significa que, a mayor edad, el número de vasos principales coloreados por fluoroscopía es menor.
+
+```{r}
+# expeak: Indica la depresión en el segmento ST inducida por el ejercicio en relación con el reposo. Con valor mínimmo de 0, y valor máximo de 6.20.
+cor.test(heartdisease$age, heartdisease$mves, alternative = "less")
 
 ```
 
@@ -425,56 +477,12 @@ heartdisease %>%
 
 Análisis inferencial:
 
-Matriz de correlaciones:
-
-```{r}
-
-correlation_matrix <- cor(heartdisease[, c("age", "restbp", "chol", "maxHR", "expeak", "mves")])
-
-# Crear el corrplot con los valores de correlación
-corrplot(correlation_matrix, method = "color", addCoef.col = "black")
-
-```
-
 Vector de medias de las variables cuantitativas:
 
 ```{r}
 avrg_chol = mean(heartdisease$chol)
 avrg_HR = mean(heartdisease$maxHR)
 avrg_restbp = mean(heartdisease$restbp)
-```
-
-Contrastes de correlación:
-
-1)  Contraste Edad, Máx Heart Rate:
-
-Confirmamos que en la *población* grande (no en nuestra muestra) la edad y el número máximo de pulsaciones tienen correlación negativa. Esto significa que, a mayor edad se espera que disminuya el número máximo de pulsaciones por minuto.
-
-```{r}
-
-cor.test(heartdisease$maxHR, heartdisease$age, alternative = "less")
-
-
-```
-
-2)  Contraste de correlación expeak () vs maxHR:
-
-Confirmamos que en la *población* grande (no en nuestra muestra) el número máximo de pulsaciones y el expeak tienen correlación negativa. Esto significa que, a mayor edad, la depresión en el segmento ST inducida por el ejercicio en relación con el reposo es menor.
-
-```{r}
-# expeak: Indica la depresión en el segmento ST inducida por el ejercicio en relación con el reposo. Con valor mínimmo de 0, y valor máximo de 6.20.
-cor.test(heartdisease$maxHR, heartdisease$expeak, alternative = "less")
-
-```
-
-3)  Contraste de correlación Edad vs mves():
-
-Confirmamos que en la *población* grande (no en nuestra muestra) la edad y la variable mves(), tienen correlación negativa. Esto significa que, a mayor edad, el número de vasos principales coloreados por fluoroscopía es menor.
-
-```{r}
-# expeak: Indica la depresión en el segmento ST inducida por el ejercicio en relación con el reposo. Con valor mínimmo de 0, y valor máximo de 6.20.
-cor.test(heartdisease$age, heartdisease$mves, alternative = "less")
-
 ```
 
 Gráfico para datos bivariantes:
@@ -492,25 +500,7 @@ bvbox(a2,xlab = " Ritmo cardíaco máximo en pulsasiones por minuto",
       pch = 19, cex = 1.25, col = "red")
 ```
 
-```{r}
-stars(a[,1:6], key.loc = c(44, 1.5),cex=0.45,
-      labels=row.names(a[,1:4]), draw.segments=TRUE)
-```
-
-Caras de Chernoff:
-
-```{r}
-b<-heartdisease %>%
-  select(sex,cp,fbs,restecg, exang, slope,tHR,fdiag)
-
-b<- b %>% 
-      filter(sex==1,
-             cp==2, 
-             fbs==0
-             )
-summary(heartdisease)
-view(b)
-
-#faces(b[,1:8],face.type = 1, scale =TRUE,print.info = TRUE)
-
-```
+<!-- ```{r} -->
+<!-- stars(a[,1:6], key.loc = c(44, 1.5),cex=0.45, -->
+<!--       labels=row.names(a[,1:4]), draw.segments=TRUE) -->
+<!-- ``` -->
