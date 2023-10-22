@@ -5,10 +5,6 @@ format: html
 editor: visual
 ---
 
-<!-- Aixo per fer es beamer https://bookdown.org/yihui/rmarkdown/beamer-presentation.html -->
-
-<!-- data set original https://archive.ics.uci.edu/dataset/45/heart+disease -->
-
 Este es el [repositorio](https://github.com/GSMir/Entrega3) de GitHub en el que alojaremos todos los archivos relacionados con esta entrega. Para consultar la fuente de la que se ha extraído nuestro Dataset consulta el siguiente [link](https://archive.ics.uci.edu/dataset/45/heart+disease). Nuestro Dataset ha sido publicado por la Universidad de California de Irvine.
 
 ```{r setup, include=FALSE}
@@ -24,9 +20,12 @@ library(corrplot)
 library(graphics)
 library(GGally)
 library("aplpack")
+```
 
+```{r}
 heartdisease = read_csv("https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data", col_names = FALSE, show_col_types = FALSE)
 ```
+
 
 Antes de empezar con el análisis multivariante se realizará una primera limpieza del Dataset. En primer lugar, renombramos las variables para hacerlas más acordes a aquello que representan (en el archivo inicial estaban nombradas como $X_1$, $X_2$, $...$, $X_{14}$). A continuación, pasamos a factor las variables categóricas (hemos encontrado que muchas no venían dadas como factor incialmente). 
 
@@ -34,86 +33,41 @@ Por último, dado que tenemos un número pequeño de muestras a las que les falt
 
 
 ```{r}
-# Renombramos las variables:
-heartdisease = heartdisease %>% rename(age = X1, sex = X2, cp = X3, restbp = X4, chol = X5, fbs = X6, restecg = X7, maxHR = X8, exang = X9, expeak = X10, slope = X11, mves = X12, tHR = X13, fdiag = X14)
+heartdisease <- heartdisease %>% 
+  filter(!str_detect(X13, "\\?") & (!str_detect(X12, "\\?")))
 
-# Se eliminan las entradas con valor '?'
-heartdisease = heartdisease %>% filter(!str_detect(tHR, "\\?") & (!str_detect(mves, "\\?")))
+heartdisease <- heartdisease %>%
+  mutate(sex = as.factor(heartdisease$X2), .after = X2) %>%
+  mutate(cp = as.factor(heartdisease$X3), .after = X3) %>%
+  mutate(fbs = as.factor(heartdisease$X6), .after = X6) %>%
+  mutate(restecg = as.factor(heartdisease$X7), .after = X7) %>%
+  mutate(exang = as.factor(heartdisease$X9), .after = X9) %>%
+  mutate(slope = as.factor(heartdisease$X11), .after = X11) %>%
+  mutate(mves = as.numeric(heartdisease$X12), .after = X12) %>%
+  mutate(
+    tHR2 = case_when(
+      X13 == "3.0" ~ "3",
+      X13 == "6.0" ~ "6",
+      X13 == "7.0" ~ "7"),
+    .keep = "all", .after = X13) %>%
+  mutate(
+    fdiag2 = case_when(
+      X14 == "0" ~ "0",
+      X14 == "1" ~ "1",
+      X14 == "2" ~ "1",
+      X14 == "3" ~ "1",
+      X14 == "4" ~ "1"),
+    .keep = "all", .after = X14)
+
+heartdisease <- heartdisease %>%
+  mutate(tHR = as.factor(heartdisease$tHR2), .after = tHR2) %>%
+  mutate(fdiag = as.factor(heartdisease$fdiag2), .after = fdiag2) %>%
+  rename(age = X1, restbp = X4, chol = X5, maxHR = X8, expeak = X10)
+
+heartdisease <- heartdisease %>%
+  select(age, sex, cp, restbp, chol, fbs, restecg, maxHR, exang, expeak, slope, mves, tHR, fdiag)
 ```
 
-
-```{r}
-
-# ESTA CHUNK HAY QUE LIMPIARLA
-
-heartdisease <- heartdisease %>%
-    mutate(mves2 = as.numeric(heartdisease$mves), .after = mves) %>%
-    select(-mves) %>%
-    rename(mves = mves2)
-heartdisease <- heartdisease %>%
-    mutate(sex2 = as.factor(heartdisease$sex), .after = sex) %>%
-    select(-sex) %>%
-    rename(sex = sex2)
-heartdisease <- heartdisease %>%
-    mutate(cp2 = as.factor(heartdisease$cp), .after = cp) %>%
-    select(-cp) %>%
-    rename(cp = cp2)
-heartdisease <- heartdisease %>%
-    mutate(fbs2 = as.factor(heartdisease$fbs), .after = fbs) %>%
-    select(-fbs) %>%
-    rename(fbs = fbs2)
-heartdisease <- heartdisease %>%
-    mutate(restecg2 = as.factor(heartdisease$restecg), .after = restecg) %>%
-    select(-restecg) %>%
-    rename(restecg = restecg2)
-heartdisease <- heartdisease %>%
-    mutate(exang2 = as.factor(heartdisease$exang), .after = exang) %>%
-    select(-exang) %>%
-    rename(exang = exang2)
-heartdisease <- heartdisease %>%
-    mutate(slope2 = as.factor(heartdisease$slope), .after = slope) %>%
-    select(-slope) %>%
-    rename(slope = slope2)
-heartdisease = heartdisease %>% 
-    mutate(
-        tHR2 = case_when(
-            tHR == "3.0" ~ "3",
-            tHR == "6.0" ~ "6",
-            tHR == "7.0" ~ "7"),
-        .keep = "all", .after = tHR) %>%
-    select(-tHR) %>%
-    rename(tHR = tHR2)
-heartdisease <- heartdisease %>%
-    mutate(tHR2 = as.factor(heartdisease$tHR), .after = tHR) %>%
-    select(-tHR) %>%
-    rename(tHR = tHR2)
-
-# Ángel: he comentado esta última porque la última variable (X14 o num) representa si el paciente ha padecido o no alguna enfermedad del corazón (lo miré en la documentación y abriendo el Dataset en Python, que incluía algún comentario sobre las variables también).
-
-# (Lo dejo por aquí pero creo que podría quitarse)
-
-# heartdisease <- heartdisease %>%
-#     mutate(fdiag2 = as.factor(heartdisease$fdiag), .after = fdiag) %>%
-#     select(-fdiag) %>%
-#     rename(fdiag = fdiag2)
-
-heartdisease = heartdisease %>%
-    mutate(
-        fdiag2 = case_when(
-            fdiag == "0" ~ "0",
-            fdiag == "1" ~ "1",
-            fdiag == "2" ~ "1",
-            fdiag == "3" ~ "1",
-            fdiag == "4" ~ "1"),
-        .keep = "all", .after = fdiag) %>%
-    select(-fdiag) %>%
-    rename(fdiag = fdiag2)
-heartdisease <- heartdisease %>%
-    mutate(fdiag2 = as.factor(heartdisease$fdiag), .after = fdiag) %>%
-    select(-fdiag) %>%
-    rename(fdiag = fdiag2)
-
-```
 
 El objetivo del estudio original tenía como principal objetivo comparar dos modelos estadísticos (uno antiguo y otro novedoso) que proporcioban estimaciones de la probabilidad de enfermedad coronaria en pacientes que presentaban dolencias en el pecho. Se tomaron las medidas que se detallan en el Dataset a un total de 303 pacientes de Cleveland (Ohio) y se aplicaron otros tres grupos de Hungría, California y Suiza. Nuestro objetivo en esta entrega será determinar los rasgos más significativo del Dataset, así como las relaciones que puedan resultar de mayor interés desde el punto de vista clínico.
 
@@ -250,7 +204,6 @@ heartdisease_numeric %>%
 ## 2) Frecuencias de los datos categóricos:
 
 ```{r}
-
 plot_sex <- heartdisease %>%
   count(sex) %>%
   ggplot(aes(x = factor(sex), y = n)) +
