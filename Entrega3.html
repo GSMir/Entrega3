@@ -84,20 +84,10 @@ ul.task-list li input[type="checkbox"] {
 </div>
 <p>El objetivo del estudio original tenía como principal objetivo comparar dos modelos estadísticos (uno antiguo y otro novedoso) que proporcioban estimaciones de la probabilidad de enfermedad coronaria en pacientes que presentaban dolencias en el pecho. Se tomaron las medidas que se detallan en el Dataset a un total de 303 pacientes de Cleveland (Ohio) y se aplicaron otros tres grupos de Hungría, California y Suiza. Nuestro objetivo en esta entrega será determinar los rasgos más significativo del Dataset, así como las relaciones que puedan resultar de mayor interés desde el punto de vista clínico.</p>
 <p>En este conjunto de datos encontramos 297 visualizaciones de 14 variables. Se describen a continuación las variables del mismo:</p>
-<div class="cell">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="SinusRhythmLabels.svg.png" class="img-fluid figure-img" style="width:60.0%"></p>
-<p></p><figcaption class="figure-caption">Electrocardiograma</figcaption><p></p>
-</figure>
-</div>
-</div>
-</div>
 <ul>
 <li><p><strong>age</strong>: Edad del paciente. Número entero. El conjunto de edades de los sujetos obersvados está comprendido entre los 29 y los 77 años. La media de edad de los pacientes está en los 54.54 años.</p></li>
 <li><p><strong>sex</strong>: Sexo cromosómico del paciente. Variable categórica que toma el valor 0 para el sexo femenino y 1 para el masculino. Encontramos un total de 96 mujeres y 201 hombres.</p></li>
-<li><p><strong>cp</strong>: (del inglés <em>“Chest Pain”</em>). Hace referencia al tipo de dolor que se sufre el paciente en el pecho. Se trata de una variable categórica que toma los valores 1 para angina de pecho típica, 2 para angina de pecho atípica, 3 para dolores que no son de angina de pecho y 4 para asintomático.</p></li>
+<li><p><strong>cp</strong>: Hace referencia al tipo de dolor que se sufre el paciente en el pecho. Se trata de una variable categórica que toma los valores 1 para angina de pecho típica, 2 para angina de pecho atípica, 3 para dolores que no son de angina de pecho y 4 para asintomático.</p></li>
 <li><p><strong>restbp</strong>: Presión sanguínea medida en reposo (mm Hg). Es una variable numérica con valor mínimo 94 y valor máximo 200. La presión media del grupo de pacientes es de 131.69 mm Hg.</p></li>
 <li><p><strong>chol</strong>: Nivel de colesterol en sangre (mg/dl). Variable numérica con mínimo de 126 mg/dl y máximo de 564 mg/dl, siendo el nivel medio de colesterol 247.35 mg/dl.</p></li>
 <li><p><strong>fbs</strong>: Booleano que determina si la cantidad de azúcar en sangre en ayuno es mayor a 120mg/dl. Toma el valor 0 para negarlo, y 1 para afirmarlo.</p></li>
@@ -110,7 +100,21 @@ ul.task-list li input[type="checkbox"] {
 <li><p><strong>tHR</strong>: Variable categórica que indica el tipo de ritmo cardíaco. Toma el valor 3 para el ritmo normal, 6 para defecto reparado, y 7 para defecto reversible.</p></li>
 <li><p><strong>fdiag</strong>: Booleano para el diagnosis de la enfermedad del corazón. Se comenta en la fuente que toma los valores enteros comprendidos entre 0 y 4 (ambos incluidos). No se especifica si se trata del número exacto de patologías diagnosticadas a cada paciente, pero sí que se menciona que el valor 0 se asigna únicamente a aquellos pacientes a los que no se les ha diagnosticado ninguna enfermedad y el resto de valores se atribuyen a los que sí tienen (o han tenido) alguna patología cardíaca. Nosotros la hemos transformado en una variable de tipo factor (0 = “libre enfermedad” y 1 = “diagnosticado”).</p></li>
 </ul>
-<!-- Toma el 0 cuando la reducción del diámetro es menor al 50%, y 1 cuando es superior al 50%. -->
+<section id="contexto-médico-de-las-variables" class="level3">
+<h3 class="anchored" data-anchor-id="contexto-médico-de-las-variables">Contexto médico de las variables:</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="SinusRhythmLabels.svg.png" class="img-fluid figure-img" style="width:60.0%"></p>
+<p></p><figcaption class="figure-caption">Electrocardiograma</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>· Sobre la variable <em>expeak</em>:</p>
+<p>Indica el grado de depresión del segmento ST inducida por el ejercicio en relación con el reposo. Si se observa la imagen del electrocardiograma se puede ver que el segmento ST es la fase que vendría después de los 3 picos propios de la onda.</p>
+</section>
 <section id="análisis-exploratorio-del-conjunto-de-datos" class="level1">
 <h1>Análisis exploratorio del conjunto de datos:</h1>
 <section id="distribución-de-los-datos-numéricos" class="level2">
@@ -198,8 +202,9 @@ ul.task-list li input[type="checkbox"] {
 <p><img src="Entrega3_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>Dichas densidades parecen ser Gaussianas, y la correspondiente a los hombres presenta una media ligeramente más alta que la de las mujeres, sin embargo la superposición de ambas densidades indica que no hay diferencias significativas.</p>
-<p>Cuando comparamos las densidades para hombres y mujeres, esta vez ambas densidades presentan el mismo valor de tendencia central pero, la cola superior de las mujeres es más ancha. A pesar de lo anterior, esta superposición nos permite afirmar que no hay diferencias significativas entre las notas de los hombres y las mujeres en las áreas del examen de redacción y escritura.</p>
+<p>Las densidades de los hombres de las variables <em>restbp</em>, <em>chol</em> y <em>maxHR</em> parecen ser Gaussianas, mientras que en el caso de las mujeres únicamente la variable <em>chol</em> presenta forma de Gaussiana.</p>
+<p>La media de colesterol y ritmo cardíaco en hombres y mujeres es prácticamente idéntica. Sin embargo, en las demás dos ocurre que las medias de las mujeres son ligeralmente más altas que las de los hombres.</p>
+<p>Por otro lado, observando el gráfico se puede estimar que las desviaciones típicas (o varianzas) del nivel de colesterol y ritmo cardíaco son distintas en hombres y mujeres. Esta conclusión la obtenemos a partir del carácter picudo de sus respectivas gráficas.</p>
 </section>
 </section>
 <section id="contraste-frecuencia-máxima-ppm-contra-edad" class="level2">
@@ -226,7 +231,7 @@ sample estimates:
 <p>Este razonamiento será análogo en los ejemplos que siguen a continuación.</p>
 </section>
 <section id="contraste-de-correlación-frecuencia-máxima-ppm-contra-depresión-del-segmento-st" class="level2">
-<h2 class="anchored" data-anchor-id="contraste-de-correlación-frecuencia-máxima-ppm-contra-depresión-del-segmento-st">2) Contraste de correlación Frecuencia máxima PPM contra depresión del segmento ST:</h2>
+<h2 class="anchored" data-anchor-id="contraste-de-correlación-frecuencia-máxima-ppm-contra-depresión-del-segmento-st">2) Contraste de correlación frecuencia máxima PPM contra depresión del segmento ST:</h2>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -333,6 +338,26 @@ sample estimates:
 </div>
 </div>
 <p>Uno de los cruces que nos parecía obvio que, a priori, en el que tendría que haber algún tipo de correlación es entre el nivel de colesterol y las pulsaciones máximas por minuto. Sin embargo, con este contraste, vemos que no podemos desmentir la hipótesis de que estas dos variables sean incorreladas.</p>
+</section>
+</section>
+<section id="conclusiones" class="level1">
+<h1>Conclusiones:</h1>
+<section id="conclusiones-sobre-la-muestra" class="level2">
+<h2 class="anchored" data-anchor-id="conclusiones-sobre-la-muestra">Conclusiones sobre la muestra:</h2>
+<ul>
+<li><p>El nivel de colesterol en sangre va en aumento conforme avanza la edad y, en particular, para las mujeres de nuestro Dataset, este aumento es mayor y más disperso.</p></li>
+<li><p>La presión arterial en reposo también tiende a incrementarse con la edad. En este caso no se aprecian diferencias significativas según el sexo de los pacientes.</p></li>
+</ul>
+</section>
+<section id="conclusiones-sobre-la-población" class="level2">
+<h2 class="anchored" data-anchor-id="conclusiones-sobre-la-población">Conclusiones sobre la población:</h2>
+<ul>
+<li><p>Existe correlación negativa entre el nivel máximo de pulsaciones por minuto inducida por el esfuerzo y la edad. A mayor edad, la frecuencia máxima cardíaca disminuye.</p></li>
+<li><p>Existe correlación negativa entre el grado de depresión del segmento ST y las pulsaciones máximas por minuto. Cuanto mayor sea <em>maxHR</em> menor es la depresión del segmento ST (más próximo es el segmento ST a la línea isoeléctrica).</p></li>
+<li><p>A mayor edad, mayor es la presión sanguínea en reposo y también el nivel de colesterol en sangre.</p></li>
+<li><p>En las mujeres con dolor habitual en el pecho existe una correlación positiva entre la amplitud del segmento ST y la presión sanguínea en reposo. No es posible ni confirmar ni desmentir este hecho en el caso de los hombres.</p></li>
+<li><p>A diferencia de como pensábamos que ocurriría, el colesterol y las frecuencia máxima cardíaca son variables incorreladas.</p></li>
+</ul>
 </section>
 </section>
 
