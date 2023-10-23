@@ -26,11 +26,9 @@ library("aplpack")
 heartdisease = read_csv("https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data", col_names = FALSE, show_col_types = FALSE)
 ```
 
-
-Antes de empezar con el análisis multivariante se realizará una primera limpieza del Dataset. En primer lugar, renombramos las variables para hacerlas más acordes a aquello que representan (en el archivo inicial estaban nombradas como $X_1$, $X_2$, $...$, $X_{14}$). A continuación, pasamos a factor las variables categóricas (hemos encontrado que muchas no venían dadas como factor incialmente). 
+Antes de empezar con el análisis multivariante se realizará una primera limpieza del Dataset. En primer lugar, renombramos las variables para hacerlas más acordes a aquello que representan (en el archivo inicial estaban nombradas como $X_1$, $X_2$, $...$, $X_{14}$). A continuación, pasamos a factor las variables categóricas (hemos encontrado que muchas no venían dadas como factor incialmente).
 
 Por último, dado que tenemos un número pequeño de muestras a las que les falta algún dato (concretamente 6), las hemos eliminado. Recalcar que los datos ausentes venían dados por interrogantes en lugar de NA's.
-
 
 ```{r}
 heartdisease <- heartdisease %>% 
@@ -68,11 +66,9 @@ heartdisease <- heartdisease %>%
   select(age, sex, cp, restbp, chol, fbs, restecg, maxHR, exang, expeak, slope, mves, tHR, fdiag)
 ```
 
-
 El objetivo del estudio original tenía como principal objetivo comparar dos modelos estadísticos (uno antiguo y otro novedoso) que proporcioban estimaciones de la probabilidad de enfermedad coronaria en pacientes que presentaban dolencias en el pecho. Se tomaron las medidas que se detallan en el Dataset a un total de 303 pacientes de Cleveland (Ohio) y se aplicaron otros tres grupos de Hungría, California y Suiza. Nuestro objetivo en esta entrega será determinar los rasgos más significativo del Dataset, así como las relaciones que puedan resultar de mayor interés desde el punto de vista clínico.
 
 En este conjunto de datos encontramos `r nrow(heartdisease)` visualizaciones de `r ncol(heartdisease)` variables. Se describen a continuación las variables del mismo:
-
 
 -   **age**: Edad del paciente. Número entero. El conjunto de edades de los sujetos obersvados está comprendido entre los 29 y los 77 años. La media de edad de los pacientes está en los 54.54 años.
 
@@ -102,21 +98,17 @@ En este conjunto de datos encontramos `r nrow(heartdisease)` visualizaciones de 
 
 -   **fdiag**: Booleano para el diagnosis de la enfermedad del corazón. Se comenta en la fuente que toma los valores enteros comprendidos entre 0 y 4 (ambos incluidos). No se especifica si se trata del número exacto de patologías diagnosticadas a cada paciente, pero sí que se menciona que el valor 0 se asigna únicamente a aquellos pacientes a los que no se les ha diagnosticado ninguna enfermedad y el resto de valores se atribuyen a los que sí tienen (o han tenido) alguna patología cardíaca. Nosotros la hemos transformado en una variable de tipo factor (0 = "libre enfermedad" y 1 = "diagnosticado").
 
-
 ### Contexto médico de las variables:
-
 
 ```{r, fig.cap = "Electrocardiograma", out.width = '60%'}
 knitr::include_graphics("SinusRhythmLabels.svg.png")
 ```
 
+Un electrocardiograma es una prueba que mide la actividad eléctrica del corazón en función del tiempo. Cada una de las acciones mecánicas del corazón se traduce en un cambio en la tendencia de la onda. Por ejemplo, la onda P, que es la primera de las secciones en las que se divide el diagrama, es la consecuencia eléctrica de la contracción (despolarización eléctrica) de las aurículas cuando se empuja la sangre hacia el los ventrículos. El complejo QRS, que está dividido a su vez en 3 partes, hace referencia a la contracción de los ventrículos cuando se bombea lal sangre hacia los pulmones o hacia el resto del cuerpo.
 
-· Sobre la variable *expeak*: 
+Para nosotros, la variable de mayor interés es el segmento ST, que refleja lo que sería la repolarización de los ventrículos (estado de relajación). En particular, de esta variable nos interesa saber si se encuentra por encima o por debajo de la línea isoeléctrica, que representa el estado de reposo eléctrico del corazón. 
 
-Indica el grado de depresión del segmento ST inducida por el ejercicio en relación con el reposo. Si se observa la imagen del electrocardiograma se puede ver que el segmento ST es la fase que vendría después de los 3 picos propios de la onda.
-
-
-
+El segmento ST es un alto indicador de la existencia de cardiopatías isquémicas. Una cardiopatía isquémica es una enfermedad provocada por el estrechamiento de las arterias que van al corazón. En particular, la elevación aguda de este segmento es uno de los signos más tempranos de infarto. Estas subidas se manifiestan tanto durante el momento del infarto como a posteriori.
 
 # Análisis exploratorio del conjunto de datos:
 
@@ -192,14 +184,12 @@ histogram5 + bar6
 
 Mostramos también el vector de medias de las variables cuantitativas:
 
-
 ```{r}
 heartdisease_numeric <- heartdisease %>%
   select_if(is.numeric)
 heartdisease_numeric %>%
   summarise_all(.funs = mean, na.rm = TRUE)
 ```
-
 
 ## 2) Frecuencias de los datos categóricos:
 
@@ -339,11 +329,7 @@ ggplot(heartdisease, aes(x = decade, y = restbp, fill = factor(sex))) +
 
 A diferencia del gráfico anterior, en este, sí se observa que, a medida que va aumentando la edad de los sujetos, también crece la dispersión del nivel de presión arterial en reposo. Téngase en cuenta que, dada la escasez de individuos de mayor edad, los resultados obtenidos para la dispersión de la última franja no son concluyentes. Se puede destacar también que todos los puntos *outliers* estan en la franja de $[49,59)$ años.
 
-
-
 # Análisis inferencial:
-
-
 
 ## Cruces de variables cuantitativas:
 
@@ -358,10 +344,7 @@ ggpairs(a, mapping = aes(color = heartdisease$sex))
 
 ```
 
-
 ### Distribuciones de probabilidad:
-
-
 
 ```{r}
 
@@ -416,9 +399,7 @@ dens1 + dens2 + dens3 + dens4
 
 ```
 
-
-Las densidades de los hombres de las variables *restbp*, *chol* y *maxHR* parecen ser Gaussianas, mientras que en el caso de las mujeres únicamente la variable *chol* presenta forma de Gaussiana. 
-
+Las densidades de los hombres de las variables *restbp*, *chol* y *maxHR* parecen ser Gaussianas, mientras que en el caso de las mujeres únicamente la variable *chol* presenta forma de Gaussiana.
 
 La media de colesterol y ritmo cardíaco en hombres y mujeres es prácticamente idéntica. Sin embargo, en las demás dos ocurre que las medias de las mujeres son ligeralmente más altas que las de los hombres.
 
@@ -444,13 +425,11 @@ cor.test(heartdisease$maxHR, heartdisease$age, alternative = "less")
 
 ```
 
-Confirmamos que en la población de individuos con síntomas de dolor en el pecho (a la que, a partir de ahora nos referiremos como población "grande"), no en la muestral, la edad y el número máximo de pulsaciones tienen correlación negativa dado que se ha obtenido un p-valor de $8.351·10^{-13} < 0.05$. Esto significa que, a mayor edad se espera que disminuya el número máximo de pulsaciones por minuto en individuos de la población grande. 
+Confirmamos que en la población de individuos con síntomas de dolor en el pecho (a la que, a partir de ahora nos referiremos como población "grande"), no en la muestral, la edad y el número máximo de pulsaciones tienen correlación negativa dado que se ha obtenido un p-valor de $8.351·10^{-13} < 0.05$. Esto significa que, a mayor edad se espera que disminuya el número máximo de pulsaciones por minuto en individuos de la población grande.
 
 Este razonamiento será análogo en los ejemplos que siguen a continuación.
 
-
-### 2)  Contraste de correlación frecuencia máxima PPM contra depresión del segmento ST:
-
+### 2) Contraste de correlación frecuencia máxima PPM contra depresión del segmento ST:
 
 ```{r}
 # Recordemos que expeak: Indica la depresión en el segmento ST inducida por el ejercicio en relación con el reposo. Con valor mínimmo de 0, y valor máximo de 6.20.
@@ -461,9 +440,7 @@ cor.test(heartdisease$maxHR, heartdisease$expeak, alternative = "less")
 
 Confirmamos que en la población grande el número máximo de pulsaciones por minuto durante una prueba de esfuerzo y *expeak* tienen correlación negativa. Esto significa que, a mayor grado de depresión del segmento ST (inducido por el ejercicio en relación con el reposo) menor es las pulsaciones máximas por minuto.
 
-
-### 3)  Contraste de correlación edad contra presión sanguínea en reposo:
-
+### 3) Contraste de correlación edad contra presión sanguínea en reposo:
 
 ```{r}
 cor.test(heartdisease$restbp, heartdisease$age, alternative = "greater")
@@ -471,10 +448,7 @@ cor.test(heartdisease$restbp, heartdisease$age, alternative = "greater")
 
 Confirmamos que en la población grande la edad y la presión sanguínea de un individuo que se encuentra en reposo tienen correlación positiva. Esto significa que, a mayor edad, la presión tiende a ser mayor.
 
-
-
-### 4)  Contraste de correlación edad contra colesterol en sangre:
-
+### 4) Contraste de correlación edad contra colesterol en sangre:
 
 ```{r}
 cor.test(heartdisease$chol, heartdisease$age, alternative = "greater")
@@ -482,9 +456,7 @@ cor.test(heartdisease$chol, heartdisease$age, alternative = "greater")
 
 Confirmamos que en la población grande la edad y el nivel de colesterol en sangre tienen correlación positiva. Esto significa que, a mayor edad, mayor tiende a ser el nivel de colesterol en sangre.
 
-
-
-### 5)  Contraste de depresión del segmento ST contra presión sanguínea en reposo por sexos:
+### 5) Contraste de depresión del segmento ST contra presión sanguínea en reposo por sexos:
 
 Se han observado diferencias significativas de correlación de estas variables según el sexo. Estudiemos este fenómeno más en detalle:
 
@@ -502,8 +474,7 @@ cor.test(masculino$expeak, masculino$restbp, alternative = "greater")
 
 Los dos contrastes de hipótesis planteados nos confirman que, se puede asegurar que existe una correlación positiva entre la depresión del segmento ST y la presión sanguínea en reposo en mujeres. Sin embargo, no podemos confirmarlo en el caso de los hombres, dado que el p-valor resulta ser superior a $0.05$.
 
-
-### 6) (No) correlación entre niveles de colesterol y la frecuencia máxima cardíaca. 
+### 6) (No) correlación entre niveles de colesterol y la frecuencia máxima cardíaca.
 
 ```{r}
 cor.test(heartdisease$chol, heartdisease$maxHR, alternative = "two.sided")
@@ -511,25 +482,22 @@ cor.test(heartdisease$chol, heartdisease$maxHR, alternative = "two.sided")
 
 Uno de los cruces que nos parecía obvio que, a priori, en el que tendría que haber algún tipo de correlación es entre el nivel de colesterol y las pulsaciones máximas por minuto. Sin embargo, con este contraste, vemos que no podemos desmentir la hipótesis de que estas dos variables sean incorreladas.
 
-
-
 # Conclusiones:
 
 ## Conclusiones sobre la muestra:
 
-- El nivel de colesterol en sangre va en aumento conforme avanza la edad y, en particular, para las mujeres de nuestro Dataset, este aumento es mayor y más disperso.
+-   El nivel de colesterol en sangre va en aumento conforme avanza la edad y, en particular, para las mujeres de nuestro Dataset, este aumento es mayor y más disperso.
 
-- La presión arterial en reposo también tiende a incrementarse con la edad. En este caso no se aprecian diferencias significativas según el sexo de los pacientes.
- 
- 
+-   La presión arterial en reposo también tiende a incrementarse con la edad. En este caso no se aprecian diferencias significativas según el sexo de los pacientes.
+
 ## Conclusiones sobre la población:
 
--  Existe correlación negativa entre el nivel máximo de pulsaciones por minuto inducida por el esfuerzo y la edad. A mayor edad, la frecuencia máxima cardíaca disminuye.
+-   Existe correlación negativa entre el nivel máximo de pulsaciones por minuto inducida por el esfuerzo y la edad. A mayor edad, la frecuencia máxima cardíaca disminuye.
 
-- Existe correlación negativa entre el grado de depresión del segmento ST y las pulsaciones máximas por minuto. Cuanto mayor sea *maxHR* menor es la depresión del segmento ST (más próximo es el segmento ST a la línea isoeléctrica).
+-   Existe correlación negativa entre el grado de depresión del segmento ST y las pulsaciones máximas por minuto. Cuanto mayor sea *maxHR* menor es la depresión del segmento ST (más próximo es el segmento ST a la línea isoeléctrica).
 
-- A mayor edad, mayor es la presión sanguínea en reposo y también el nivel de colesterol en sangre.
+-   A mayor edad, mayor es la presión sanguínea en reposo y también el nivel de colesterol en sangre.
 
-- En las mujeres con dolor habitual en el pecho existe una correlación positiva entre la amplitud del segmento ST y la presión sanguínea en reposo. No es posible ni confirmar ni desmentir este hecho en el caso de los hombres.
+-   En las mujeres con dolor habitual en el pecho existe una correlación positiva entre la amplitud del segmento ST y la presión sanguínea en reposo. No es posible ni confirmar ni desmentir este hecho en el caso de los hombres.
 
-- A diferencia de como pensábamos que ocurriría, el colesterol y las frecuencia máxima cardíaca son variables incorreladas.
+-   A diferencia de como pensábamos que ocurriría, el colesterol y las frecuencia máxima cardíaca son variables incorreladas.
