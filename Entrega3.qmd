@@ -341,7 +341,7 @@ A diferencia del gráfico anterior, en este, sí se observa que, a medida que va
 
 
 
-#Análisis inferencial:
+# Análisis inferencial:
 
 
 
@@ -424,9 +424,9 @@ La media de colesterol y ritmo cardíaco en hombres y mujeres es prácticamente 
 
 Por otro lado, observando el gráfico se puede estimar que las desviaciones típicas (o varianzas) del nivel de colesterol y ritmo cardíaco son distintas en hombres y mujeres. Esta conclusión la obtenemos a partir del carácter picudo de sus respectivas gráficas.
 
+## Contrastes
 
-
-## 1) Contraste Frecuencia máxima PPM contra edad:
+### 1) Contraste Frecuencia máxima PPM contra edad:
 
 ```{r}
 
@@ -449,7 +449,7 @@ Confirmamos que en la población de individuos con síntomas de dolor en el pech
 Este razonamiento será análogo en los ejemplos que siguen a continuación.
 
 
-## 2)  Contraste de correlación frecuencia máxima PPM contra depresión del segmento ST:
+### 2)  Contraste de correlación frecuencia máxima PPM contra depresión del segmento ST:
 
 
 ```{r}
@@ -462,7 +462,7 @@ cor.test(heartdisease$maxHR, heartdisease$expeak, alternative = "less")
 Confirmamos que en la población grande el número máximo de pulsaciones por minuto durante una prueba de esfuerzo y *expeak* tienen correlación negativa. Esto significa que, a mayor grado de depresión del segmento ST (inducido por el ejercicio en relación con el reposo) menor es las pulsaciones máximas por minuto.
 
 
-## 3)  Contraste de correlación edad contra presión sanguínea en reposo:
+### 3)  Contraste de correlación edad contra presión sanguínea en reposo:
 
 
 ```{r}
@@ -473,7 +473,7 @@ Confirmamos que en la población grande la edad y la presión sanguínea de un i
 
 
 
-## 4)  Contraste de correlación edad contra colesterol en sangre:
+### 4)  Contraste de correlación edad contra colesterol en sangre:
 
 
 ```{r}
@@ -484,7 +484,7 @@ Confirmamos que en la población grande la edad y el nivel de colesterol en sang
 
 
 
-## 5)  Contraste de depresión del segmento ST contra presión sanguínea en reposo por sexos:
+### 5)  Contraste de depresión del segmento ST contra presión sanguínea en reposo por sexos:
 
 Se han observado diferencias significativas de correlación de estas variables según el sexo. Estudiemos este fenómeno más en detalle:
 
@@ -503,7 +503,7 @@ cor.test(masculino$expeak, masculino$restbp, alternative = "greater")
 Los dos contrastes de hipótesis planteados nos confirman que, se puede asegurar que existe una correlación positiva entre la depresión del segmento ST y la presión sanguínea en reposo en mujeres. Sin embargo, no podemos confirmarlo en el caso de los hombres, dado que el p-valor resulta ser superior a $0.05$.
 
 
-## 6) (No) correlación entre niveles de colesterol y la frecuencia máxima cardíaca. 
+### 6) (No) correlación entre niveles de colesterol y la frecuencia máxima cardíaca. 
 
 ```{r}
 cor.test(heartdisease$chol, heartdisease$maxHR, alternative = "two.sided")

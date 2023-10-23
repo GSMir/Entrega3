@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.353">
+<meta name="generator" content="quarto-1.2.475">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -18,7 +18,7 @@ div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
   width: 0.8em;
-  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  margin: 0 0.8em 0.2em -1.6em;
   vertical-align: middle;
 }
 </style>
@@ -35,7 +35,6 @@ ul.task-list li input[type="checkbox"] {
 <link href="Entrega3_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="Entrega3_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 </head>
@@ -70,8 +69,17 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 <p>Este es el <a href="https://github.com/GSMir/Entrega3">repositorio</a> de GitHub en el que alojaremos todos los archivos relacionados con esta entrega. Para consultar la fuente de la que se ha extraído nuestro Dataset consulta el siguiente <a href="https://archive.ics.uci.edu/dataset/45/heart+disease">link</a>. Nuestro Dataset ha sido publicado por la Universidad de California de Irvine.</p>
+<div class="cell">
+
+</div>
+<div class="cell">
+
+</div>
 <p>Antes de empezar con el análisis multivariante se realizará una primera limpieza del Dataset. En primer lugar, renombramos las variables para hacerlas más acordes a aquello que representan (en el archivo inicial estaban nombradas como <span class="math inline">\(X_1\)</span>, <span class="math inline">\(X_2\)</span>, <span class="math inline">\(...\)</span>, <span class="math inline">\(X_{14}\)</span>). A continuación, pasamos a factor las variables categóricas (hemos encontrado que muchas no venían dadas como factor incialmente).</p>
 <p>Por último, dado que tenemos un número pequeño de muestras a las que les falta algún dato (concretamente 6), las hemos eliminado. Recalcar que los datos ausentes venían dados por interrogantes en lugar de NA’s.</p>
+<div class="cell">
+
+</div>
 <p>El objetivo del estudio original tenía como principal objetivo comparar dos modelos estadísticos (uno antiguo y otro novedoso) que proporcioban estimaciones de la probabilidad de enfermedad coronaria en pacientes que presentaban dolencias en el pecho. Se tomaron las medidas que se detallan en el Dataset a un total de 303 pacientes de Cleveland (Ohio) y se aplicaron otros tres grupos de Hungría, California y Suiza. Nuestro objetivo en esta entrega será determinar los rasgos más significativo del Dataset, así como las relaciones que puedan resultar de mayor interés desde el punto de vista clínico.</p>
 <p>En este conjunto de datos encontramos 297 visualizaciones de 14 variables. Se describen a continuación las variables del mismo:</p>
 <ul>
@@ -97,7 +105,7 @@ ul.task-list li input[type="checkbox"] {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="SinusRhythmLabels.svg.png" class="img-fluid figure-img" style="width:60.0%"></p>
-<figcaption class="figure-caption">Electrocardiograma</figcaption>
+<p></p><figcaption class="figure-caption">Electrocardiograma</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -124,7 +132,7 @@ ul.task-list li input[type="checkbox"] {
 <p>Mostramos también el vector de medias de las variables cuantitativas:</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 x 6
+<pre><code># A tibble: 1 × 6
     age restbp  chol maxHR expeak  mves
   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;
 1  54.5   132.  247.  150.   1.06 0.677</code></pre>
@@ -175,8 +183,10 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 <p>A diferencia del gráfico anterior, en este, sí se observa que, a medida que va aumentando la edad de los sujetos, también crece la dispersión del nivel de presión arterial en reposo. Téngase en cuenta que, dada la escasez de individuos de mayor edad, los resultados obtenidos para la dispersión de la última franja no son concluyentes. Se puede destacar también que todos los puntos <em>outliers</em> estan en la franja de <span class="math inline">\([49,59)\)</span> años.</p>
-<p>#Análisis inferencial:</p>
 </section>
+</section>
+<section id="análisis-inferencial" class="level1">
+<h1>Análisis inferencial:</h1>
 <section id="cruces-de-variables-cuantitativas" class="level2">
 <h2 class="anchored" data-anchor-id="cruces-de-variables-cuantitativas">Cruces de variables cuantitativas:</h2>
 <p>Representamos el gráfico <em>ggpairs</em> para obtener una visión general de la relación entre todos los pares de variables cuantitativas (y además teniendo el cuenta la variable sexo) y así poder luego focalizar el estudio en aquellas en las que pueda haber mayor nivel de correlación o interés.</p>
@@ -197,8 +207,10 @@ ul.task-list li input[type="checkbox"] {
 <p>Por otro lado, observando el gráfico se puede estimar que las desviaciones típicas (o varianzas) del nivel de colesterol y ritmo cardíaco son distintas en hombres y mujeres. Esta conclusión la obtenemos a partir del carácter picudo de sus respectivas gráficas.</p>
 </section>
 </section>
-<section id="contraste-frecuencia-máxima-ppm-contra-edad" class="level2">
-<h2 class="anchored" data-anchor-id="contraste-frecuencia-máxima-ppm-contra-edad">1) Contraste Frecuencia máxima PPM contra edad:</h2>
+<section id="contrastes" class="level2">
+<h2 class="anchored" data-anchor-id="contrastes">Contrastes</h2>
+<section id="contraste-frecuencia-máxima-ppm-contra-edad" class="level3">
+<h3 class="anchored" data-anchor-id="contraste-frecuencia-máxima-ppm-contra-edad">1) Contraste Frecuencia máxima PPM contra edad:</h3>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="Entrega3_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
@@ -220,8 +232,8 @@ sample estimates:
 <p>Confirmamos que en la población de individuos con síntomas de dolor en el pecho (a la que, a partir de ahora nos referiremos como población “grande”), no en la muestral, la edad y el número máximo de pulsaciones tienen correlación negativa dado que se ha obtenido un p-valor de <span class="math inline">\(8.351·10^{-13} &lt; 0.05\)</span>. Esto significa que, a mayor edad se espera que disminuya el número máximo de pulsaciones por minuto en individuos de la población grande.</p>
 <p>Este razonamiento será análogo en los ejemplos que siguen a continuación.</p>
 </section>
-<section id="contraste-de-correlación-frecuencia-máxima-ppm-contra-depresión-del-segmento-st" class="level2">
-<h2 class="anchored" data-anchor-id="contraste-de-correlación-frecuencia-máxima-ppm-contra-depresión-del-segmento-st">2) Contraste de correlación frecuencia máxima PPM contra depresión del segmento ST:</h2>
+<section id="contraste-de-correlación-frecuencia-máxima-ppm-contra-depresión-del-segmento-st" class="level3">
+<h3 class="anchored" data-anchor-id="contraste-de-correlación-frecuencia-máxima-ppm-contra-depresión-del-segmento-st">2) Contraste de correlación frecuencia máxima PPM contra depresión del segmento ST:</h3>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -239,8 +251,8 @@ sample estimates:
 </div>
 <p>Confirmamos que en la población grande el número máximo de pulsaciones por minuto durante una prueba de esfuerzo y <em>expeak</em> tienen correlación negativa. Esto significa que, a mayor grado de depresión del segmento ST (inducido por el ejercicio en relación con el reposo) menor es las pulsaciones máximas por minuto.</p>
 </section>
-<section id="contraste-de-correlación-edad-contra-presión-sanguínea-en-reposo" class="level2">
-<h2 class="anchored" data-anchor-id="contraste-de-correlación-edad-contra-presión-sanguínea-en-reposo">3) Contraste de correlación edad contra presión sanguínea en reposo:</h2>
+<section id="contraste-de-correlación-edad-contra-presión-sanguínea-en-reposo" class="level3">
+<h3 class="anchored" data-anchor-id="contraste-de-correlación-edad-contra-presión-sanguínea-en-reposo">3) Contraste de correlación edad contra presión sanguínea en reposo:</h3>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -258,8 +270,8 @@ sample estimates:
 </div>
 <p>Confirmamos que en la población grande la edad y la presión sanguínea de un individuo que se encuentra en reposo tienen correlación positiva. Esto significa que, a mayor edad, la presión tiende a ser mayor.</p>
 </section>
-<section id="contraste-de-correlación-edad-contra-colesterol-en-sangre" class="level2">
-<h2 class="anchored" data-anchor-id="contraste-de-correlación-edad-contra-colesterol-en-sangre">4) Contraste de correlación edad contra colesterol en sangre:</h2>
+<section id="contraste-de-correlación-edad-contra-colesterol-en-sangre" class="level3">
+<h3 class="anchored" data-anchor-id="contraste-de-correlación-edad-contra-colesterol-en-sangre">4) Contraste de correlación edad contra colesterol en sangre:</h3>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -277,8 +289,8 @@ sample estimates:
 </div>
 <p>Confirmamos que en la población grande la edad y el nivel de colesterol en sangre tienen correlación positiva. Esto significa que, a mayor edad, mayor tiende a ser el nivel de colesterol en sangre.</p>
 </section>
-<section id="contraste-de-depresión-del-segmento-st-contra-presión-sanguínea-en-reposo-por-sexos" class="level2">
-<h2 class="anchored" data-anchor-id="contraste-de-depresión-del-segmento-st-contra-presión-sanguínea-en-reposo-por-sexos">5) Contraste de depresión del segmento ST contra presión sanguínea en reposo por sexos:</h2>
+<section id="contraste-de-depresión-del-segmento-st-contra-presión-sanguínea-en-reposo-por-sexos" class="level3">
+<h3 class="anchored" data-anchor-id="contraste-de-depresión-del-segmento-st-contra-presión-sanguínea-en-reposo-por-sexos">5) Contraste de depresión del segmento ST contra presión sanguínea en reposo por sexos:</h3>
 <p>Se han observado diferencias significativas de correlación de estas variables según el sexo. Estudiemos este fenómeno más en detalle:</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
@@ -310,8 +322,8 @@ sample estimates:
 </div>
 <p>Los dos contrastes de hipótesis planteados nos confirman que, se puede asegurar que existe una correlación positiva entre la depresión del segmento ST y la presión sanguínea en reposo en mujeres. Sin embargo, no podemos confirmarlo en el caso de los hombres, dado que el p-valor resulta ser superior a <span class="math inline">\(0.05\)</span>.</p>
 </section>
-<section id="no-correlación-entre-niveles-de-colesterol-y-la-frecuencia-máxima-cardíaca." class="level2">
-<h2 class="anchored" data-anchor-id="no-correlación-entre-niveles-de-colesterol-y-la-frecuencia-máxima-cardíaca.">6) (No) correlación entre niveles de colesterol y la frecuencia máxima cardíaca.</h2>
+<section id="no-correlación-entre-niveles-de-colesterol-y-la-frecuencia-máxima-cardíaca." class="level3">
+<h3 class="anchored" data-anchor-id="no-correlación-entre-niveles-de-colesterol-y-la-frecuencia-máxima-cardíaca.">6) (No) correlación entre niveles de colesterol y la frecuencia máxima cardíaca.</h3>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -328,6 +340,7 @@ sample estimates:
 </div>
 </div>
 <p>Uno de los cruces que nos parecía obvio que, a priori, en el que tendría que haber algún tipo de correlación es entre el nivel de colesterol y las pulsaciones máximas por minuto. Sin embargo, con este contraste, vemos que no podemos desmentir la hipótesis de que estas dos variables sean incorreladas.</p>
+</section>
 </section>
 </section>
 <section id="conclusiones" class="level1">
@@ -380,23 +393,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     icon: icon
   };
   anchorJS.add('.anchored');
-  const isCodeAnnotation = (el) => {
-    for (const clz of el.classList) {
-      if (clz.startsWith('code-annotation-')) {                     
-        return true;
-      }
-    }
-    return false;
-  }
   const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
+    target: function(trigger) {
+      return trigger.previousElementSibling;
     }
   });
   clipboard.on('success', function(e) {
@@ -461,92 +460,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       return note.innerHTML;
     });
   }
-      let selectedAnnoteEl;
-      const selectorForAnnotation = ( cell, annotation) => {
-        let cellAttr = 'data-code-cell="' + cell + '"';
-        let lineAttr = 'data-code-annotation="' +  annotation + '"';
-        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-        return selector;
-      }
-      const selectCodeLines = (annoteEl) => {
-        const doc = window.document;
-        const targetCell = annoteEl.getAttribute("data-target-cell");
-        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-        const lineIds = lines.map((line) => {
-          return targetCell + "-" + line;
-        })
-        let top = null;
-        let height = null;
-        let parent = null;
-        if (lineIds.length > 0) {
-            //compute the position of the single el (top and bottom and make a div)
-            const el = window.document.getElementById(lineIds[0]);
-            top = el.offsetTop;
-            height = el.offsetHeight;
-            parent = el.parentElement.parentElement;
-          if (lineIds.length > 1) {
-            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-            height = bottom - top;
-          }
-          if (top !== null && height !== null && parent !== null) {
-            // cook up a div (if necessary) and position it 
-            let div = window.document.getElementById("code-annotation-line-highlight");
-            if (div === null) {
-              div = window.document.createElement("div");
-              div.setAttribute("id", "code-annotation-line-highlight");
-              div.style.position = 'absolute';
-              parent.appendChild(div);
-            }
-            div.style.top = top - 2 + "px";
-            div.style.height = height + 4 + "px";
-            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-            if (gutterDiv === null) {
-              gutterDiv = window.document.createElement("div");
-              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-              gutterDiv.style.position = 'absolute';
-              const codeCell = window.document.getElementById(targetCell);
-              const gutter = codeCell.querySelector('.code-annotation-gutter');
-              gutter.appendChild(gutterDiv);
-            }
-            gutterDiv.style.top = top - 2 + "px";
-            gutterDiv.style.height = height + 4 + "px";
-          }
-          selectedAnnoteEl = annoteEl;
-        }
-      };
-      const unselectCodeLines = () => {
-        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-        elementsIds.forEach((elId) => {
-          const div = window.document.getElementById(elId);
-          if (div) {
-            div.remove();
-          }
-        });
-        selectedAnnoteEl = undefined;
-      };
-      // Attach click handler to the DT
-      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-      for (const annoteDlNode of annoteDls) {
-        annoteDlNode.addEventListener('click', (event) => {
-          const clickedEl = event.target;
-          if (clickedEl !== selectedAnnoteEl) {
-            unselectCodeLines();
-            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-            if (activeEl) {
-              activeEl.classList.remove('code-annotation-active');
-            }
-            selectCodeLines(clickedEl);
-            clickedEl.classList.add('code-annotation-active');
-          } else {
-            // Unselect the line
-            unselectCodeLines();
-            clickedEl.classList.remove('code-annotation-active');
-          }
-        });
-      }
   const findCites = (el) => {
     const parentEl = el.parentElement;
     if (parentEl) {
