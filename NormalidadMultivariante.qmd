@@ -1,0 +1,75 @@
+---
+title: "multinormalidad"
+author: "Ángel García, Arnau Piferrer y Guillem Serra"
+format: html
+editor: visual
+---
+
+Este es el [repositorio](https://github.com/GSMir/Entrega3) de GitHub en el que alojaremos todos los archivos relacionados con esta entrega.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, message = FALSE,warning=FALSE}
+library(readr)
+library(tidyverse)
+library(patchwork)
+library(MVA)
+library(corrplot)
+library(graphics)
+library(GGally)
+library("aplpack")
+library(mvnormtest)
+```
+
+```{r}
+heartdisease = read_csv("https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data", col_names = FALSE, show_col_types = FALSE)
+
+heartdisease <- heartdisease %>% 
+  filter(!str_detect(X13, "\\?") & (!str_detect(X12, "\\?")))
+
+heartdisease <- heartdisease %>%
+  mutate(sex = as.factor(heartdisease$X2), .after = X2) %>%
+  mutate(cp = as.factor(heartdisease$X3), .after = X3) %>%
+  mutate(fbs = as.factor(heartdisease$X6), .after = X6) %>%
+  mutate(restecg = as.factor(heartdisease$X7), .after = X7) %>%
+  mutate(exang = as.factor(heartdisease$X9), .after = X9) %>%
+  mutate(slope = as.factor(heartdisease$X11), .after = X11) %>%
+  mutate(
+    tHR2 = case_when(
+      X13 == "3.0" ~ "3",
+      X13 == "6.0" ~ "6",
+      X13 == "7.0" ~ "7"),
+    .keep = "all", .after = X13) %>%
+  mutate(
+    fdiag2 = case_when(
+      X14 == "0" ~ "0",
+      X14 == "1" ~ "1",
+      X14 == "2" ~ "1",
+      X14 == "3" ~ "1",
+      X14 == "4" ~ "1"),
+    .keep = "all", .after = X14)
+
+heartdisease <- heartdisease %>%
+  mutate(tHR = as.factor(heartdisease$tHR2), .after = tHR2) %>%
+  mutate(fdiag = as.factor(heartdisease$fdiag2), .after = fdiag2) %>%
+  rename(age = X1, restbp = X4, chol = X5, maxHR = X8, expeak = X10)
+
+heartdisease <- heartdisease %>%
+  select(age, sex, cp, restbp, chol, fbs, restecg, maxHR, exang, expeak, slope, tHR, fdiag)
+
+heartdisease_numeric <- heartdisease %>%
+  select_if(is.numeric)
+```
+
+
+Realizamos el test de Saphiro-Wilk para evaluar la normalidad multivariante;
+
+
+```{r}
+# Shapiro-Wilk
+mshapiro.test(t(heartdisease_numeric))
+```
+
+El p-valor de Shapiro-Wilk de `r mshapiro.test(t(heartdisease_numeric))$p.value` indica que no se cumple el supuesto de normalidad multivariante. Una o más variables individuales no se distribuyen normalmente.

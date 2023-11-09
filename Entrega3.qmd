@@ -106,7 +106,7 @@ knitr::include_graphics("SinusRhythmLabels.svg.png")
 
 Un electrocardiograma es una prueba que mide la actividad eléctrica del corazón en función del tiempo. Cada una de las acciones mecánicas del corazón se traduce en un cambio en la tendencia de la onda. Por ejemplo, la onda P, que es la primera de las secciones en las que se divide el diagrama, es la consecuencia eléctrica de la contracción (despolarización eléctrica) de las aurículas cuando se empuja la sangre hacia el los ventrículos. El complejo QRS, que está dividido a su vez en 3 partes, hace referencia a la contracción de los ventrículos cuando se bombea lal sangre hacia los pulmones o hacia el resto del cuerpo.
 
-Para nosotros, la variable de mayor interés es el segmento ST, que refleja lo que sería la repolarización de los ventrículos (estado de relajación). En particular, de esta variable nos interesa saber si se encuentra por encima o por debajo de la línea isoeléctrica, que representa el estado de reposo eléctrico del corazón. 
+Para nosotros, la variable de mayor interés es el segmento ST, que refleja lo que sería la repolarización de los ventrículos (estado de relajación). En particular, de esta variable nos interesa saber si se encuentra por encima o por debajo de la línea isoeléctrica, que representa el estado de reposo eléctrico del corazón.
 
 El segmento ST es un alto indicador de la existencia de cardiopatías isquémicas. Una cardiopatía isquémica es una enfermedad provocada por el estrechamiento de las arterias que van al corazón. En particular, la elevación aguda de este segmento es uno de los signos más tempranos de infarto. Estas subidas se manifiestan tanto durante el momento del infarto como a posteriori.
 
