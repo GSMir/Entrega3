@@ -21,3 +21,29 @@ library(graphics)
 library(GGally)
 library("aplpack")
 ```
+
+```{r}
+heartdisease <- read_csv("https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data", col_names = FALSE, show_col_types = FALSE) %>%
+  # Filtrar las filas que no contienen "?"
+  filter(!str_detect(X13, "\\?"), !str_detect(X12, "\\?")) %>%
+  # Convertir ciertas columnas a factores y renombrarlas
+  mutate(across(c(X2, X3, X6, X7, X9, X11), as.factor), 
+         tHR2 = case_when(
+           X13 == "3.0" ~ "3",
+           X13 == "6.0" ~ "6",
+           X13 == "7.0" ~ "7"),
+         fdiag2 = case_when(
+           X14 %in% 0:4 ~ as.character(X14 %>% as.numeric() > 0)),
+         across(c(tHR2, fdiag2), as.factor),
+         age = X1, restbp = X4, chol = X5, maxHR = X8, expeak = X10) %>%
+  # Seleccionar y reordenar las columnas
+  select(age, sex = X2, cp = X3, restbp, chol, fbs = X6, restecg = X7, 
+         maxHR = X8, exang = X9, expeak, slope = X11, tHR = tHR2, fdiag = fdiag2)
+
+# Crear un data frame solo con variables numéricas
+heartdisease_numeric <- heartdisease %>%
+  select(where(is.numeric))
+```
+
+
+
