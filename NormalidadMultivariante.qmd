@@ -63,9 +63,7 @@ heartdisease_numeric <- heartdisease %>%
   select_if(is.numeric)
 ```
 
-
 Realizamos el test de Saphiro-Wilk para evaluar la normalidad multivariante;
-
 
 ```{r}
 # Shapiro-Wilk

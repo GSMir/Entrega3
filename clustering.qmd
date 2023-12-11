@@ -1,0 +1,23 @@
+---
+title: "Clustering"
+author: "Ángel García, Arnau Piferrer y Guillem Serra"
+format: html
+editor: visual
+---
+
+Este es el [repositorio](https://github.com/GSMir/Entrega3) de GitHub en el que alojaremos todos los archivos relacionados con esta entrega. Para consultar la fuente de la que se ha extraído nuestro Dataset consulta el siguiente [link](https://archive.ics.uci.edu/dataset/45/heart+disease). Nuestro Dataset ha sido publicado por la Universidad de California de Irvine.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, message = FALSE,warning=FALSE}
+library(readr)
+library(tidyverse)
+library(patchwork)
+library(MVA)
+library(corrplot)
+library(graphics)
+library(GGally)
+library("aplpack")
+```
