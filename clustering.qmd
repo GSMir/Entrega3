@@ -23,6 +23,7 @@ library(GGally)
 library("aplpack")
 library(ggplot2)
 library(factoextra)
+library(cluster)
 ```
 
 ```{r}
@@ -38,13 +39,22 @@ heartdisease <- read_csv("https://archive.ics.uci.edu/ml/machine-learning-databa
          across(c(tHR2, fdiag2), as.factor),
          age = X1, restbp = X4, chol = X5, maxHR = X8, expeak = X10) %>%
   select(age, sex = X2, cp = X3, restbp, chol, fbs = X6, restecg = X7, 
-         maxHR = X8, exang = X9, expeak, slope = X11, tHR = tHR2, fdiag = fdiag2)
-
+         maxHR = X8, exang = X9, expeak, slope = X11, tHR = tHR2, fdiag = fdiag2) %>%
+  arrange(age, sex) %>% # Asumiendo que tu dataframe se llama heartdisease y que tiene una columna age
+  mutate(grupo_edad = factor(case_when(
+    age >= 29 & age <= 45 ~ "joven",
+    age >= 46 & age <= 59 ~ "maduro",
+    age >= 60 & age <= 77 ~ "mayor",
+    TRUE ~ NA_character_  # Para cualquier edad fuera de los rangos especificados
+  ))) %>%
+  select(grupo_edad, everything())
 
 
 heartdisease_numeric <- heartdisease %>%
   select(where(is.numeric)) %>%
-  scale() # Això tal vegada no s'hauria de fer amb totes ses variables, perquè es anys no sé si tenen sentit que estiguin escalats
+  scale()
+
+
 heartdisease_categoric <- heartdisease %>%
   select(where(is.factor))
 ```
@@ -59,35 +69,97 @@ mat_dist <- dist(x = heartdisease_numeric, method = "euclidean")
 ```{r}
 mat_dist <- get_dist(x = heartdisease_numeric, method = "pearson")
 #round(as.matrix(mat_dist)[1:9, 1:9], 2)
-fviz_dist(dist.obj = mat_dist, lab_size = 5) +
-theme(legend.position = "right") #Heatmap de matrices de distancia
+#fviz_dist(dist.obj = mat_dist, lab_size = 5) +
+#theme(legend.position = "right") #Heatmap de matrices de distancia
 ```
 
+
+
+
+```{r}
+set.seed(420) # Para reproducibilidad
+datos <- heartdisease_numeric[, c("restbp", "chol")]
+
+wcss <- sapply(1:10, function(k) {
+  kmeans(datos, centers = k, nstart = 50)$tot.withinss
+})
+
+plot(1:10, wcss, type = "b", xlab = "Número de Clusters", ylab = "Suma de Cuadrados Dentro del Grupo (WCSS)", main = "Método del Codo")
+```
+
+```{r}
+sil_width <- numeric(length(2:10)) # Pre-allocate the vector to ensure it has the correct length
+
+for (k in 2:10) {
+  km_res <- kmeans(as.data.frame(datos), centers = k, nstart = 50)
+  sil <- silhouette(km_res$cluster, dist(as.data.frame(datos)))
+  
+  if (length(sil[, 3]) == length(km_res$cluster)) {
+    sil_width[k-1] <- mean(sil[, 3])
+  } else {
+    sil_width[k-1] <- NA # Assign NA if the result is not as expected
+  }
+}
+
+# Remove NA values in case there were any errors
+valid_indices <- !is.na(sil_width)
+plot(2:10, sil_width, type = "b", xlab = "Número de Clusters", ylab = "Ancho Promedio de Silueta", main = "Análisis de Silueta")
+```
+
+
+
+
+
 ```{r} 
-set.seed(420) #Mirar quins hauríem de fer
+
 # Suponiendo que heartdisease_numeric ya está cargado y que eliges dos columnas específicas
 # Por ejemplo, 'restbp' y 'chol'
 datos <- heartdisease_numeric[, c("restbp", "chol")]
+grupo <- heartdisease$grupo_edad
 
-# A continuación, sigue tu código original, pero sin la parte de simulación
-# Se genera un vector que asigne aleatoriamente cada observación a uno de los 4 grupos
-grupo <- sample(x = 1:4, size = nrow(datos), replace = TRUE)
+km_clusters <- kmeans(x = datos, centers = 3, nstart = 50)
+#km_clusters
+
 datos <- cbind(datos, grupo)
-
-# Aquí deberías definir cómo quieres manejar las medias de los grupos
-# En este caso, simplemente asigno medias aleatorias como en tu ejemplo
-media_grupos <- matrix(rnorm(n = 8, mean = 0, sd = 4), nrow = 4, ncol = 2,
-                       dimnames = list(NULL, c("media_restbp", "media_chol")))
-media_grupos <- cbind(grupo = 1:4, media_grupos)
-
-datos <- merge(datos, media_grupos, by = "grupo")
-datos[,"restbp"] <- datos[, "restbp"] + datos[, "media_restbp"]
-datos[,"chol"] <- datos[, "chol"] + datos[, "media_chol"]
-
-# Gráfica
-plot(x = datos[,"restbp"], y = datos[,"chol"], col = datos[,"grupo"], pch = 19,
-     xlab = "Presión Sanguínea en Reposo", ylab = "Nivel de Colesterol")
 ```
+
+
+
+
+```{r}
+datos <- cbind(cluster = km_clusters$cluster, datos) 
+plot(x = datos[,"restbp"], y = datos[,"chol"], col = km_clusters$cluster, pch = 1,
+     cex = 2, lwd = 2, xlab = "restbp", ylab = "chol") 
+# Se rellenan las circunferencias con puntos del color real del grupo al 
+# que pertenecen las observaciones. Es necesario hacer coincidir los 
+# colores con el mismo orden que el devuelto por la función kmeans() ya 
+# que el clustering no asigna variable respuesta, solo agrupa las 
+# observaciones. 
+points(x = datos[,"restbp"], y = datos[,"chol"], 
+       col = c(2, 1, 3, 4)[datos[, "grupo"]], pch = 19)
+```
+
+```{r}
+table(km_clusters$cluster, datos[, "grupo"], 
+      dnn = list("cluster", "grupo real"))
+```
+
+```{r}
+heartdisease$cluster <- km_clusters$cluster
+
+ggplot(heartdisease, aes(x = factor(cluster), fill = grupo_edad)) +
+  geom_bar(position = "dodge") +
+  labs(x = "Cluster", y = "Count", fill = "Grupo de Edad") +
+  theme_minimal()
+```
+
+
+
+
+
+
+
+
 
 
 
