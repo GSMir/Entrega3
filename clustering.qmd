@@ -59,8 +59,6 @@ heartdisease_categoric <- heartdisease %>%
   select(where(is.factor))
 ```
 
-
-
 ```{r}
 mat_dist <- dist(x = heartdisease_numeric, method = "euclidean")
 #round(as.matrix(mat_dist)[1:9, 1:9], 2)
@@ -72,9 +70,6 @@ mat_dist <- get_dist(x = heartdisease_numeric, method = "pearson")
 #fviz_dist(dist.obj = mat_dist, lab_size = 5) +
 #theme(legend.position = "right") #Heatmap de matrices de distancia
 ```
-
-
-
 
 ```{r}
 set.seed(420) # Para reproducibilidad
@@ -106,11 +101,7 @@ valid_indices <- !is.na(sil_width)
 plot(2:10, sil_width, type = "b", xlab = "Número de Clusters", ylab = "Ancho Promedio de Silueta", main = "Análisis de Silueta")
 ```
 
-
-
-
-
-```{r} 
+```{r}
 
 # Suponiendo que heartdisease_numeric ya está cargado y que eliges dos columnas específicas
 # Por ejemplo, 'restbp' y 'chol'
@@ -122,9 +113,6 @@ km_clusters <- kmeans(x = datos, centers = 3, nstart = 50)
 
 datos <- cbind(datos, grupo)
 ```
-
-
-
 
 ```{r}
 datos <- cbind(cluster = km_clusters$cluster, datos) 
@@ -152,15 +140,3 @@ ggplot(heartdisease, aes(x = factor(cluster), fill = grupo_edad)) +
   labs(x = "Cluster", y = "Count", fill = "Grupo de Edad") +
   theme_minimal()
 ```
-
-
-
-
-
-
-
-
-
-
-
-
