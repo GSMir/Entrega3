@@ -41,13 +41,13 @@ heartdisease <- read_csv("https://archive.ics.uci.edu/ml/machine-learning-databa
   select(age, sex = X2, cp = X3, restbp, chol, fbs = X6, restecg = X7, 
          maxHR = X8, exang = X9, expeak, slope = X11, tHR = tHR2, fdiag = fdiag2) %>%
   arrange(age, sex) %>% # Asumiendo que tu dataframe se llama heartdisease y que tiene una columna age
-  mutate(grupo_edad = factor(case_when(
+  mutate(edad = factor(case_when(
     age >= 29 & age <= 45 ~ "joven",
     age >= 46 & age <= 59 ~ "maduro",
     age >= 60 & age <= 77 ~ "mayor",
     TRUE ~ NA_character_  # Para cualquier edad fuera de los rangos especificados
   ))) %>%
-  select(grupo_edad, everything())
+  select(edad, everything())
 
 
 heartdisease_numeric <- heartdisease %>%
@@ -135,7 +135,7 @@ theme(legend.position = "right")
 # Suponiendo que heartdisease_numeric ya está cargado y que eliges dos columnas específicas
 # Por ejemplo, 'restbp' y 'chol'
 datos <- heartdisease_numeric[, c("restbp", "chol")]
-grupo <- heartdisease$grupo_edad
+grupo <- heartdisease$edad
 
 km_clusters <- kmeans(x = datos, centers = 3, nstart = 50)
 #km_clusters
@@ -164,7 +164,7 @@ table(km_clusters$cluster, datos[, "grupo"],
 ```{r}
 heartdisease$cluster <- km_clusters$cluster
 
-ggplot(heartdisease, aes(x = factor(cluster), fill = grupo_edad)) +
+ggplot(heartdisease, aes(x = factor(cluster), fill = edad)) +
   geom_bar(position = "dodge") +
   labs(x = "Cluster", y = "Count", fill = "Grupo de Edad") +
   theme_minimal()
