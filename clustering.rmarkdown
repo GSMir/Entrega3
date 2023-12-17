@@ -1,0 +1,310 @@
+---
+title: "Clustering"
+author: "Ángel García, Arnau Piferrer y Guillem Serra"
+format: html
+editor: visual
+---
+
+
+Este es el [repositorio](https://github.com/GSMir/Entrega3) de GitHub en el que alojaremos todos los archivos relacionados con esta entrega. Para consultar la fuente de la que se ha extraído nuestro Dataset consulta el siguiente [link](https://archive.ics.uci.edu/dataset/45/heart+disease). Nuestro Dataset ha sido publicado por la Universidad de California de Irvine.
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, message = FALSE,warning=FALSE}
+library(readr)
+library(tidyverse)
+library(dplyr)
+library(patchwork)
+library(MVA)
+library(corrplot)
+library(graphics)
+library(GGally)
+library("aplpack")
+library(ggplot2)
+library(factoextra)
+library(cluster)
+library(dendextend)
+library(clValid)
+
+```
+
+```{r}
+heartdisease = read_csv("https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data", col_names = FALSE, show_col_types = FALSE)
+heartdisease <- heartdisease %>% 
+  filter(!str_detect(X13, "\\?") & (!str_detect(X12, "\\?")))
+
+heartdisease <- heartdisease %>%
+  mutate(sex = as.factor(heartdisease$X2), .after = X2) %>%
+  mutate(cp = as.factor(heartdisease$X3), .after = X3) %>%
+  mutate(fbs = as.factor(heartdisease$X6), .after = X6) %>%
+  mutate(restecg = as.factor(heartdisease$X7), .after = X7) %>%
+  mutate(exang = as.factor(heartdisease$X9), .after = X9) %>%
+  mutate(slope = as.factor(heartdisease$X11), .after = X11) %>%
+  mutate(mves = as.numeric(heartdisease$X12), .after = X12) %>%
+  mutate(
+    tHR2 = case_when(
+      X13 == "3.0" ~ "3",
+      X13 == "6.0" ~ "6",
+      X13 == "7.0" ~ "7"),
+    .keep = "all", .after = X13) %>%
+  mutate(
+    fdiag2 = case_when(
+      X14 == "0" ~ "0",
+      X14 == "1" ~ "1",
+      X14 == "2" ~ "1",
+      X14 == "3" ~ "1",
+      X14 == "4" ~ "1"),
+    .keep = "all", .after = X14)
+
+heartdisease <- heartdisease %>%
+  mutate(tHR = as.factor(heartdisease$tHR2), .after = tHR2) %>%
+  mutate(fdiag = as.factor(heartdisease$fdiag2), .after = fdiag2) %>%
+  rename(age = X1, restbp = X4, chol = X5, maxHR = X8, expeak = X10)
+heartdisease <- heartdisease %>%
+  select(age, sex, cp, restbp, chol, fbs, restecg, maxHR, exang, expeak, slope, mves, tHR, fdiag)
+
+heartdisease_numeric <- heartdisease %>%
+  select(where(is.numeric))
+
+
+heartdisease_categoric <- heartdisease %>%
+  select(where(is.factor))
+```
+
+```{r}
+mat_dist <- dist(x = heartdisease_numeric, method = "euclidean")
+#round(as.matrix(mat_dist)[1:9, 1:9], 2)
+```
+
+```{r}
+mat_dist <- get_dist(x = heartdisease_numeric, method = "pearson")
+#round(as.matrix(mat_dist)[1:9, 1:9], 2)
+#fviz_dist(dist.obj = mat_dist, lab_size = 5) +
+#theme(legend.position = "right") #Heatmap de matrices de distancia
+```
+
+```{r}
+set.seed(420) # Para reproducibilidad
+datos <- as.tibble(heartdisease_numeric)
+datos <- datos %>% filter(chol != max(chol))%>% filter(restbp != max(restbp))%>% filter(restbp != max(restbp))%>% filter(restbp != max(restbp))%>% filter(restbp != max(restbp))
+datos <- scale(datos)
+
+
+#wcss <- sapply(1:10, function(k) {
+#  kmeans(datos, centers = k, nstart = 50)$tot.withinss
+#})
+
+#plot(1:10, wcss, type = "b", xlab = "Número de Clusters", ylab = "Suma de Cuadrados Dentro del Grupo (WCSS)", main = "Método del Codo")
+```
+
+```{r}
+fviz_nbclust(x = datos, FUNcluster = kmeans, method = "wss",
+            diss = dist(datos, method = "euclidean")) +
+            geom_vline(xintercept = 2, linetype = 2) +labs(title = "Elbow method")
+```
+
+```{r}
+#sil_width <- numeric(length(2:10)) # Pre-allocate the vector to ensure it has the correct length
+
+#for (k in 2:10) {
+ # km_res <- kmeans(as.data.frame(datos), centers = k, nstart = 50)
+  #sil <- silhouette(km_res$cluster, dist(as.data.frame(datos)))
+  
+  #if (length(sil[, 3]) == length(km_res$cluster)) {
+   # sil_width[k-1] <- mean(sil[, 3])
+  #} else {
+   # sil_width[k-1] <- NA # Assign NA if the result is not as expected
+  #}
+#}
+
+# Remove NA values in case there were any errors
+#valid_indices <- !is.na(sil_width)
+#plot(2:10, sil_width, type = "b", xlab = "Número de Clusters", ylab = "Ancho Promedio de Silueta", main = "Análisis de Silueta")
+```
+
+```{r}
+fviz_nbclust(x = datos, FUNcluster = kmeans, method = "silhouette") +
+ labs(title = "Silhouette method")
+```
+
+```{r, warning=FALSE}
+fviz_nbclust(x = datos, FUNcluster = kmeans, method = "gap_stat", nboot = 500,
+ verbose = FALSE, nstart = 25) +
+ labs(title = "Gap Stat method")
+```
+
+```{r}
+set.seed(123)
+km_clusters <- kmeans(x = datos, centers = 2, nstart = 25)
+fviz_cluster(object = km_clusters, data = datos, show.clust.cent = TRUE,
+ ellipse.type = "euclid", star.plot = TRUE, repel = TRUE) +
+theme_bw() +
+theme(legend.position = "right")
+```
+
+`
+
+
+
+
+
+```{r}
+
+# Suponiendo que heartdisease_numeric ya está cargado y que eliges dos columnas específicas
+# Por ejemplo, 'restbp' y 'chol'
+#datos <- heartdisease_numeric[, c("restbp", "chol")]
+#grupo <- heartdisease$grupo_edad
+
+#km_clusters <- kmeans(x = datos, centers = 3, nstart = 50)
+#km_clusters
+
+#datos <- cbind(datos, grupo)
+```
+
+```{r}
+#datos <- cbind(cluster = km_clusters$cluster, datos) 
+#plot(x = datos[,"restbp"], y = datos[,"chol"], col = km_clusters$cluster, pch = 1,
+ #    cex = 2, lwd = 2, xlab = "restbp", ylab = "chol") 
+# Se rellenan las circunferencias con puntos del color real del grupo al 
+# que pertenecen las observaciones. Es necesario hacer coincidir los 
+# colores con el mismo orden que el devuelto por la función kmeans() ya 
+# que el clustering no asigna variable respuesta, solo agrupa las 
+# observaciones. 
+#points(x = datos[,"restbp"], y = datos[,"chol"], 
+#       col = c(2, 1, 3, 4)[datos[, "grupo"]], pch = 19)
+```
+
+```{r}
+#table(km_clusters$cluster, datos[, "grupo"], 
+#      dnn = list("cluster", "grupo real"))
+```
+
+```{r}
+#heartdisease$cluster <- km_clusters$cluster
+
+#ggplot(heartdisease, aes(x = factor(cluster), fill = grupo_edad)) +
+#  geom_bar(position = "dodge") +
+ # labs(x = "Cluster", y = "Count", fill = "Grupo de Edad") +
+  #theme_minimal()
+```
+
+
+
+#K−medoids
+
+
+```{r}
+datos_esc <- as.tibble(heartdisease_numeric)
+datos_esc<- scale(datos)
+datos_esc<- as.tibble(datos_esc)
+dist_manhattan <- get_dist(x = datos_esc, method = "manhattan")
+fviz_dist(dist.obj = dist_manhattan, lab_size = 5) +
+ theme(legend.position = "right")
+```
+
+```{r}
+fviz_nbclust(x = datos_esc, FUNcluster = pam, method = "wss",
+ diss = dist(datos, method = "manhattan")) +
+    geom_vline(xintercept = 2, linetype = 2) +labs(title = "Elbow method")
+```
+
+```{r}
+fviz_nbclust(x = datos_esc, FUNcluster = pam, method = "silhouette") +
+ labs(title = "Silhouette method")
+```
+
+```{r,warning=FALSE}
+fviz_nbclust(x = datos_esc, FUNcluster = pam, method = "gap_stat", nboot = 500,
+ verbose = FALSE, nstart = 25) +
+ labs(title = "Gap Stat method")
+```
+
+```{r}
+set.seed(123)
+
+pam_clusters <- pam(x = datos_esc[, 1:3], k = 2, metric = "manhattan")
+
+fviz_cluster(object = pam_clusters, data = datos_esc, ellipse.type = "t",
+            repel = TRUE) +
+ theme_bw() +
+ theme(legend.position = "right")
+```
+
+
+
+#Hierarchical Clustering
+
+
+```{r}
+datos_esc <- datos_esc %>% filter(chol != max(chol))%>% filter(restbp != max(restbp))%>% filter(restbp != max(restbp))%>% filter(restbp != max(restbp))%>% filter(restbp != max(restbp))
+
+mat_dist <- dist(x = datos_esc, method = "euclidean")
+fviz_dist(dist.obj = mat_dist, lab_size = 5) +
+ theme(legend.position = "right")
+```
+
+
+##Complete
+
+```{r}
+
+hc_complete <- hclust(d = mat_dist, method = "complete")
+
+
+fviz_dend(x = hc_complete, k = 2, cex = 0.5, show_labels = FALSE) +
+  geom_hline(yintercept = 2.795, linetype = "dashed")
+```
+
+```{r}
+fviz_cluster(object = list(data = datos_esc, cluster = cutree(hc_complete, k = 2)),
+ ellipse.type = "convex",
+ repel = TRUE,
+ show.clust.cent = TRUE) +
+theme_bw()
+```
+
+
+##Single
+
+
+```{r}
+hc_single <- hclust(d = mat_dist, method = "single")
+
+fviz_dend(x = hc_single, k = 5, cex = 0.6) +
+  geom_hline(yintercept = 1.235, linetype = "dashed")
+```
+
+```{r}
+fviz_cluster(object = list(data = datos_esc, cluster = cutree(hc_single, k = 8)),
+ ellipse.type = "convex",
+ repel = TRUE,
+ show.clust.cent = TRUE) +
+theme_bw()
+```
+
+
+
+##Avarage
+
+```{r}
+hc_average <- hclust(d = mat_dist, method = "average")
+
+fviz_dend(x = hc_average, k = 2, cex = 0.6) +
+  geom_hline(yintercept = 2.25, linetype = "dashed")
+```
+
+```{r}
+fviz_cluster(object = list(data = datos_esc, cluster = cutree(hc_average, k = 3)),
+ ellipse.type = "convex",
+ repel = TRUE,
+ show.clust.cent = TRUE) +
+theme_bw()
+```
+
+```{r}
+cor(x = mat_dist, cophenetic(hc_average))
+```
+
