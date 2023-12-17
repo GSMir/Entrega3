@@ -258,5 +258,57 @@ theme_bw()
 ```{r}
 cor(x = mat_dist, cophenetic(hc_average))
 ```
+##Centroid
+```{r,warning=FALSE}
+hc_centroid <- hclust(d=mat_dist,method="centroid")
 
+fviz_dend(x = hc_centroid, k = 2, cex = 0.6)
+```
+
+```{r}
+fviz_cluster(object = list(data = datos_2, cluster = cutree(hc_centroid, k = 2)),
+ ellipse.type = "convex",
+ repel = TRUE,
+ show.clust.cent = TRUE) +
+theme_bw()
+```
+```{r}
+cor(x = mat_dist, cophenetic(hc_centroid))
+
+```
+
+
+##Ward
+
+```{r}
+hc_ward <- hclust(d=mat_dist,method="ward.D")
+
+fviz_dend(x = hc_ward, k = 2, cex = 0.6,show_labels = FALSE) +
+  geom_hline(yintercept = 20, linetype = "dashed")
+```
+```{r}
+fviz_cluster(object = list(data = datos_2, cluster = cutree(hc_ward, k = 2)),
+ ellipse.type = "convex",
+ repel = TRUE,
+ show.clust.cent = TRUE) +
+theme_bw()
+```
+
+
+```{r}
+cor(x = mat_dist, cophenetic(hc_ward))
+```
+
+
+```{r}
+dend_1 <- datos_2 %>% dist(method = "euclidean") %>% hclust(method = "average") %>%  as.dendrogram()
+dend_2 <- datos_2 %>% dist(method = "euclidean") %>% hclust(method = "single") %>%  as.dendrogram()
+dend_3 <- datos_2 %>% dist(method = "euclidean") %>% hclust(method = "complete") %>%  as.dendrogram()
+dend_4 <- datos_2 %>% dist(method = "euclidean") %>% hclust(method = "median") %>%  as.dendrogram()
+dend_5 <- datos_2 %>% dist(method = "euclidean") %>% hclust(method = "centroid") %>%  as.dendrogram()
+
+list_dendrogramas <- dendlist("average" = dend_1, "single" = dend_2,
+ "complete" = dend_3, "median" = dend_4,"centroid"=dend_5)
+cor.dendlist(dend = list_dendrogramas, method = "cophenetic") %>% round(digits= 3)
+```
 
