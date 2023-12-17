@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.353">
+<meta name="generator" content="quarto-1.3.433">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -68,9 +68,12 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 <p>Este es el <a href="https://github.com/GSMir/Entrega3">repositorio</a> de GitHub en el que alojaremos todos los archivos relacionados con esta entrega. Para consultar la fuente de la que se ha extraído nuestro Dataset consulta el siguiente <a href="https://archive.ics.uci.edu/dataset/45/heart+disease">link</a>. Nuestro Dataset ha sido publicado por la Universidad de California de Irvine.</p>
+<p>#Partitioning Clustering ##K-means</p>
 <div class="cell">
-<div class="cell-output-display">
-<p><img src="clustering_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: `as.tibble()` was deprecated in tibble 2.0.0.
+ℹ Please use `as_tibble()` instead.
+ℹ The signature and semantics have changed, see `?as_tibble`.</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -85,41 +88,94 @@ ul.task-list li input[type="checkbox"] {
 </div>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="clustering_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<div class="cell">
-<div class="cell-output-display">
 <p><img src="clustering_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>Seleccionem un subconjunt aleatori i tornem a fer el clustering `</p>
 <div class="cell">
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: ggrepel: 237 unlabeled data points (too many overlaps). Consider
-increasing max.overlaps</code></pre>
-</div>
 <div class="cell-output-display">
 <p><img src="clustering_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>`</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="clustering_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="clustering_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>#K−medoids</p>
 <div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>       grupo real
-cluster  1  2  3
-      1 11 33 23
-      2 42 68 29
-      3  8 44 39</code></pre>
+<div class="cell-output-display">
+<p><img src="clustering_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="clustering_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="clustering_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="clustering_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>#Hierarchical Clustering</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="clustering_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>##Complete</p>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: The `&lt;scale&gt;` argument of `guides()` cannot be `FALSE`. Use "none" instead as
+of ggplot2 3.3.4.
+ℹ The deprecated feature was likely used in the factoextra package.
+  Please report the issue at &lt;https://github.com/kassambara/factoextra/issues&gt;.</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="clustering_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="clustering_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>##Single</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="clustering_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="clustering_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>##Avarage</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="clustering_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="clustering_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.5849612</code></pre>
 </div>
 </div>
 

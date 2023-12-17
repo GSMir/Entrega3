@@ -62,7 +62,7 @@ heartdisease <- heartdisease %>%
   mutate(fdiag = as.factor(heartdisease$fdiag2), .after = fdiag2) %>%
   rename(age = X1, restbp = X4, chol = X5, maxHR = X8, expeak = X10)
 heartdisease <- heartdisease %>%
-  select(age, sex, cp, restbp, chol, fbs, restecg, maxHR, exang, expeak, slope, mves, tHR, fdiag)
+  select(age, sex, cp, restbp, chol, fbs, restecg, maxHR, exang, expeak, slope, tHR, fdiag)
 
 heartdisease_numeric <- heartdisease %>%
   select(where(is.numeric))
@@ -71,6 +71,10 @@ heartdisease_numeric <- heartdisease %>%
 heartdisease_categoric <- heartdisease %>%
   select(where(is.factor))
 ```
+
+#Partitioning Clustering
+##K-means
+
 
 ```{r}
 mat_dist <- dist(x = heartdisease_numeric, method = "euclidean")
@@ -87,7 +91,7 @@ mat_dist <- get_dist(x = heartdisease_numeric, method = "pearson")
 ```{r}
 set.seed(420) # Para reproducibilidad
 datos <- as.tibble(heartdisease_numeric)
-datos <- datos %>% filter(chol != max(chol))%>% filter(restbp != max(restbp))%>% filter(restbp != max(restbp))%>% filter(restbp != max(restbp))%>% filter(restbp != max(restbp))
+datos <- datos %>% filter(chol != max(chol))
 datos <- scale(datos)
 
 
@@ -104,121 +108,87 @@ fviz_nbclust(x = datos, FUNcluster = kmeans, method = "wss",
 ```
 
 
-```{r}
-#sil_width <- numeric(length(2:10)) # Pre-allocate the vector to ensure it has the correct length
 
-#for (k in 2:10) {
- # km_res <- kmeans(as.data.frame(datos), centers = k, nstart = 50)
-  #sil <- silhouette(km_res$cluster, dist(as.data.frame(datos)))
-  
-  #if (length(sil[, 3]) == length(km_res$cluster)) {
-   # sil_width[k-1] <- mean(sil[, 3])
-  #} else {
-   # sil_width[k-1] <- NA # Assign NA if the result is not as expected
-  #}
-#}
 
-# Remove NA values in case there were any errors
-#valid_indices <- !is.na(sil_width)
-#plot(2:10, sil_width, type = "b", xlab = "Número de Clusters", ylab = "Ancho Promedio de Silueta", main = "Análisis de Silueta")
-```
+
 ```{r}
 fviz_nbclust(x = datos, FUNcluster = kmeans, method = "silhouette") +
  labs(title = "Silhouette method")
 ```
 
 ```{r, warning=FALSE}
-fviz_nbclust(x = datos, FUNcluster = kmeans, method = "gap_stat", nboot = 500,
- verbose = FALSE, nstart = 25) +
- labs(title = "Gap Stat method")
+#fviz_nbclust(x = datos, FUNcluster = kmeans, method = "gap_stat", nboot = 500,
+ #verbose = FALSE, nstart = 25) +
+ #labs(title = "Gap Stat method")
 ```
 
 ```{r}
-set.seed(123)
+
 km_clusters <- kmeans(x = datos, centers = 2, nstart = 25)
 fviz_cluster(object = km_clusters, data = datos, show.clust.cent = TRUE,
  ellipse.type = "euclid", star.plot = TRUE, repel = TRUE) +
 theme_bw() +
 theme(legend.position = "right")
 ```
+
+Seleccionem un subconjunt aleatori i tornem a fer el clustering
 `
+```{r}
+set.seed(420)
+datos<-as.data.frame(datos)
+datos_1 <- sample_n(datos, 100)
+datos_2<-as.tibble(datos_1)
 
+fviz_nbclust(x = datos_2, FUNcluster = kmeans, method = "wss",
+            diss = dist(datos, method = "euclidean")) +
+            geom_vline(xintercept = 2, linetype = 2) +labs(title = "Elbow method")
+```
+
+```{r}
+fviz_nbclust(x = datos_2, FUNcluster = kmeans, method = "silhouette") +
+ labs(title = "Silhouette method")
+```
 
 
 
 ```{r}
-
-# Suponiendo que heartdisease_numeric ya está cargado y que eliges dos columnas específicas
-# Por ejemplo, 'restbp' y 'chol'
-#datos <- heartdisease_numeric[, c("restbp", "chol")]
-#grupo <- heartdisease$grupo_edad
-
-#km_clusters <- kmeans(x = datos, centers = 3, nstart = 50)
-#km_clusters
-
-#datos <- cbind(datos, grupo)
+km_clusters <- kmeans(x = datos_2, centers = 2, nstart = 25)
+fviz_cluster(object = km_clusters, data = datos_2, show.clust.cent = TRUE,
+ ellipse.type = "euclid", star.plot = TRUE, repel = TRUE) +
+theme_bw() +
+theme(legend.position = "right")
 ```
-
-```{r}
-#datos <- cbind(cluster = km_clusters$cluster, datos) 
-#plot(x = datos[,"restbp"], y = datos[,"chol"], col = km_clusters$cluster, pch = 1,
- #    cex = 2, lwd = 2, xlab = "restbp", ylab = "chol") 
-# Se rellenan las circunferencias con puntos del color real del grupo al 
-# que pertenecen las observaciones. Es necesario hacer coincidir los 
-# colores con el mismo orden que el devuelto por la función kmeans() ya 
-# que el clustering no asigna variable respuesta, solo agrupa las 
-# observaciones. 
-#points(x = datos[,"restbp"], y = datos[,"chol"], 
-#       col = c(2, 1, 3, 4)[datos[, "grupo"]], pch = 19)
-```
-
-```{r}
-#table(km_clusters$cluster, datos[, "grupo"], 
-#      dnn = list("cluster", "grupo real"))
-```
-
-```{r}
-#heartdisease$cluster <- km_clusters$cluster
-
-#ggplot(heartdisease, aes(x = factor(cluster), fill = grupo_edad)) +
-#  geom_bar(position = "dodge") +
- # labs(x = "Cluster", y = "Count", fill = "Grupo de Edad") +
-  #theme_minimal()
-```
-
 
 #K−medoids
 
 ```{r}
-datos_esc <- as.tibble(heartdisease_numeric)
-datos_esc<- scale(datos)
-datos_esc<- as.tibble(datos_esc)
-dist_manhattan <- get_dist(x = datos_esc, method = "manhattan")
+
+dist_manhattan <- get_dist(x = datos_2, method = "manhattan")
 fviz_dist(dist.obj = dist_manhattan, lab_size = 5) +
  theme(legend.position = "right")
 ```
 
 ```{r}
-fviz_nbclust(x = datos_esc, FUNcluster = pam, method = "wss",
+
+fviz_nbclust(x = datos_2, FUNcluster = pam, method = "wss",
  diss = dist(datos, method = "manhattan")) +
     geom_vline(xintercept = 2, linetype = 2) +labs(title = "Elbow method")
 ```
 ```{r}
-fviz_nbclust(x = datos_esc, FUNcluster = pam, method = "silhouette") +
+fviz_nbclust(x = datos_2, FUNcluster = pam, method = "silhouette") +
  labs(title = "Silhouette method")
 ```
 ```{r,warning=FALSE}
-fviz_nbclust(x = datos_esc, FUNcluster = pam, method = "gap_stat", nboot = 500,
- verbose = FALSE, nstart = 25) +
- labs(title = "Gap Stat method")
+#fviz_nbclust(x = datos_2, FUNcluster = pam, method = "gap_stat", nboot = 200,
+ #verbose = FALSE, nstart = 25) +
+ #labs(title = "Gap Stat method")
 ```
 
 ```{r}
-set.seed(123)
 
-pam_clusters <- pam(x = datos_esc[, 1:3], k = 2, metric = "manhattan")
+pam_clusters <- pam(x = datos_2, k = 2, metric = "manhattan")
 
-fviz_cluster(object = pam_clusters, data = datos_esc, ellipse.type = "t",
+fviz_cluster(object = pam_clusters, data = datos_2, ellipse.type = "t",
             repel = TRUE) +
  theme_bw() +
  theme(legend.position = "right")
@@ -228,9 +198,8 @@ fviz_cluster(object = pam_clusters, data = datos_esc, ellipse.type = "t",
 #Hierarchical Clustering
 
 ```{r}
-datos_esc <- datos_esc %>% filter(chol != max(chol))%>% filter(restbp != max(restbp))%>% filter(restbp != max(restbp))%>% filter(restbp != max(restbp))%>% filter(restbp != max(restbp))
 
-mat_dist <- dist(x = datos_esc, method = "euclidean")
+mat_dist <- dist(x = datos_2, method = "euclidean")
 fviz_dist(dist.obj = mat_dist, lab_size = 5) +
  theme(legend.position = "right")
 ```
@@ -247,7 +216,7 @@ fviz_dend(x = hc_complete, k = 2, cex = 0.5, show_labels = FALSE) +
 
 
 ```{r}
-fviz_cluster(object = list(data = datos_esc, cluster = cutree(hc_complete, k = 2)),
+fviz_cluster(object = list(data = datos_2, cluster = cutree(hc_complete, k = 2)),
  ellipse.type = "convex",
  repel = TRUE,
  show.clust.cent = TRUE) +
@@ -259,11 +228,11 @@ theme_bw()
 ```{r}
 hc_single <- hclust(d = mat_dist, method = "single")
 
-fviz_dend(x = hc_single, k = 5, cex = 0.6) +
-  geom_hline(yintercept = 1.235, linetype = "dashed")
+fviz_dend(x = hc_single, k = 2, cex = 0.6,show_labels=FALSE) +
+  geom_hline(yintercept = 1, linetype = "dashed")
 ```
 ```{r}
-fviz_cluster(object = list(data = datos_esc, cluster = cutree(hc_single, k = 8)),
+fviz_cluster(object = list(data = datos_2, cluster = cutree(hc_single, k = 2)),
  ellipse.type = "convex",
  repel = TRUE,
  show.clust.cent = TRUE) +
@@ -275,12 +244,12 @@ theme_bw()
 ```{r}
 hc_average <- hclust(d = mat_dist, method = "average")
 
-fviz_dend(x = hc_average, k = 2, cex = 0.6) +
+fviz_dend(x = hc_average, k = 2, cex = 0.6,show_labels = FALSE) +
   geom_hline(yintercept = 2.25, linetype = "dashed")
 ```
 
 ```{r}
-fviz_cluster(object = list(data = datos_esc, cluster = cutree(hc_average, k = 3)),
+fviz_cluster(object = list(data = datos_2, cluster = cutree(hc_average, k = 3)),
  ellipse.type = "convex",
  repel = TRUE,
  show.clust.cent = TRUE) +
