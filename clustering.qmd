@@ -26,7 +26,7 @@ library(factoextra)
 library(cluster)
 library(dendextend)
 library(clValid)
-
+library(plotly)
 ```
 
 ```{r}
@@ -72,44 +72,27 @@ heartdisease_categoric <- heartdisease %>%
   select(where(is.factor))
 ```
 
-#Partitioning Clustering
-##K-means
-
+#Partitioning Clustering ##K-means
 
 ```{r}
 mat_dist <- dist(x = heartdisease_numeric, method = "euclidean")
-#round(as.matrix(mat_dist)[1:9, 1:9], 2)
 ```
 
 ```{r}
-mat_dist <- get_dist(x = heartdisease_numeric, method = "pearson")
-#round(as.matrix(mat_dist)[1:9, 1:9], 2)
-#fviz_dist(dist.obj = mat_dist, lab_size = 5) +
-#theme(legend.position = "right") #Heatmap de matrices de distancia
+#mat_dist <- get_dist(x = heartdisease_numeric, method = "pearson")
 ```
 
 ```{r}
-set.seed(420) # Para reproducibilidad
-datos <- as.tibble(heartdisease_numeric)
-datos <- datos %>% filter(chol != max(chol))
-datos <- scale(datos)
-
-
-#wcss <- sapply(1:10, function(k) {
-#  kmeans(datos, centers = k, nstart = 50)$tot.withinss
-#})
-
-#plot(1:10, wcss, type = "b", xlab = "Número de Clusters", ylab = "Suma de Cuadrados Dentro del Grupo (WCSS)", main = "Método del Codo")
+datos_temp <- as_tibble(heartdisease_numeric)
+datos_temp <- datos_temp %>% filter(chol != max(chol))
+datos <- scale(datos_temp)
 ```
+
 ```{r}
 fviz_nbclust(x = datos, FUNcluster = kmeans, method = "wss",
             diss = dist(datos, method = "euclidean")) +
             geom_vline(xintercept = 2, linetype = 2) +labs(title = "Elbow method")
 ```
-
-
-
-
 
 ```{r}
 fviz_nbclust(x = datos, FUNcluster = kmeans, method = "silhouette") +
@@ -117,13 +100,12 @@ fviz_nbclust(x = datos, FUNcluster = kmeans, method = "silhouette") +
 ```
 
 ```{r, warning=FALSE}
-#fviz_nbclust(x = datos, FUNcluster = kmeans, method = "gap_stat", nboot = 500,
- #verbose = FALSE, nstart = 25) +
- #labs(title = "Gap Stat method")
+fviz_nbclust(x = datos, FUNcluster = kmeans, method = "gap_stat", nboot = 50,
+ verbose = FALSE, nstart = 25) +
+ labs(title = "Gap Stat method")
 ```
 
 ```{r}
-
 km_clusters <- kmeans(x = datos, centers = 2, nstart = 25)
 fviz_cluster(object = km_clusters, data = datos, show.clust.cent = TRUE,
  ellipse.type = "euclid", star.plot = TRUE, repel = TRUE) +
@@ -131,13 +113,14 @@ theme_bw() +
 theme(legend.position = "right")
 ```
 
-Seleccionem un subconjunt aleatori i tornem a fer el clustering
-`
+Seleccionem un subconjunt aleatori i tornem a fer el clustering \`
+
 ```{r}
 set.seed(420)
-datos<-as.data.frame(datos)
-datos_1 <- sample_n(datos, 100)
-datos_2<-as.tibble(datos_1)
+datos<-as.data.frame(datos_temp)
+datos_temp1 <- sample_n(datos, 100)
+datos_1 <- scale(datos_temp1)
+datos_2<-as_tibble(datos_1)
 
 fviz_nbclust(x = datos_2, FUNcluster = kmeans, method = "wss",
             diss = dist(datos, method = "euclidean")) +
@@ -148,8 +131,6 @@ fviz_nbclust(x = datos_2, FUNcluster = kmeans, method = "wss",
 fviz_nbclust(x = datos_2, FUNcluster = kmeans, method = "silhouette") +
  labs(title = "Silhouette method")
 ```
-
-
 
 ```{r}
 km_clusters <- kmeans(x = datos_2, centers = 2, nstart = 25)
@@ -162,31 +143,30 @@ theme(legend.position = "right")
 #K−medoids
 
 ```{r}
-
 dist_manhattan <- get_dist(x = datos_2, method = "manhattan")
 fviz_dist(dist.obj = dist_manhattan, lab_size = 5) +
  theme(legend.position = "right")
 ```
 
 ```{r}
-
 fviz_nbclust(x = datos_2, FUNcluster = pam, method = "wss",
  diss = dist(datos, method = "manhattan")) +
     geom_vline(xintercept = 2, linetype = 2) +labs(title = "Elbow method")
 ```
+
 ```{r}
 fviz_nbclust(x = datos_2, FUNcluster = pam, method = "silhouette") +
  labs(title = "Silhouette method")
 ```
+
 ```{r,warning=FALSE}
-#fviz_nbclust(x = datos_2, FUNcluster = pam, method = "gap_stat", nboot = 200,
- #verbose = FALSE, nstart = 25) +
- #labs(title = "Gap Stat method")
+fviz_nbclust(x = datos_2, FUNcluster = pam, method = "gap_stat", nboot = 50,
+ verbose = FALSE, nstart = 25) +
+ labs(title = "Gap Stat method")
 ```
 
 ```{r}
-
-pam_clusters <- pam(x = datos_2, k = 2, metric = "manhattan")
+pam_clusters <- pam(x = datos_2, k = 4, metric = "manhattan")
 
 fviz_cluster(object = pam_clusters, data = datos_2, ellipse.type = "t",
             repel = TRUE) +
@@ -194,26 +174,22 @@ fviz_cluster(object = pam_clusters, data = datos_2, ellipse.type = "t",
  theme(legend.position = "right")
 ```
 
-
 #Hierarchical Clustering
 
 ```{r}
-
 mat_dist <- dist(x = datos_2, method = "euclidean")
 fviz_dist(dist.obj = mat_dist, lab_size = 5) +
  theme(legend.position = "right")
 ```
 
 ##Complete
-```{r}
 
+```{r, warning = FALSE}
 hc_complete <- hclust(d = mat_dist, method = "complete")
-
 
 fviz_dend(x = hc_complete, k = 2, cex = 0.5, show_labels = FALSE) +
   geom_hline(yintercept = 2.795, linetype = "dashed")
 ```
-
 
 ```{r}
 fviz_cluster(object = list(data = datos_2, cluster = cutree(hc_complete, k = 2)),
@@ -225,12 +201,13 @@ theme_bw()
 
 ##Single
 
-```{r}
+```{r, warning = FALSE}
 hc_single <- hclust(d = mat_dist, method = "single")
 
 fviz_dend(x = hc_single, k = 2, cex = 0.6,show_labels=FALSE) +
   geom_hline(yintercept = 1, linetype = "dashed")
 ```
+
 ```{r}
 fviz_cluster(object = list(data = datos_2, cluster = cutree(hc_single, k = 2)),
  ellipse.type = "convex",
@@ -239,26 +216,27 @@ fviz_cluster(object = list(data = datos_2, cluster = cutree(hc_single, k = 2)),
 theme_bw()
 ```
 
-
 ##Avarage
-```{r}
+
+```{r, warning=FALSE}
 hc_average <- hclust(d = mat_dist, method = "average")
 
-fviz_dend(x = hc_average, k = 2, cex = 0.6,show_labels = FALSE) +
+fviz_dend(x = hc_average, k = 2, cex = 0.6, show_labels = FALSE) +
   geom_hline(yintercept = 2.25, linetype = "dashed")
 ```
 
 ```{r}
-fviz_cluster(object = list(data = datos_2, cluster = cutree(hc_average, k = 3)),
+fviz_cluster(object = list(data = datos_2, cluster = cutree(hc_average, k = 2)),
  ellipse.type = "convex",
  repel = TRUE,
  show.clust.cent = TRUE) +
 theme_bw()
 ```
-```{r}
-cor(x = mat_dist, cophenetic(hc_average))
-```
+
+
+
 ##Centroid
+
 ```{r,warning=FALSE}
 hc_centroid <- hclust(d=mat_dist,method="centroid")
 
@@ -272,20 +250,16 @@ fviz_cluster(object = list(data = datos_2, cluster = cutree(hc_centroid, k = 2))
  show.clust.cent = TRUE) +
 theme_bw()
 ```
-```{r}
-cor(x = mat_dist, cophenetic(hc_centroid))
-
-```
-
 
 ##Ward
 
-```{r}
+```{r, warning=FALSE}
 hc_ward <- hclust(d=mat_dist,method="ward.D")
 
 fviz_dend(x = hc_ward, k = 2, cex = 0.6,show_labels = FALSE) +
   geom_hline(yintercept = 20, linetype = "dashed")
 ```
+
 ```{r}
 fviz_cluster(object = list(data = datos_2, cluster = cutree(hc_ward, k = 2)),
  ellipse.type = "convex",
@@ -295,20 +269,78 @@ theme_bw()
 ```
 
 
+# ACP
+
 ```{r}
-cor(x = mat_dist, cophenetic(hc_ward))
+datos_acp <- datos_temp1 %>%
+  mutate(cluster = as.factor(km_clusters$cluster)) %>%
+  mutate(orden = row_number())
+grupo1 <- filter(datos_acp, datos_acp$cluster == "1")
+grupo2 <- filter(datos_acp, datos_acp$cluster == "2")
 ```
 
 
 ```{r}
-dend_1 <- datos_2 %>% dist(method = "euclidean") %>% hclust(method = "average") %>%  as.dendrogram()
-dend_2 <- datos_2 %>% dist(method = "euclidean") %>% hclust(method = "single") %>%  as.dendrogram()
-dend_3 <- datos_2 %>% dist(method = "euclidean") %>% hclust(method = "complete") %>%  as.dendrogram()
-dend_4 <- datos_2 %>% dist(method = "euclidean") %>% hclust(method = "median") %>%  as.dendrogram()
-dend_5 <- datos_2 %>% dist(method = "euclidean") %>% hclust(method = "centroid") %>%  as.dendrogram()
+grupo1_acp = princomp(grupo1[,1:5], cor = TRUE) 
 
-list_dendrogramas <- dendlist("average" = dend_1, "single" = dend_2,
- "complete" = dend_3, "median" = dend_4,"centroid"=dend_5)
-cor.dendlist(dend = list_dendrogramas, method = "cophenetic") %>% round(digits= 3)
+fviz_eig(grupo1_acp, addlabels = TRUE, ylim=c(0,100)) + ggtitle("Peso de las componentes principales")
+
+grupo1_acp$loadings
 ```
+
+
+```{r, warning=FALSE}
+grupo1_tipi = scale(grupo1[,1:5])
+
+descomp = svd(grupo1_tipi)
+
+x = descomp$u%*%diag(descomp$d)
+a_1 = x[,1]
+a_2 = x[,2]
+a_3 = x[,3]
+
+
+plot_ly(grupo1, x = ~a_1, y = ~a_2, z = ~a_3, type = "scatter3d", mode = "markers+text", color=a_3,
+               marker = list(size = 10, color = ~a_1), text = grupo1[,7],
+               textposition = "top center") %>%
+  layout(scene = list(xaxis = list(title = 'CP1'),
+                      yaxis = list(title = 'CP2'),
+                      zaxis = list(title = 'CP3')))
+```
+
+
+
+
+
+
+```{r}
+grupo2_acp = princomp(grupo2[,1:5], cor = TRUE) 
+
+fviz_eig(grupo2_acp, addlabels = TRUE, ylim=c(0,100)) + ggtitle("Peso de las componentes principales")
+
+grupo2_acp$loadings
+```
+
+
+
+```{r, warning=FALSE}
+grupo2_tipi = scale(grupo2[,1:5])
+
+descomp = svd(grupo2_tipi)
+
+x = descomp$u%*%diag(descomp$d)
+a_1 = x[,1]
+a_2 = x[,2]
+a_3 = x[,3]
+
+
+plot_ly(grupo2, x = ~a_1, y = ~a_2, z = ~a_3, type = "scatter3d", mode = "markers+text", color=a_3,
+               marker = list(size = 10, color = ~a_2), text = grupo2[,7],
+               textposition = "top center") %>%
+  layout(scene = list(xaxis = list(title = 'CP1'),
+                      yaxis = list(title = 'CP2'),
+                      zaxis = list(title = 'CP3')))
+```
+
+
 
