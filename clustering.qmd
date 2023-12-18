@@ -7,11 +7,7 @@ editor: visual
 
 Este es el [repositorio](https://github.com/GSMir/Entrega3) de GitHub en el que alojaremos todos los archivos relacionados con esta entrega. Para consultar la fuente de la que se ha extraído nuestro Dataset consulta el siguiente [link](https://archive.ics.uci.edu/dataset/45/heart+disease). Nuestro Dataset ha sido publicado por la Universidad de California de Irvine.
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-```
-
-```{r, message = FALSE,warning=FALSE}
+```{r, message = FALSE,warning=FALSE, include=FALSE}
 library(readr)
 library(tidyverse)
 library(dplyr)
@@ -29,7 +25,7 @@ library(clValid)
 library(plotly)
 ```
 
-```{r}
+```{r, include=FALSE}
 heartdisease = read_csv("https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data", col_names = FALSE, show_col_types = FALSE)
 heartdisease <- heartdisease %>% 
   filter(!str_detect(X13, "\\?") & (!str_detect(X12, "\\?")))
@@ -72,23 +68,26 @@ heartdisease_categoric <- heartdisease %>%
   select(where(is.factor))
 ```
 
-#Partitioning Clustering 
-
-##K-means
-
-
 
 ```{r}
 datos_temp <- as_tibble(heartdisease_numeric)
 datos_temp <- datos_temp %>% filter(chol != max(chol))
 datos <- scale(datos_temp)
 ```
+Recargamos los datos, y eliminamos el único *outlier*, ya que este nos puede dar problemas en alguna de las funciones, sobretodo con el *k-means*.
 
+
+# Clustering
+
+## K-means
+
+En primer lugar procedemos a determinar el número de clusters en el que podemos agrupar las entradas de nuestro conjunto de datos. Para ello disponemos de 3 posibles métodos implementados en R.
 ```{r}
 fviz_nbclust(x = datos, FUNcluster = kmeans, method = "wss",
             diss = dist(datos, method = "euclidean")) +
             geom_vline(xintercept = 2, linetype = 2) +labs(title = "Elbow method")
 ```
+El primero de los métodos, el del codo, nos sugiere que tendríamos que tomar un total de $k=2$ clusters. Si comprobamos si el valor de $k$ obtenido con las otras dos instrucciones es el mismo, estaremos más seguros de tomar un total de 2 clusters.
 
 ```{r}
 fviz_nbclust(x = datos, FUNcluster = kmeans, method = "silhouette") +
@@ -100,6 +99,7 @@ fviz_nbclust(x = datos, FUNcluster = kmeans, method = "gap_stat", nboot = 50,
  verbose = FALSE, nstart = 25) +
  labs(title = "Gap Stat method")
 ```
+Como se ve en las gráficas anteriores, los otros dos métodos nos confirman que deberíamos de tomar 2 clusters.
 
 ```{r}
 km_clusters <- kmeans(x = datos, centers = 2, nstart = 25)
@@ -108,8 +108,12 @@ fviz_cluster(object = km_clusters, data = datos, show.clust.cent = TRUE,
 theme_bw() +
 theme(legend.position = "right")
 ```
+Los puntos están agrupados en dos clusters identificados por colores y cada punto parece estar etiquetado con un número, que podría referirse a un identificador de paciente o a una observación específica dentro del conjunto de datos.
 
-Seleccionem un subconjunt aleatori i tornem a fer el clustering \`
+La primera dimensión (Dim1) explica el 36.1% de la varianza en los datos, mientras que la segunda dimensión (Dim2) explica el 22.2%. Esto indica que estas dos dimensiones combinadas explican aproximadamente el 58.3% de la varianza total en los datos, lo que sugiere que hay más factores o dimensiones que podrían ser relevantes para una comprensión completa del conjunto de datos.
+
+
+Hemos realizado el mismo estudio tomando el conjunto total de datos y era engorroso a la hora de extraer conclusiones. Las gráficas resultaban complicadas de interpretar. Lo que se ha decidido es tomar una muestra de tamaño $n=100$ y continuar con el estudio a partir de nuevo conjunto de datos. Fijando una semilla para la reproducibilidad de este estudio.
 
 ```{r}
 set.seed(420)
@@ -128,6 +132,8 @@ fviz_nbclust(x = datos_2, FUNcluster = kmeans, method = "silhouette") +
  labs(title = "Silhouette method")
 ```
 
+Si repetimos las gráficas obtenemos de nuevo el mismo número de clusters que antes. Sin embargo, recalcar que con este subconjunto de los datos obtenemos un nivel de explicación total de la variabilidad ligeramente inferior (del 56%). Pensamos que esta pérdida en el nivell de explicación de los dos componentes se debe a la pérdida de información fruto de nuestra elección de reducir el tamaño del Dataset.
+
 ```{r}
 km_clusters <- kmeans(x = datos_2, centers = 2, nstart = 25)
 fviz_cluster(object = km_clusters, data = datos_2, show.clust.cent = TRUE,
@@ -136,21 +142,16 @@ theme_bw() +
 theme(legend.position = "right")
 ```
 
-# K−medoids
+## K−medoids
 
 ```{r}
 mat_dist <- dist(x = datos_2, method = "euclidean")
-```
-
-```{r}
-#mat_dist <- get_dist(x = datos_2, method = "pearson")
-```
-
-```{r}
 
 fviz_dist(dist.obj = mat_dist, lab_size = 5) +
  theme(legend.position = "right")
 ```
+El método VAT no nos proporciona indicios de ninguna agrupación de los datos, ya que no se han formado rectangulos.
+
 
 ```{r}
 fviz_nbclust(x = datos_2, FUNcluster = pam, method = "wss",
@@ -169,8 +170,11 @@ fviz_nbclust(x = datos_2, FUNcluster = pam, method = "gap_stat", nboot = 50,
  labs(title = "Gap Stat method")
 ```
 
+Esta vez, los 3 métodos nos dan 3 agrupaciones de clusters diferentes, obviaremos la que nos proporciona un solo grupo, y al visualizar con $k=2, 3, 4$ hemos decidido quedarnos con 3 agrupaciones, la media de 2 y 4, ya que esta es la que mejor representa los grupos.
+
+
 ```{r}
-pam_clusters <- pam(x = datos_2, k = 2, metric = "manhattan")
+pam_clusters <- pam(x = datos_2, k = 3, metric = "manhattan")
 
 fviz_cluster(object = pam_clusters, data = datos_2, ellipse.type = "t",
             repel = TRUE) +
@@ -178,38 +182,35 @@ fviz_cluster(object = pam_clusters, data = datos_2, ellipse.type = "t",
  theme(legend.position = "right")
 ```
 
-#Hierarchical Clustering
 
-```{r}
-mat_dist <- dist(x = datos_2, method = "euclidean")
-fviz_dist(dist.obj = mat_dist, lab_size = 5) +
- theme(legend.position = "right")
-```
 
-##Complete
+## Hierarchical Clustering
+Realicemos ahora los estudios de analisi jerárquicos.
+### Complete
 
 ```{r, warning = FALSE}
 hc_complete <- hclust(d = mat_dist, method = "complete")
 
-fviz_dend(x = hc_complete, k = 2, cex = 0.5, show_labels = FALSE) +
-  geom_hline(yintercept = 2.795, linetype = "dashed")
+fviz_dend(x = hc_complete, k = 4, cex = 0.5, show_labels = FALSE) +
+  geom_hline(yintercept = 5.2, linetype = "dashed")
 ```
 
 ```{r}
-fviz_cluster(object = list(data = datos_2, cluster = cutree(hc_complete, k = 2)),
+fviz_cluster(object = list(data = datos_2, cluster = cutree(hc_complete, k = 4)),
  ellipse.type = "convex",
  repel = TRUE,
  show.clust.cent = TRUE) +
 theme_bw()
 ```
 
-##Single
 
+
+### Single
 ```{r, warning = FALSE}
 hc_single <- hclust(d = mat_dist, method = "single")
 
 fviz_dend(x = hc_single, k = 2, cex = 0.6,show_labels=FALSE) +
-  geom_hline(yintercept = 1, linetype = "dashed")
+  geom_hline(yintercept = 1.95, linetype = "dashed")
 ```
 
 ```{r}
@@ -219,18 +220,19 @@ fviz_cluster(object = list(data = datos_2, cluster = cutree(hc_single, k = 2)),
  show.clust.cent = TRUE) +
 theme_bw()
 ```
+Observamos que en la realización de este clustering queda un grupo formado por un solo elemento, lo cual nos da a pensar que este caso no funciona bien para nuestro dataset. Lo hemos observado también con más grupos de clustering y en cada nuevo grupo solo se añade un solo punto.
 
-##Avarage
+### Avarage
 
 ```{r, warning=FALSE}
 hc_average <- hclust(d = mat_dist, method = "average")
 
-fviz_dend(x = hc_average, k = 2, cex = 0.6, show_labels = FALSE) +
-  geom_hline(yintercept = 2.25, linetype = "dashed")
+fviz_dend(x = hc_average, k = 3, cex = 0.6, show_labels = FALSE) +
+  geom_hline(yintercept = 3.45, linetype = "dashed")
 ```
 
 ```{r}
-fviz_cluster(object = list(data = datos_2, cluster = cutree(hc_average, k = 2)),
+fviz_cluster(object = list(data = datos_2, cluster = cutree(hc_average, k = 3)),
  ellipse.type = "convex",
  repel = TRUE,
  show.clust.cent = TRUE) +
@@ -238,34 +240,17 @@ theme_bw()
 ```
 
 
-
-##Centroid
-
-```{r,warning=FALSE}
-hc_centroid <- hclust(d=mat_dist,method="centroid")
-
-fviz_dend(x = hc_centroid, k = 2, cex = 0.6,show_labels = FALSE)
-```
-
-```{r}
-fviz_cluster(object = list(data = datos_2, cluster = cutree(hc_centroid, k = 2)),
- ellipse.type = "convex",
- repel = TRUE,
- show.clust.cent = TRUE) +
-theme_bw()
-```
-
-##Ward
+### Ward
 
 ```{r, warning=FALSE}
 hc_ward <- hclust(d=mat_dist,method="ward.D")
 
-fviz_dend(x = hc_ward, k = 2, cex = 0.6,show_labels = FALSE) +
-  geom_hline(yintercept = 20, linetype = "dashed")
+fviz_dend(x = hc_ward, k = 3, cex = 0.6,show_labels = FALSE) +
+  geom_hline(yintercept = 18, linetype = "dashed")
 ```
 
 ```{r}
-fviz_cluster(object = list(data = datos_2, cluster = cutree(hc_ward, k = 2)),
+fviz_cluster(object = list(data = datos_2, cluster = cutree(hc_ward, k = 3)),
  ellipse.type = "convex",
  repel = TRUE,
  show.clust.cent = TRUE) +
@@ -274,7 +259,7 @@ theme_bw()
 
 
 # ACP
-
+Procedamos ahora con el estudio de componentes principales. Separamos los grupos que nos han salido de los clusterings del *k-means*, ya que este nos ha parecido el más representativo.
 ```{r}
 datos_acp <- datos_temp1 %>%
   mutate(cluster = as.factor(km_clusters$cluster)) %>%
@@ -291,7 +276,12 @@ fviz_eig(grupo1_acp, addlabels = TRUE, ylim=c(0,100)) + ggtitle("Peso de las com
 
 grupo1_acp$loadings
 ```
-
+Al realizar el estudio de componentes principales, no nos decantamos por usar 2 o 3 componentes. Veamos si con dos componentes quedan las 5 variables bien representadas:
+```{r}
+var <- get_pca_var(grupo1_acp)
+fviz_cos2(grupo1_acp, choice = "var", axes = 1:2)
+```
+Podemos observar que hay 2 variables que no quedan bien representadas, por ello decidimos quedarnos con 3 componentes principales. Visualicemos ahora el gráfico:
 
 ```{r, warning=FALSE}
 grupo1_tipi = scale(grupo1[,1:5])
@@ -312,10 +302,7 @@ plot_ly(grupo1, x = ~a_1, y = ~a_2, z = ~a_3, type = "scatter3d", mode = "marker
                       zaxis = list(title = 'CP3')))
 ```
 
-
-
-
-
+Dado que las 3 componentes principales tienen mucha información, no podemos realizar un agrupamiento de los datos como es debido, deberíamos realizar otros estudios para ello.
 
 ```{r}
 grupo2_acp = princomp(grupo2[,1:5], cor = TRUE) 
@@ -324,8 +311,13 @@ fviz_eig(grupo2_acp, addlabels = TRUE, ylim=c(0,100)) + ggtitle("Peso de las com
 
 grupo2_acp$loadings
 ```
+Al realizar el estudio de componentes principales, no nos decantamos por usar 2 o 3 componentes. Veamos si con dos componentes quedan las 5 variables bien representadas:
 
-
+```{r}
+var <- get_pca_var(grupo2_acp)
+fviz_cos2(grupo2_acp, choice = "var", axes = 1:2)
+```
+Podemos observar que una única variable no queda bien representada, por ello decidimos quedarnos con 3 componentes principales. Visualicemos ahora el gráfico:
 
 ```{r, warning=FALSE}
 grupo2_tipi = scale(grupo2[,1:5])
@@ -346,5 +338,10 @@ plot_ly(grupo2, x = ~a_1, y = ~a_2, z = ~a_3, type = "scatter3d", mode = "marker
                       zaxis = list(title = 'CP3')))
 ```
 
+Dado que las 3 componentes principales tienen mucha información, no podemos realizar un agrupamiento de los datos como es debido, deberíamos realizar otros estudios para ello.
+
+# Conclusiones
+El dataset tiene muchas observaciones, y los datos no estan muy bien agrupados, no es un buen dataset para realizar un estudio de clustering y ACP. A diferencia de el estudio de correlaciones, dónde si obtuvimos muchas conclusiones, en éste estudio no podemos hacerlo.
+Si quisiésemos seguir con este estudio deberíamos cambiar el dataset.
 
 

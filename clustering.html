@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.433">
+<meta name="generator" content="quarto-1.3.353">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -21,6 +21,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -34,15 +68,17 @@ ul.task-list li input[type="checkbox"] {
 <script src="clustering_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="clustering_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="clustering_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
-<script src="clustering_files/libs/htmlwidgets-1.6.3/htmlwidgets.js"></script>
-<script src="clustering_files/libs/plotly-binding-4.10.3/plotly.js"></script>
+<script src="clustering_files/libs/htmlwidgets-1.5.4/htmlwidgets.js"></script>
+<script src="clustering_files/libs/plotly-binding-4.10.0/plotly.js"></script>
 <script src="clustering_files/libs/typedarray-0.1/typedarray.min.js"></script>
 <script src="clustering_files/libs/jquery-3.5.1/jquery.min.js"></script>
-<link href="clustering_files/libs/crosstalk-1.2.1/css/crosstalk.min.css" rel="stylesheet">
-<script src="clustering_files/libs/crosstalk-1.2.1/js/crosstalk.min.js"></script>
-<link href="clustering_files/libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet">
-<script src="clustering_files/libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+<link href="clustering_files/libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet">
+<script src="clustering_files/libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
+<link href="clustering_files/libs/plotly-htmlwidgets-css-2.5.1/plotly-htmlwidgets.css" rel="stylesheet">
+<script src="clustering_files/libs/plotly-main-2.5.1/plotly-latest.min.js"></script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 </head>
 
@@ -76,139 +112,249 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 <p>Este es el <a href="https://github.com/GSMir/Entrega3">repositorio</a> de GitHub en el que alojaremos todos los archivos relacionados con esta entrega. Para consultar la fuente de la que se ha extraído nuestro Dataset consulta el siguiente <a href="https://archive.ics.uci.edu/dataset/45/heart+disease">link</a>. Nuestro Dataset ha sido publicado por la Universidad de California de Irvine.</p>
-<p>#Partitioning Clustering</p>
-<p>##K-means</p>
 <div class="cell">
-<div class="cell-output-display">
-<p><img src="clustering_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>datos_temp <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(heartdisease_numeric)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>datos_temp <span class="ot">&lt;-</span> datos_temp <span class="sc">%&gt;%</span> <span class="fu">filter</span>(chol <span class="sc">!=</span> <span class="fu">max</span>(chol))</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>datos <span class="ot">&lt;-</span> <span class="fu">scale</span>(datos_temp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</div>
+<p>Recargamos los datos, y eliminamos el único <em>outlier</em>, ya que este nos puede dar problemas en alguna de las funciones, sobretodo con el <em>k-means</em>.</p>
+<section id="clustering" class="level1">
+<h1>Clustering</h1>
+<section id="k-means" class="level2">
+<h2 class="anchored" data-anchor-id="k-means">K-means</h2>
+<p>En primer lugar procedemos a determinar el número de clusters en el que podemos agrupar las entradas de nuestro conjunto de datos. Para ello disponemos de 3 posibles métodos implementados en R.</p>
 <div class="cell">
-<div class="cell-output-display">
-<p><img src="clustering_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<div class="cell">
-<div class="cell-output-display">
-<p><img src="clustering_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<div class="cell">
-<div class="cell-output-display">
-<p><img src="clustering_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<p>Seleccionem un subconjunt aleatori i tornem a fer el clustering `</p>
-<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_nbclust</span>(<span class="at">x =</span> datos, <span class="at">FUNcluster =</span> kmeans, <span class="at">method =</span> <span class="st">"wss"</span>,</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">diss =</span> <span class="fu">dist</span>(datos, <span class="at">method =</span> <span class="st">"euclidean"</span>)) <span class="sc">+</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">2</span>, <span class="at">linetype =</span> <span class="dv">2</span>) <span class="sc">+</span><span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Elbow method"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="clustering_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>El primero de los métodos, el del codo, nos sugiere que tendríamos que tomar un total de <span class="math inline">\(k=2\)</span> clusters. Si comprobamos si el valor de <span class="math inline">\(k\)</span> obtenido con las otras dos instrucciones es el mismo, estaremos más seguros de tomar un total de 2 clusters.</p>
 <div class="cell">
-<div class="cell-output-display">
-<p><img src="clustering_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_nbclust</span>(<span class="at">x =</span> datos, <span class="at">FUNcluster =</span> kmeans, <span class="at">method =</span> <span class="st">"silhouette"</span>) <span class="sc">+</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Silhouette method"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="clustering_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<section id="kmedoids" class="level1">
-<h1>K−medoids</h1>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_nbclust</span>(<span class="at">x =</span> datos, <span class="at">FUNcluster =</span> kmeans, <span class="at">method =</span> <span class="st">"gap_stat"</span>, <span class="at">nboot =</span> <span class="dv">50</span>,</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a> <span class="at">verbose =</span> <span class="cn">FALSE</span>, <span class="at">nstart =</span> <span class="dv">25</span>) <span class="sc">+</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a> <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Gap Stat method"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="clustering_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+<p><img src="clustering_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>Como se ve en las gráficas anteriores, los otros dos métodos nos confirman que deberíamos de tomar 2 clusters.</p>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>km_clusters <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(<span class="at">x =</span> datos, <span class="at">centers =</span> <span class="dv">2</span>, <span class="at">nstart =</span> <span class="dv">25</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_cluster</span>(<span class="at">object =</span> km_clusters, <span class="at">data =</span> datos, <span class="at">show.clust.cent =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a> <span class="at">ellipse.type =</span> <span class="st">"euclid"</span>, <span class="at">star.plot =</span> <span class="cn">TRUE</span>, <span class="at">repel =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"right"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: ggrepel: 185 unlabeled data points (too many overlaps). Consider
+increasing max.overlaps</code></pre>
+</div>
 <div class="cell-output-display">
 <p><img src="clustering_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>Los puntos están agrupados en dos clusters identificados por colores y cada punto parece estar etiquetado con un número, que podría referirse a un identificador de paciente o a una observación específica dentro del conjunto de datos.</p>
+<p>La primera dimensión (Dim1) explica el 36.1% de la varianza en los datos, mientras que la segunda dimensión (Dim2) explica el 22.2%. Esto indica que estas dos dimensiones combinadas explican aproximadamente el 58.3% de la varianza total en los datos, lo que sugiere que hay más factores o dimensiones que podrían ser relevantes para una comprensión completa del conjunto de datos.</p>
+<p>Hemos realizado el mismo estudio tomando el conjunto total de datos y era engorroso a la hora de extraer conclusiones. Las gráficas resultaban complicadas de interpretar. Lo que se ha decidido es tomar una muestra de tamaño <span class="math inline">\(n=100\)</span> y continuar con el estudio a partir de nuevo conjunto de datos. Fijando una semilla para la reproducibilidad de este estudio.</p>
 <div class="cell">
-<div class="cell-output-display">
-<p><img src="clustering_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">420</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>datos<span class="ot">&lt;-</span><span class="fu">as.data.frame</span>(datos_temp)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>datos_temp1 <span class="ot">&lt;-</span> <span class="fu">sample_n</span>(datos, <span class="dv">100</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>datos_1 <span class="ot">&lt;-</span> <span class="fu">scale</span>(datos_temp1)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>datos_2<span class="ot">&lt;-</span><span class="fu">as_tibble</span>(datos_1)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_nbclust</span>(<span class="at">x =</span> datos_2, <span class="at">FUNcluster =</span> kmeans, <span class="at">method =</span> <span class="st">"wss"</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">diss =</span> <span class="fu">dist</span>(datos, <span class="at">method =</span> <span class="st">"euclidean"</span>)) <span class="sc">+</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">2</span>, <span class="at">linetype =</span> <span class="dv">2</span>) <span class="sc">+</span><span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Elbow method"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="clustering_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="cell">
-<div class="cell-output-display">
-<p><img src="clustering_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<p>#Hierarchical Clustering</p>
-<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_nbclust</span>(<span class="at">x =</span> datos_2, <span class="at">FUNcluster =</span> kmeans, <span class="at">method =</span> <span class="st">"silhouette"</span>) <span class="sc">+</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Silhouette method"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="clustering_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>##Complete</p>
+<p>Si repetimos las gráficas obtenemos de nuevo el mismo número de clusters que antes. Sin embargo, recalcar que con este subconjunto de los datos obtenemos un nivel de explicación total de la variabilidad ligeramente inferior (del 56%). Pensamos que esta pérdida en el nivell de explicación de los dos componentes se debe a la pérdida de información fruto de nuestra elección de reducir el tamaño del Dataset.</p>
 <div class="cell">
-<div class="cell-output-display">
-<p><img src="clustering_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>km_clusters <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(<span class="at">x =</span> datos_2, <span class="at">centers =</span> <span class="dv">2</span>, <span class="at">nstart =</span> <span class="dv">25</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_cluster</span>(<span class="at">object =</span> km_clusters, <span class="at">data =</span> datos_2, <span class="at">show.clust.cent =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a> <span class="at">ellipse.type =</span> <span class="st">"euclid"</span>, <span class="at">star.plot =</span> <span class="cn">TRUE</span>, <span class="at">repel =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"right"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="clustering_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>##Single</p>
+</section>
+<section id="kmedoids" class="level2">
+<h2 class="anchored" data-anchor-id="kmedoids">K−medoids</h2>
 <div class="cell">
-<div class="cell-output-display">
-<p><img src="clustering_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>mat_dist <span class="ot">&lt;-</span> <span class="fu">dist</span>(<span class="at">x =</span> datos_2, <span class="at">method =</span> <span class="st">"euclidean"</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_dist</span>(<span class="at">dist.obj =</span> mat_dist, <span class="at">lab_size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"right"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="clustering_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>##Avarage</p>
+<p>El método VAT no nos proporciona indicios de ninguna agrupación de los datos, ya que no se han formado rectangulos.</p>
 <div class="cell">
-<div class="cell-output-display">
-<p><img src="clustering_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_nbclust</span>(<span class="at">x =</span> datos_2, <span class="at">FUNcluster =</span> pam, <span class="at">method =</span> <span class="st">"wss"</span>,</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a> <span class="at">diss =</span> <span class="fu">dist</span>(datos, <span class="at">method =</span> <span class="st">"manhattan"</span>)) <span class="sc">+</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">2</span>, <span class="at">linetype =</span> <span class="dv">2</span>) <span class="sc">+</span><span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Elbow method"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="clustering_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>##Centroid</p>
 <div class="cell">
-<div class="cell-output-display">
-<p><img src="clustering_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_nbclust</span>(<span class="at">x =</span> datos_2, <span class="at">FUNcluster =</span> pam, <span class="at">method =</span> <span class="st">"silhouette"</span>) <span class="sc">+</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Silhouette method"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="clustering_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>##Ward</p>
 <div class="cell">
-<div class="cell-output-display">
-<p><img src="clustering_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_nbclust</span>(<span class="at">x =</span> datos_2, <span class="at">FUNcluster =</span> pam, <span class="at">method =</span> <span class="st">"gap_stat"</span>, <span class="at">nboot =</span> <span class="dv">50</span>,</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a> <span class="at">verbose =</span> <span class="cn">FALSE</span>, <span class="at">nstart =</span> <span class="dv">25</span>) <span class="sc">+</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a> <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Gap Stat method"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="clustering_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-</section>
-<section id="acp" class="level1">
-<h1>ACP</h1>
+<p>Esta vez, los 3 métodos nos dan 3 agrupaciones de clusters diferentes, obviaremos la que nos proporciona un solo grupo, y al visualizar con <span class="math inline">\(k=2, 3, 4\)</span> hemos decidido quedarnos con 3 agrupaciones, la media de 2 y 4, ya que esta es la que mejor representa los grupos.</p>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>pam_clusters <span class="ot">&lt;-</span> <span class="fu">pam</span>(<span class="at">x =</span> datos_2, <span class="at">k =</span> <span class="dv">3</span>, <span class="at">metric =</span> <span class="st">"manhattan"</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_cluster</span>(<span class="at">object =</span> pam_clusters, <span class="at">data =</span> datos_2, <span class="at">ellipse.type =</span> <span class="st">"t"</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">repel =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a> <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"right"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="clustering_files/figure-html/unnamed-chunk-30-1.png" class="img-fluid" width="672"></p>
 </div>
+</div>
+</section>
+<section id="hierarchical-clustering" class="level2">
+<h2 class="anchored" data-anchor-id="hierarchical-clustering">Hierarchical Clustering</h2>
+<p>Realicemos ahora los estudios de analisi jerárquicos. ### Complete</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>hc_complete <span class="ot">&lt;-</span> <span class="fu">hclust</span>(<span class="at">d =</span> mat_dist, <span class="at">method =</span> <span class="st">"complete"</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_dend</span>(<span class="at">x =</span> hc_complete, <span class="at">k =</span> <span class="dv">4</span>, <span class="at">cex =</span> <span class="fl">0.5</span>, <span class="at">show_labels =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="fl">5.2</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="clustering_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_cluster</span>(<span class="at">object =</span> <span class="fu">list</span>(<span class="at">data =</span> datos_2, <span class="at">cluster =</span> <span class="fu">cutree</span>(hc_complete, <span class="at">k =</span> <span class="dv">4</span>)),</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a> <span class="at">ellipse.type =</span> <span class="st">"convex"</span>,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a> <span class="at">repel =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a> <span class="at">show.clust.cent =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="clustering_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<section id="single" class="level3">
+<h3 class="anchored" data-anchor-id="single">Single</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>hc_single <span class="ot">&lt;-</span> <span class="fu">hclust</span>(<span class="at">d =</span> mat_dist, <span class="at">method =</span> <span class="st">"single"</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_dend</span>(<span class="at">x =</span> hc_single, <span class="at">k =</span> <span class="dv">2</span>, <span class="at">cex =</span> <span class="fl">0.6</span>,<span class="at">show_labels=</span><span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="fl">1.95</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="clustering_files/figure-html/unnamed-chunk-36-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_cluster</span>(<span class="at">object =</span> <span class="fu">list</span>(<span class="at">data =</span> datos_2, <span class="at">cluster =</span> <span class="fu">cutree</span>(hc_single, <span class="at">k =</span> <span class="dv">2</span>)),</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a> <span class="at">ellipse.type =</span> <span class="st">"convex"</span>,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a> <span class="at">repel =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a> <span class="at">show.clust.cent =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="clustering_files/figure-html/unnamed-chunk-38-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Observamos que en la realización de este clustering queda un grupo formado por un solo elemento, lo cual nos da a pensar que este caso no funciona bien para nuestro dataset. Lo hemos observado también con más grupos de clustering y en cada nuevo grupo solo se añade un solo punto.</p>
+</section>
+<section id="avarage" class="level3">
+<h3 class="anchored" data-anchor-id="avarage">Avarage</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>hc_average <span class="ot">&lt;-</span> <span class="fu">hclust</span>(<span class="at">d =</span> mat_dist, <span class="at">method =</span> <span class="st">"average"</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_dend</span>(<span class="at">x =</span> hc_average, <span class="at">k =</span> <span class="dv">3</span>, <span class="at">cex =</span> <span class="fl">0.6</span>, <span class="at">show_labels =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="fl">3.45</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="clustering_files/figure-html/unnamed-chunk-40-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_cluster</span>(<span class="at">object =</span> <span class="fu">list</span>(<span class="at">data =</span> datos_2, <span class="at">cluster =</span> <span class="fu">cutree</span>(hc_average, <span class="at">k =</span> <span class="dv">3</span>)),</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a> <span class="at">ellipse.type =</span> <span class="st">"convex"</span>,</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a> <span class="at">repel =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a> <span class="at">show.clust.cent =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="clustering_files/figure-html/unnamed-chunk-42-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="ward" class="level3">
+<h3 class="anchored" data-anchor-id="ward">Ward</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>hc_ward <span class="ot">&lt;-</span> <span class="fu">hclust</span>(<span class="at">d=</span>mat_dist,<span class="at">method=</span><span class="st">"ward.D"</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_dend</span>(<span class="at">x =</span> hc_ward, <span class="at">k =</span> <span class="dv">3</span>, <span class="at">cex =</span> <span class="fl">0.6</span>,<span class="at">show_labels =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">18</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="clustering_files/figure-html/unnamed-chunk-44-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_cluster</span>(<span class="at">object =</span> <span class="fu">list</span>(<span class="at">data =</span> datos_2, <span class="at">cluster =</span> <span class="fu">cutree</span>(hc_ward, <span class="at">k =</span> <span class="dv">3</span>)),</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a> <span class="at">ellipse.type =</span> <span class="st">"convex"</span>,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a> <span class="at">repel =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a> <span class="at">show.clust.cent =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="clustering_files/figure-html/unnamed-chunk-46-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="acp" class="level1">
+<h1>ACP</h1>
+<p>Procedamos ahora con el estudio de componentes principales. Separamos los grupos que nos han salido de los clusterings del <em>k-means</em>, ya que este nos ha parecido el más representativo.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>datos_acp <span class="ot">&lt;-</span> datos_temp1 <span class="sc">%&gt;%</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cluster =</span> <span class="fu">as.factor</span>(km_clusters<span class="sc">$</span>cluster)) <span class="sc">%&gt;%</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">orden =</span> <span class="fu">row_number</span>())</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>grupo1 <span class="ot">&lt;-</span> <span class="fu">filter</span>(datos_acp, datos_acp<span class="sc">$</span>cluster <span class="sc">==</span> <span class="st">"1"</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>grupo2 <span class="ot">&lt;-</span> <span class="fu">filter</span>(datos_acp, datos_acp<span class="sc">$</span>cluster <span class="sc">==</span> <span class="st">"2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>grupo1_acp <span class="ot">=</span> <span class="fu">princomp</span>(grupo1[,<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="at">cor =</span> <span class="cn">TRUE</span>) </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_eig</span>(grupo1_acp, <span class="at">addlabels =</span> <span class="cn">TRUE</span>, <span class="at">ylim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">100</span>)) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Peso de las componentes principales"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="clustering_files/figure-html/unnamed-chunk-50-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>grupo1_acp<span class="sc">$</span>loadings</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Loadings:
@@ -225,16 +371,46 @@ Proportion Var    0.2    0.2    0.2    0.2    0.2
 Cumulative Var    0.2    0.4    0.6    0.8    1.0</code></pre>
 </div>
 </div>
+<p>Al realizar el estudio de componentes principales, no nos decantamos por usar 2 o 3 componentes. Veamos si con dos componentes quedan las 5 variables bien representadas:</p>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>var <span class="ot">&lt;-</span> <span class="fu">get_pca_var</span>(grupo1_acp)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_cos2</span>(grupo1_acp, <span class="at">choice =</span> <span class="st">"var"</span>, <span class="at">axes =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div class="plotly html-widget html-fill-item" id="htmlwidget-78b19172db6b2aee328d" style="width:100%;height:464px;"></div>
-<script type="application/json" data-for="htmlwidget-78b19172db6b2aee328d">{"x":{"visdat":{"297c2808202e":["function () ","plotlyVisDat"]},"cur_data":"297c2808202e","attrs":{"297c2808202e":{"x":{},"y":{},"z":{},"mode":"markers+text","marker":{"size":10,"color":{}},"text":[1,3,4,12,15,16,17,18,19,22,25,30,32,33,34,38,44,48,54,56,57,61,62,63,65,74,77,80,82,85,88,90,92,95,97,98],"textposition":"top center","color":[-0.754720322197118,1.33065016737042,-2.31252482857059,1.12115993182565,-1.30616218820596,0.475349617420247,-0.30142750811882,-0.6778883935675,-0.530210792284423,0.238905239550066,0.845765905914647,-0.804860278308963,0.934625619914994,0.225188683985969,-0.0249424676541293,1.74069702993139,0.730276664154188,0.0781973125357277,-0.733173769600972,-0.619696297796175,0.561004161903509,0.432737039404012,0.00164394030336846,1.12968462907346,0.304659382226681,-0.1320811703341,-1.92565687108346,-1.19807300457863,-1.63116780408672,1.06723067306621,1.72629911224239,-1.14182937632798,0.529801136152095,0.440225121448347,-0.822695905583869,1.00300960987604],"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter3d"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"scene":{"xaxis":{"title":"CP1"},"yaxis":{"title":"CP2"},"zaxis":{"title":"CP3"}},"hovermode":"closest","showlegend":false,"legend":{"yanchor":"top","y":0.5}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":[-1.99429663221833,-0.0845373781789227,-0.0767648661616901,-2.16254239364985,0.360542422532532,-0.673150522214232,1.47316024042963,-1.07751101339101,0.251699572672832,1.39533331538669,0.490723667668858,-0.262762088042106,-0.532002371598839,0.269423171707862,1.80984718542049,-0.233192577120534,-0.727665086357554,-1.8901454947655,-0.822682491077608,0.279466919493107,0.465439526841137,1.05547425941718,-0.588919580886771,-0.548914718899952,-1.54373788833782,-0.660585835174689,1.71837195402658,-1.84640133807738,0.741304811453929,-1.68254787587266,1.4608885983493,-0.795625000629417,2.72833069287528,2.18632071884247,0.713829578373646,0.803828517163366],"y":[-1.07875244130227,-0.611171879773967,-0.64246837460967,0.380193812625689,1.66976206901775,0.525690381376686,-0.41409221335865,-1.38846312507075,1.43196710178763,0.764131826305457,-0.608825377620912,-0.444674347876459,-0.293678003031472,-0.87286479624877,1.69250173831497,-0.905838063651792,0.657200917064033,0.807065698047257,-0.556113918788907,-2.89299825530541,-1.86595076245548,1.81515598436829,0.402386443521552,0.578334160911588,0.549334913757407,-1.10582115658649,-0.352654397833755,1.47496372388186,-1.15370660317261,-0.187503122222917,-0.445484089540589,1.66981088295895,-1.09807734447283,1.33586578873189,0.419784860850658,0.744987969402014],"z":[-0.754720322197118,1.33065016737042,-2.31252482857059,1.12115993182565,-1.30616218820596,0.475349617420247,-0.30142750811882,-0.6778883935675,-0.530210792284423,0.238905239550066,0.845765905914647,-0.804860278308963,0.934625619914994,0.225188683985969,-0.0249424676541293,1.74069702993139,0.730276664154188,0.0781973125357277,-0.733173769600972,-0.619696297796175,0.561004161903509,0.432737039404012,0.00164394030336846,1.12968462907346,0.304659382226681,-0.1320811703341,-1.92565687108346,-1.19807300457863,-1.63116780408672,1.06723067306621,1.72629911224239,-1.14182937632798,0.529801136152095,0.440225121448347,-0.822695905583869,1.00300960987604],"mode":"markers+text","marker":{"colorbar":{"title":"","ticklen":2},"cmin":-2.31252482857059,"cmax":1.74069702993139,"colorscale":[["0","rgba(68,1,84,1)"],["0.0416666666666667","rgba(70,19,97,1)"],["0.0833333333333334","rgba(72,32,111,1)"],["0.125","rgba(71,45,122,1)"],["0.166666666666667","rgba(68,58,128,1)"],["0.208333333333333","rgba(64,70,135,1)"],["0.25","rgba(60,82,138,1)"],["0.291666666666667","rgba(56,93,140,1)"],["0.333333333333333","rgba(49,104,142,1)"],["0.375","rgba(46,114,142,1)"],["0.416666666666667","rgba(42,123,142,1)"],["0.458333333333333","rgba(38,133,141,1)"],["0.5","rgba(37,144,140,1)"],["0.541666666666667","rgba(33,154,138,1)"],["0.583333333333333","rgba(39,164,133,1)"],["0.625","rgba(47,174,127,1)"],["0.666666666666667","rgba(53,183,121,1)"],["0.708333333333333","rgba(79,191,110,1)"],["0.75","rgba(98,199,98,1)"],["0.791666666666667","rgba(119,207,85,1)"],["0.833333333333333","rgba(147,214,70,1)"],["0.875","rgba(172,220,52,1)"],["0.916666666666667","rgba(199,225,42,1)"],["0.958333333333333","rgba(226,228,40,1)"],["1","rgba(253,231,37,1)"]],"showscale":false,"color":[-1.99429663221833,-0.0845373781789227,-0.0767648661616901,-2.16254239364985,0.360542422532532,-0.673150522214232,1.47316024042963,-1.07751101339101,0.251699572672832,1.39533331538669,0.490723667668858,-0.262762088042106,-0.532002371598839,0.269423171707862,1.80984718542049,-0.233192577120534,-0.727665086357554,-1.8901454947655,-0.822682491077608,0.279466919493107,0.465439526841137,1.05547425941718,-0.588919580886771,-0.548914718899952,-1.54373788833782,-0.660585835174689,1.71837195402658,-1.84640133807738,0.741304811453929,-1.68254787587266,1.4608885983493,-0.795625000629417,2.72833069287528,2.18632071884247,0.713829578373646,0.803828517163366],"size":10,"line":{"colorbar":{"title":"","ticklen":2},"cmin":-2.31252482857059,"cmax":1.74069702993139,"colorscale":[["0","rgba(68,1,84,1)"],["0.0416666666666667","rgba(70,19,97,1)"],["0.0833333333333334","rgba(72,32,111,1)"],["0.125","rgba(71,45,122,1)"],["0.166666666666667","rgba(68,58,128,1)"],["0.208333333333333","rgba(64,70,135,1)"],["0.25","rgba(60,82,138,1)"],["0.291666666666667","rgba(56,93,140,1)"],["0.333333333333333","rgba(49,104,142,1)"],["0.375","rgba(46,114,142,1)"],["0.416666666666667","rgba(42,123,142,1)"],["0.458333333333333","rgba(38,133,141,1)"],["0.5","rgba(37,144,140,1)"],["0.541666666666667","rgba(33,154,138,1)"],["0.583333333333333","rgba(39,164,133,1)"],["0.625","rgba(47,174,127,1)"],["0.666666666666667","rgba(53,183,121,1)"],["0.708333333333333","rgba(79,191,110,1)"],["0.75","rgba(98,199,98,1)"],["0.791666666666667","rgba(119,207,85,1)"],["0.833333333333333","rgba(147,214,70,1)"],["0.875","rgba(172,220,52,1)"],["0.916666666666667","rgba(199,225,42,1)"],["0.958333333333333","rgba(226,228,40,1)"],["1","rgba(253,231,37,1)"]],"showscale":false,"color":[-0.754720322197118,1.33065016737042,-2.31252482857059,1.12115993182565,-1.30616218820596,0.475349617420247,-0.30142750811882,-0.6778883935675,-0.530210792284423,0.238905239550066,0.845765905914647,-0.804860278308963,0.934625619914994,0.225188683985969,-0.0249424676541293,1.74069702993139,0.730276664154188,0.0781973125357277,-0.733173769600972,-0.619696297796175,0.561004161903509,0.432737039404012,0.00164394030336846,1.12968462907346,0.304659382226681,-0.1320811703341,-1.92565687108346,-1.19807300457863,-1.63116780408672,1.06723067306621,1.72629911224239,-1.14182937632798,0.529801136152095,0.440225121448347,-0.822695905583869,1.00300960987604]}},"text":[1,3,4,12,15,16,17,18,19,22,25,30,32,33,34,38,44,48,54,56,57,61,62,63,65,74,77,80,82,85,88,90,92,95,97,98],"textposition":["top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center"],"type":"scatter3d","frame":null},{"x":[-2.16254239364985,2.72833069287528],"y":[-2.89299825530541,1.81515598436829],"type":"scatter3d","mode":"markers","opacity":0,"hoverinfo":"none","showlegend":false,"marker":{"colorbar":{"title":"","ticklen":2,"len":0.5,"lenmode":"fraction","y":1,"yanchor":"top"},"cmin":-2.31252482857059,"cmax":1.74069702993139,"colorscale":[["0","rgba(68,1,84,1)"],["0.0416666666666667","rgba(70,19,97,1)"],["0.0833333333333334","rgba(72,32,111,1)"],["0.125","rgba(71,45,122,1)"],["0.166666666666667","rgba(68,58,128,1)"],["0.208333333333333","rgba(64,70,135,1)"],["0.25","rgba(60,82,138,1)"],["0.291666666666667","rgba(56,93,140,1)"],["0.333333333333333","rgba(49,104,142,1)"],["0.375","rgba(46,114,142,1)"],["0.416666666666667","rgba(42,123,142,1)"],["0.458333333333333","rgba(38,133,141,1)"],["0.5","rgba(37,144,140,1)"],["0.541666666666667","rgba(33,154,138,1)"],["0.583333333333333","rgba(39,164,133,1)"],["0.625","rgba(47,174,127,1)"],["0.666666666666667","rgba(53,183,121,1)"],["0.708333333333333","rgba(79,191,110,1)"],["0.75","rgba(98,199,98,1)"],["0.791666666666667","rgba(119,207,85,1)"],["0.833333333333333","rgba(147,214,70,1)"],["0.875","rgba(172,220,52,1)"],["0.916666666666667","rgba(199,225,42,1)"],["0.958333333333333","rgba(226,228,40,1)"],["1","rgba(253,231,37,1)"]],"showscale":true,"color":[-2.31252482857059,1.74069702993139],"line":{"color":"rgba(255,127,14,1)"}},"z":[-2.31252482857059,1.74069702993139],"frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p><img src="clustering_files/figure-html/unnamed-chunk-52-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>Podemos observar que hay 2 variables que no quedan bien representadas, por ello decidimos quedarnos con 3 componentes principales. Visualicemos ahora el gráfico:</p>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>grupo1_tipi <span class="ot">=</span> <span class="fu">scale</span>(grupo1[,<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>])</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>descomp <span class="ot">=</span> <span class="fu">svd</span>(grupo1_tipi)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>x <span class="ot">=</span> descomp<span class="sc">$</span>u<span class="sc">%*%</span><span class="fu">diag</span>(descomp<span class="sc">$</span>d)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>a_1 <span class="ot">=</span> x[,<span class="dv">1</span>]</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>a_2 <span class="ot">=</span> x[,<span class="dv">2</span>]</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>a_3 <span class="ot">=</span> x[,<span class="dv">3</span>]</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_ly</span>(grupo1, <span class="at">x =</span> <span class="sc">~</span>a_1, <span class="at">y =</span> <span class="sc">~</span>a_2, <span class="at">z =</span> <span class="sc">~</span>a_3, <span class="at">type =</span> <span class="st">"scatter3d"</span>, <span class="at">mode =</span> <span class="st">"markers+text"</span>, <span class="at">color=</span>a_3,</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>               <span class="at">marker =</span> <span class="fu">list</span>(<span class="at">size =</span> <span class="dv">10</span>, <span class="at">color =</span> <span class="sc">~</span>a_1), <span class="at">text =</span> grupo1[,<span class="dv">7</span>],</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>               <span class="at">textposition =</span> <span class="st">"top center"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">layout</span>(<span class="at">scene =</span> <span class="fu">list</span>(<span class="at">xaxis =</span> <span class="fu">list</span>(<span class="at">title =</span> <span class="st">'CP1'</span>),</span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>                      <span class="at">yaxis =</span> <span class="fu">list</span>(<span class="at">title =</span> <span class="st">'CP2'</span>),</span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>                      <span class="at">zaxis =</span> <span class="fu">list</span>(<span class="at">title =</span> <span class="st">'CP3'</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="clustering_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid" width="672"></p>
+<div id="htmlwidget-9eceb20dc2a931752ae4" style="width:100%;height:464px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-9eceb20dc2a931752ae4">{"x":{"visdat":{"261c607528dc":["function () ","plotlyVisDat"]},"cur_data":"261c607528dc","attrs":{"261c607528dc":{"x":{},"y":{},"z":{},"mode":"markers+text","marker":{"size":10,"color":{}},"text":[1,3,4,12,15,16,17,18,19,22,25,30,32,33,34,38,44,48,54,56,57,61,62,63,65,74,77,80,82,85,88,90,92,95,97,98],"textposition":"top center","color":[-0.754720322197116,1.33065016737042,-2.31252482857059,1.12115993182565,-1.30616218820596,0.475349617420249,-0.301427508118819,-0.677888393567501,-0.530210792284424,0.238905239550066,0.845765905914647,-0.804860278308966,0.934625619914997,0.22518868398597,-0.0249424676541295,1.74069702993139,0.730276664154193,0.0781973125357227,-0.733173769600971,-0.619696297796174,0.561004161903509,0.432737039404012,0.00164394030336819,1.12968462907347,0.304659382226685,-0.132081170334099,-1.92565687108347,-1.19807300457863,-1.63116780408672,1.06723067306621,1.72629911224239,-1.14182937632798,0.529801136152096,0.440225121448344,-0.822695905583871,1.00300960987604],"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter3d"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"scene":{"xaxis":{"title":"CP1"},"yaxis":{"title":"CP2"},"zaxis":{"title":"CP3"}},"hovermode":"closest","showlegend":false,"legend":{"yanchor":"top","y":0.5}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":[-1.99429663221833,-0.0845373781789226,-0.0767648661616882,-2.16254239364985,0.360542422532529,-0.673150522214232,1.47316024042963,-1.077511013391,0.25169957267283,1.39533331538669,0.490723667668858,-0.262762088042105,-0.532002371598838,0.269423171707863,1.80984718542048,-0.233192577120532,-0.727665086357554,-1.8901454947655,-0.822682491077607,0.27946691949311,0.46543952684114,1.05547425941717,-0.588919580886771,-0.548914718899953,-1.54373788833782,-0.660585835174687,1.71837195402657,-1.84640133807738,0.74130481145393,-1.68254787587266,1.4608885983493,-0.79562500062942,2.72833069287528,2.18632071884246,0.713829578373645,0.803828517163364],"y":[-1.07875244130227,-0.611171879773965,-0.642468374609669,0.380193812625686,1.66976206901775,0.525690381376685,-0.414092213358648,-1.38846312507075,1.43196710178762,0.764131826305458,-0.608825377620909,-0.44467434787646,-0.293678003031471,-0.872864796248768,1.69250173831497,-0.905838063651789,0.657200917064032,0.807065698047253,-0.556113918788907,-2.8929982553054,-1.86595076245547,1.81515598436829,0.40238644352155,0.578334160911588,0.549334913757404,-1.10582115658649,-0.352654397833754,1.47496372388186,-1.15370660317261,-0.187503122222917,-0.445484089540585,1.66981088295894,-1.09807734447282,1.33586578873189,0.419784860850657,0.744987969402014],"z":[-0.754720322197116,1.33065016737042,-2.31252482857059,1.12115993182565,-1.30616218820596,0.475349617420249,-0.301427508118819,-0.677888393567501,-0.530210792284424,0.238905239550066,0.845765905914647,-0.804860278308966,0.934625619914997,0.22518868398597,-0.0249424676541295,1.74069702993139,0.730276664154193,0.0781973125357227,-0.733173769600971,-0.619696297796174,0.561004161903509,0.432737039404012,0.00164394030336819,1.12968462907347,0.304659382226685,-0.132081170334099,-1.92565687108347,-1.19807300457863,-1.63116780408672,1.06723067306621,1.72629911224239,-1.14182937632798,0.529801136152096,0.440225121448344,-0.822695905583871,1.00300960987604],"mode":"markers+text","marker":{"colorbar":{"title":"","ticklen":2},"cmin":-2.31252482857059,"cmax":1.74069702993139,"colorscale":[["0","rgba(68,1,84,1)"],["0.0416666666666667","rgba(70,19,97,1)"],["0.0833333333333333","rgba(72,32,111,1)"],["0.125","rgba(71,45,122,1)"],["0.166666666666667","rgba(68,58,128,1)"],["0.208333333333333","rgba(64,70,135,1)"],["0.25","rgba(60,82,138,1)"],["0.291666666666667","rgba(56,93,140,1)"],["0.333333333333333","rgba(49,104,142,1)"],["0.375","rgba(46,114,142,1)"],["0.416666666666667","rgba(42,123,142,1)"],["0.458333333333333","rgba(38,133,141,1)"],["0.5","rgba(37,144,140,1)"],["0.541666666666667","rgba(33,154,138,1)"],["0.583333333333333","rgba(39,164,133,1)"],["0.625","rgba(47,174,127,1)"],["0.666666666666667","rgba(53,183,121,1)"],["0.708333333333333","rgba(79,191,110,1)"],["0.75","rgba(98,199,98,1)"],["0.791666666666667","rgba(119,207,85,1)"],["0.833333333333333","rgba(147,214,70,1)"],["0.875","rgba(172,220,52,1)"],["0.916666666666667","rgba(199,225,42,1)"],["0.958333333333333","rgba(226,228,40,1)"],["1","rgba(253,231,37,1)"]],"showscale":false,"color":[-1.99429663221833,-0.0845373781789226,-0.0767648661616882,-2.16254239364985,0.360542422532529,-0.673150522214232,1.47316024042963,-1.077511013391,0.25169957267283,1.39533331538669,0.490723667668858,-0.262762088042105,-0.532002371598838,0.269423171707863,1.80984718542048,-0.233192577120532,-0.727665086357554,-1.8901454947655,-0.822682491077607,0.27946691949311,0.46543952684114,1.05547425941717,-0.588919580886771,-0.548914718899953,-1.54373788833782,-0.660585835174687,1.71837195402657,-1.84640133807738,0.74130481145393,-1.68254787587266,1.4608885983493,-0.79562500062942,2.72833069287528,2.18632071884246,0.713829578373645,0.803828517163364],"size":10,"line":{"colorbar":{"title":"","ticklen":2},"cmin":-2.31252482857059,"cmax":1.74069702993139,"colorscale":[["0","rgba(68,1,84,1)"],["0.0416666666666667","rgba(70,19,97,1)"],["0.0833333333333333","rgba(72,32,111,1)"],["0.125","rgba(71,45,122,1)"],["0.166666666666667","rgba(68,58,128,1)"],["0.208333333333333","rgba(64,70,135,1)"],["0.25","rgba(60,82,138,1)"],["0.291666666666667","rgba(56,93,140,1)"],["0.333333333333333","rgba(49,104,142,1)"],["0.375","rgba(46,114,142,1)"],["0.416666666666667","rgba(42,123,142,1)"],["0.458333333333333","rgba(38,133,141,1)"],["0.5","rgba(37,144,140,1)"],["0.541666666666667","rgba(33,154,138,1)"],["0.583333333333333","rgba(39,164,133,1)"],["0.625","rgba(47,174,127,1)"],["0.666666666666667","rgba(53,183,121,1)"],["0.708333333333333","rgba(79,191,110,1)"],["0.75","rgba(98,199,98,1)"],["0.791666666666667","rgba(119,207,85,1)"],["0.833333333333333","rgba(147,214,70,1)"],["0.875","rgba(172,220,52,1)"],["0.916666666666667","rgba(199,225,42,1)"],["0.958333333333333","rgba(226,228,40,1)"],["1","rgba(253,231,37,1)"]],"showscale":false,"color":[-0.754720322197116,1.33065016737042,-2.31252482857059,1.12115993182565,-1.30616218820596,0.475349617420249,-0.301427508118819,-0.677888393567501,-0.530210792284424,0.238905239550066,0.845765905914647,-0.804860278308966,0.934625619914997,0.22518868398597,-0.0249424676541295,1.74069702993139,0.730276664154193,0.0781973125357227,-0.733173769600971,-0.619696297796174,0.561004161903509,0.432737039404012,0.00164394030336819,1.12968462907347,0.304659382226685,-0.132081170334099,-1.92565687108347,-1.19807300457863,-1.63116780408672,1.06723067306621,1.72629911224239,-1.14182937632798,0.529801136152096,0.440225121448344,-0.822695905583871,1.00300960987604]}},"text":[1,3,4,12,15,16,17,18,19,22,25,30,32,33,34,38,44,48,54,56,57,61,62,63,65,74,77,80,82,85,88,90,92,95,97,98],"textposition":["top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center"],"type":"scatter3d","frame":null},{"x":[-2.16254239364985,2.72833069287528],"y":[-2.8929982553054,1.81515598436829],"type":"scatter3d","mode":"markers","opacity":0,"hoverinfo":"none","showlegend":false,"marker":{"colorbar":{"title":"","ticklen":2,"len":0.5,"lenmode":"fraction","y":1,"yanchor":"top"},"cmin":-2.31252482857059,"cmax":1.74069702993139,"colorscale":[["0","rgba(68,1,84,1)"],["0.0416666666666667","rgba(70,19,97,1)"],["0.0833333333333333","rgba(72,32,111,1)"],["0.125","rgba(71,45,122,1)"],["0.166666666666667","rgba(68,58,128,1)"],["0.208333333333333","rgba(64,70,135,1)"],["0.25","rgba(60,82,138,1)"],["0.291666666666667","rgba(56,93,140,1)"],["0.333333333333333","rgba(49,104,142,1)"],["0.375","rgba(46,114,142,1)"],["0.416666666666667","rgba(42,123,142,1)"],["0.458333333333333","rgba(38,133,141,1)"],["0.5","rgba(37,144,140,1)"],["0.541666666666667","rgba(33,154,138,1)"],["0.583333333333333","rgba(39,164,133,1)"],["0.625","rgba(47,174,127,1)"],["0.666666666666667","rgba(53,183,121,1)"],["0.708333333333333","rgba(79,191,110,1)"],["0.75","rgba(98,199,98,1)"],["0.791666666666667","rgba(119,207,85,1)"],["0.833333333333333","rgba(147,214,70,1)"],["0.875","rgba(172,220,52,1)"],["0.916666666666667","rgba(199,225,42,1)"],["0.958333333333333","rgba(226,228,40,1)"],["1","rgba(253,231,37,1)"]],"showscale":true,"color":[-2.31252482857059,1.74069702993139],"line":{"color":"rgba(255,127,14,1)"}},"z":[-2.31252482857059,1.74069702993139],"frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
 </div>
+</div>
+<p>Dado que las 3 componentes principales tienen mucha información, no podemos realizar un agrupamiento de los datos como es debido, deberíamos realizar otros estudios para ello.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>grupo2_acp <span class="ot">=</span> <span class="fu">princomp</span>(grupo2[,<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="at">cor =</span> <span class="cn">TRUE</span>) </span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_eig</span>(grupo2_acp, <span class="at">addlabels =</span> <span class="cn">TRUE</span>, <span class="at">ylim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">100</span>)) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Peso de las componentes principales"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="clustering_files/figure-html/unnamed-chunk-56-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>grupo2_acp<span class="sc">$</span>loadings</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Loadings:
@@ -251,12 +427,42 @@ Proportion Var    0.2    0.2    0.2    0.2    0.2
 Cumulative Var    0.2    0.4    0.6    0.8    1.0</code></pre>
 </div>
 </div>
+<p>Al realizar el estudio de componentes principales, no nos decantamos por usar 2 o 3 componentes. Veamos si con dos componentes quedan las 5 variables bien representadas:</p>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>var <span class="ot">&lt;-</span> <span class="fu">get_pca_var</span>(grupo2_acp)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_cos2</span>(grupo2_acp, <span class="at">choice =</span> <span class="st">"var"</span>, <span class="at">axes =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div class="plotly html-widget html-fill-item" id="htmlwidget-ca47e3f59d5c904d0cb5" style="width:100%;height:464px;"></div>
-<script type="application/json" data-for="htmlwidget-ca47e3f59d5c904d0cb5">{"x":{"visdat":{"297c59c968f5":["function () ","plotlyVisDat"]},"cur_data":"297c59c968f5","attrs":{"297c59c968f5":{"x":{},"y":{},"z":{},"mode":"markers+text","marker":{"size":10,"color":{}},"text":[2,5,6,7,8,9,10,11,13,14,20,21,23,24,26,27,28,29,31,35,36,37,39,40,41,42,43,45,46,47,49,50,51,52,53,55,58,59,60,64,66,67,68,69,70,71,72,73,75,76,78,79,81,83,84,86,87,89,91,93,94,96,99,100],"textposition":"top center","color":[-1.42615647591519,0.534558965522388,0.649813738821003,0.15916708529726,0.0602935111094418,-0.198410671454472,-0.507664953808438,-1.79186390454441,0.32563279748629,-0.522018006411207,-0.375901151517704,1.0286036952873,0.285587224348486,0.610312541082637,-0.0412762192535305,0.543343258967794,-1.80195411627067,-0.381708588152501,1.74975164486155,0.149621576872127,-0.978265847735139,0.245081720271792,-1.22972984538683,0.903064159886121,-1.01856162848162,1.66819452130792,-0.323017729363422,-0.589371643144708,-0.950859996804566,-0.827720497172255,1.27698760764161,1.40094872848819,-0.807247026791791,-0.867052586066774,1.9644258316753,0.793251366266267,-0.930959678735651,-0.873437405320349,-0.112676264537701,-1.55363997043599,1.99302279664982,0.207961432334193,-0.45496994735502,-1.10158590792931,0.532723786503872,-1.40975115459819,0.622953758674086,-0.0221001130715112,-0.371844465602422,0.58164919219667,0.409010646150887,-1.36254027086187,0.556105373760013,0.224997827054565,1.38449403251438,2.23549755626393,1.13679415649086,0.966523289772127,-0.331563947445046,-1.79848218279214,0.0533779029827998,0.117423838671644,0.572945664993854,-0.98178903324673],"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter3d"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"scene":{"xaxis":{"title":"CP1"},"yaxis":{"title":"CP2"},"zaxis":{"title":"CP3"}},"hovermode":"closest","showlegend":false,"legend":{"yanchor":"top","y":0.5}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":[-1.12070177472649,-1.09222054139784,2.14587512185951,1.45389205675951,1.52218620856954,-0.132816160540163,-0.362619418618687,2.23084386714522,2.37367480610583,-0.997744645683699,1.69597144035389,-0.594494627258286,1.11631813541,-1.25175271413273,-1.89182501303678,-1.66552560896517,-1.48863832765423,0.831520778940022,-0.217114785719354,0.151133755029189,-0.0725819926371586,-2.52801144020528,-1.1801704846014,0.622723994264273,2.46859542247142,-0.837337429692737,-1.13920401724319,-0.717182294175548,-1.15826737482417,-0.683327683728581,-0.683157805725901,1.51430909432481,-1.35859507908142,0.135636544986764,-0.454273190615499,-0.305344604666181,1.56509658561071,-2.91835137031162,-0.12694215893538,-1.48209630635076,-1.45282835736752,-0.0778777504537394,0.555584905306791,-1.65516395420932,-0.610035605139937,0.637322085524475,0.248983846904022,0.656806784308977,0.647158086369759,-0.0953493021023849,-0.126828915493661,1.06289683811644,0.549184864945822,1.88692955688174,2.38946769738652,-0.986836582484962,1.46313887031673,-0.897626506132364,1.16330902666892,1.16605718788149,-0.73043458404551,2.35686359544441,-1.21732952483958,-0.300873225089564],"y":[-1.02225682712968,1.35478769728682,0.261178035576738,0.899657465715973,-0.29924513167356,3.06233897347867,2.50731566245988,-1.12024950241643,-0.325906315844479,-1.30693935349614,-1.14206757229358,0.302616014299617,-0.940485848376187,-0.291445675563327,-1.06311511592985,1.42451331328321,-1.12141010413186,-0.387215078404387,-2.23039029940379,1.1093240209534,-1.63798849098782,-1.20957927011478,-0.34912891598867,-0.891079884279986,-1.67487784092058,-0.123372236036529,-0.396727211627448,-0.25988957526304,-2.47700500704708,-0.123139132762008,-0.0118018496958303,1.39209724122722,0.742228256616816,0.117267566620256,-0.638824788409781,-0.440992915632788,0.577955019179701,0.81203789630782,0.89101629170648,0.678347363807573,-0.234656769868202,-0.484009627836799,-0.734792078277371,1.27237860516069,-0.348337968530161,-0.513443856125755,1.27811067163181,1.57366183147252,-0.529352131809673,-0.175431554321128,0.895783396186341,0.849291167205406,-0.811068167315538,1.15223545386532,-1.40834353992355,-0.333786068049325,1.59766185662938,-0.604444645093166,-0.132593168720973,1.43895166454946,0.706075366781871,0.150793323278272,0.507757783575382,0.240011580444639],"z":[-1.42615647591519,0.534558965522388,0.649813738821003,0.15916708529726,0.0602935111094418,-0.198410671454472,-0.507664953808438,-1.79186390454441,0.32563279748629,-0.522018006411207,-0.375901151517704,1.0286036952873,0.285587224348486,0.610312541082637,-0.0412762192535305,0.543343258967794,-1.80195411627067,-0.381708588152501,1.74975164486155,0.149621576872127,-0.978265847735139,0.245081720271792,-1.22972984538683,0.903064159886121,-1.01856162848162,1.66819452130792,-0.323017729363422,-0.589371643144708,-0.950859996804566,-0.827720497172255,1.27698760764161,1.40094872848819,-0.807247026791791,-0.867052586066774,1.9644258316753,0.793251366266267,-0.930959678735651,-0.873437405320349,-0.112676264537701,-1.55363997043599,1.99302279664982,0.207961432334193,-0.45496994735502,-1.10158590792931,0.532723786503872,-1.40975115459819,0.622953758674086,-0.0221001130715112,-0.371844465602422,0.58164919219667,0.409010646150887,-1.36254027086187,0.556105373760013,0.224997827054565,1.38449403251438,2.23549755626393,1.13679415649086,0.966523289772127,-0.331563947445046,-1.79848218279214,0.0533779029827998,0.117423838671644,0.572945664993854,-0.98178903324673],"mode":"markers+text","marker":{"colorbar":{"title":"","ticklen":2},"cmin":-1.80195411627067,"cmax":2.23549755626393,"colorscale":[["0","rgba(68,1,84,1)"],["0.0416666666666667","rgba(70,19,97,1)"],["0.0833333333333333","rgba(72,32,111,1)"],["0.125","rgba(71,45,122,1)"],["0.166666666666667","rgba(68,58,128,1)"],["0.208333333333333","rgba(64,70,135,1)"],["0.25","rgba(60,82,138,1)"],["0.291666666666667","rgba(56,93,140,1)"],["0.333333333333333","rgba(49,104,142,1)"],["0.375","rgba(46,114,142,1)"],["0.416666666666667","rgba(42,123,142,1)"],["0.458333333333333","rgba(38,133,141,1)"],["0.5","rgba(37,144,140,1)"],["0.541666666666667","rgba(33,154,138,1)"],["0.583333333333333","rgba(39,164,133,1)"],["0.625","rgba(47,174,127,1)"],["0.666666666666667","rgba(53,183,121,1)"],["0.708333333333333","rgba(79,191,110,1)"],["0.75","rgba(98,199,98,1)"],["0.791666666666667","rgba(119,207,85,1)"],["0.833333333333333","rgba(147,214,70,1)"],["0.875","rgba(172,220,52,1)"],["0.916666666666667","rgba(199,225,42,1)"],["0.958333333333333","rgba(226,228,40,1)"],["1","rgba(253,231,37,1)"]],"showscale":false,"color":[-1.02225682712968,1.35478769728682,0.261178035576738,0.899657465715973,-0.29924513167356,3.06233897347867,2.50731566245988,-1.12024950241643,-0.325906315844479,-1.30693935349614,-1.14206757229358,0.302616014299617,-0.940485848376187,-0.291445675563327,-1.06311511592985,1.42451331328321,-1.12141010413186,-0.387215078404387,-2.23039029940379,1.1093240209534,-1.63798849098782,-1.20957927011478,-0.34912891598867,-0.891079884279986,-1.67487784092058,-0.123372236036529,-0.396727211627448,-0.25988957526304,-2.47700500704708,-0.123139132762008,-0.0118018496958303,1.39209724122722,0.742228256616816,0.117267566620256,-0.638824788409781,-0.440992915632788,0.577955019179701,0.81203789630782,0.89101629170648,0.678347363807573,-0.234656769868202,-0.484009627836799,-0.734792078277371,1.27237860516069,-0.348337968530161,-0.513443856125755,1.27811067163181,1.57366183147252,-0.529352131809673,-0.175431554321128,0.895783396186341,0.849291167205406,-0.811068167315538,1.15223545386532,-1.40834353992355,-0.333786068049325,1.59766185662938,-0.604444645093166,-0.132593168720973,1.43895166454946,0.706075366781871,0.150793323278272,0.507757783575382,0.240011580444639],"size":10,"line":{"colorbar":{"title":"","ticklen":2},"cmin":-1.80195411627067,"cmax":2.23549755626393,"colorscale":[["0","rgba(68,1,84,1)"],["0.0416666666666667","rgba(70,19,97,1)"],["0.0833333333333333","rgba(72,32,111,1)"],["0.125","rgba(71,45,122,1)"],["0.166666666666667","rgba(68,58,128,1)"],["0.208333333333333","rgba(64,70,135,1)"],["0.25","rgba(60,82,138,1)"],["0.291666666666667","rgba(56,93,140,1)"],["0.333333333333333","rgba(49,104,142,1)"],["0.375","rgba(46,114,142,1)"],["0.416666666666667","rgba(42,123,142,1)"],["0.458333333333333","rgba(38,133,141,1)"],["0.5","rgba(37,144,140,1)"],["0.541666666666667","rgba(33,154,138,1)"],["0.583333333333333","rgba(39,164,133,1)"],["0.625","rgba(47,174,127,1)"],["0.666666666666667","rgba(53,183,121,1)"],["0.708333333333333","rgba(79,191,110,1)"],["0.75","rgba(98,199,98,1)"],["0.791666666666667","rgba(119,207,85,1)"],["0.833333333333333","rgba(147,214,70,1)"],["0.875","rgba(172,220,52,1)"],["0.916666666666667","rgba(199,225,42,1)"],["0.958333333333333","rgba(226,228,40,1)"],["1","rgba(253,231,37,1)"]],"showscale":false,"color":[-1.42615647591519,0.534558965522388,0.649813738821003,0.15916708529726,0.0602935111094418,-0.198410671454472,-0.507664953808438,-1.79186390454441,0.32563279748629,-0.522018006411207,-0.375901151517704,1.0286036952873,0.285587224348486,0.610312541082637,-0.0412762192535305,0.543343258967794,-1.80195411627067,-0.381708588152501,1.74975164486155,0.149621576872127,-0.978265847735139,0.245081720271792,-1.22972984538683,0.903064159886121,-1.01856162848162,1.66819452130792,-0.323017729363422,-0.589371643144708,-0.950859996804566,-0.827720497172255,1.27698760764161,1.40094872848819,-0.807247026791791,-0.867052586066774,1.9644258316753,0.793251366266267,-0.930959678735651,-0.873437405320349,-0.112676264537701,-1.55363997043599,1.99302279664982,0.207961432334193,-0.45496994735502,-1.10158590792931,0.532723786503872,-1.40975115459819,0.622953758674086,-0.0221001130715112,-0.371844465602422,0.58164919219667,0.409010646150887,-1.36254027086187,0.556105373760013,0.224997827054565,1.38449403251438,2.23549755626393,1.13679415649086,0.966523289772127,-0.331563947445046,-1.79848218279214,0.0533779029827998,0.117423838671644,0.572945664993854,-0.98178903324673]}},"text":[2,5,6,7,8,9,10,11,13,14,20,21,23,24,26,27,28,29,31,35,36,37,39,40,41,42,43,45,46,47,49,50,51,52,53,55,58,59,60,64,66,67,68,69,70,71,72,73,75,76,78,79,81,83,84,86,87,89,91,93,94,96,99,100],"textposition":["top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center"],"type":"scatter3d","frame":null},{"x":[-2.91835137031162,2.46859542247142],"y":[-2.47700500704708,3.06233897347867],"type":"scatter3d","mode":"markers","opacity":0,"hoverinfo":"none","showlegend":false,"marker":{"colorbar":{"title":"","ticklen":2,"len":0.5,"lenmode":"fraction","y":1,"yanchor":"top"},"cmin":-1.80195411627067,"cmax":2.23549755626393,"colorscale":[["0","rgba(68,1,84,1)"],["0.0416666666666667","rgba(70,19,97,1)"],["0.0833333333333333","rgba(72,32,111,1)"],["0.125","rgba(71,45,122,1)"],["0.166666666666667","rgba(68,58,128,1)"],["0.208333333333333","rgba(64,70,135,1)"],["0.25","rgba(60,82,138,1)"],["0.291666666666667","rgba(56,93,140,1)"],["0.333333333333333","rgba(49,104,142,1)"],["0.375","rgba(46,114,142,1)"],["0.416666666666667","rgba(42,123,142,1)"],["0.458333333333333","rgba(38,133,141,1)"],["0.5","rgba(37,144,140,1)"],["0.541666666666667","rgba(33,154,138,1)"],["0.583333333333333","rgba(39,164,133,1)"],["0.625","rgba(47,174,127,1)"],["0.666666666666667","rgba(53,183,121,1)"],["0.708333333333333","rgba(79,191,110,1)"],["0.75","rgba(98,199,98,1)"],["0.791666666666667","rgba(119,207,85,1)"],["0.833333333333333","rgba(147,214,70,1)"],["0.875","rgba(172,220,52,1)"],["0.916666666666667","rgba(199,225,42,1)"],["0.958333333333333","rgba(226,228,40,1)"],["1","rgba(253,231,37,1)"]],"showscale":true,"color":[-1.80195411627067,2.23549755626393],"line":{"color":"rgba(255,127,14,1)"}},"z":[-1.80195411627067,2.23549755626393],"frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p><img src="clustering_files/figure-html/unnamed-chunk-58-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>Podemos observar que una única variable no queda bien representada, por ello decidimos quedarnos con 3 componentes principales. Visualicemos ahora el gráfico:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>grupo2_tipi <span class="ot">=</span> <span class="fu">scale</span>(grupo2[,<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>])</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>descomp <span class="ot">=</span> <span class="fu">svd</span>(grupo2_tipi)</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>x <span class="ot">=</span> descomp<span class="sc">$</span>u<span class="sc">%*%</span><span class="fu">diag</span>(descomp<span class="sc">$</span>d)</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>a_1 <span class="ot">=</span> x[,<span class="dv">1</span>]</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>a_2 <span class="ot">=</span> x[,<span class="dv">2</span>]</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>a_3 <span class="ot">=</span> x[,<span class="dv">3</span>]</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_ly</span>(grupo2, <span class="at">x =</span> <span class="sc">~</span>a_1, <span class="at">y =</span> <span class="sc">~</span>a_2, <span class="at">z =</span> <span class="sc">~</span>a_3, <span class="at">type =</span> <span class="st">"scatter3d"</span>, <span class="at">mode =</span> <span class="st">"markers+text"</span>, <span class="at">color=</span>a_3,</span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>               <span class="at">marker =</span> <span class="fu">list</span>(<span class="at">size =</span> <span class="dv">10</span>, <span class="at">color =</span> <span class="sc">~</span>a_2), <span class="at">text =</span> grupo2[,<span class="dv">7</span>],</span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>               <span class="at">textposition =</span> <span class="st">"top center"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">layout</span>(<span class="at">scene =</span> <span class="fu">list</span>(<span class="at">xaxis =</span> <span class="fu">list</span>(<span class="at">title =</span> <span class="st">'CP1'</span>),</span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>                      <span class="at">yaxis =</span> <span class="fu">list</span>(<span class="at">title =</span> <span class="st">'CP2'</span>),</span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a>                      <span class="at">zaxis =</span> <span class="fu">list</span>(<span class="at">title =</span> <span class="st">'CP3'</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="htmlwidget-f30d7598595affc4f25a" style="width:100%;height:464px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-f30d7598595affc4f25a">{"x":{"visdat":{"261c4b896541":["function () ","plotlyVisDat"]},"cur_data":"261c4b896541","attrs":{"261c4b896541":{"x":{},"y":{},"z":{},"mode":"markers+text","marker":{"size":10,"color":{}},"text":[2,5,6,7,8,9,10,11,13,14,20,21,23,24,26,27,28,29,31,35,36,37,39,40,41,42,43,45,46,47,49,50,51,52,53,55,58,59,60,64,66,67,68,69,70,71,72,73,75,76,78,79,81,83,84,86,87,89,91,93,94,96,99,100],"textposition":"top center","color":[-1.42615647591519,0.534558965522391,0.649813738821004,0.159167085297262,0.0602935111094406,-0.198410671454465,-0.507664953808432,-1.79186390454442,0.325632797486289,-0.522018006411209,-0.375901151517707,1.0286036952873,0.285587224348484,0.610312541082637,-0.0412762192535328,0.543343258967797,-1.80195411627067,-0.381708588152502,1.74975164486155,0.149621576872129,-0.978265847735144,0.245081720271789,-1.22972984538683,0.903064159886119,-1.01856162848163,1.66819452130792,-0.323017729363423,-0.589371643144708,-0.950859996804572,-0.827720497172255,1.27698760764162,1.40094872848819,-0.807247026791789,-0.867052586066774,1.9644258316753,0.793251366266266,-0.930959678735651,-0.873437405320347,-0.112676264537699,-1.55363997043599,1.99302279664982,0.207961432334192,-0.454969947355022,-1.10158590792931,0.532723786503872,-1.40975115459819,0.622953758674089,-0.0221001130715073,-0.371844465602423,0.581649192196669,0.409010646150889,-1.36254027086187,0.556105373760012,0.224997827054568,1.38449403251437,2.23549755626393,1.13679415649086,0.966523289772126,-0.331563947445046,-1.79848218279214,0.0533779029828014,0.117423838671644,0.572945664993856,-0.981789033246729],"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter3d"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"scene":{"xaxis":{"title":"CP1"},"yaxis":{"title":"CP2"},"zaxis":{"title":"CP3"}},"hovermode":"closest","showlegend":false,"legend":{"yanchor":"top","y":0.5}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":[-1.12070177472648,-1.09222054139785,2.1458751218595,1.45389205675951,1.52218620856955,-0.132816160540168,-0.36261941861869,2.23084386714522,2.37367480610583,-0.997744645683698,1.69597144035389,-0.594494627258287,1.11631813541,-1.25175271413273,-1.89182501303678,-1.66552560896517,-1.48863832765423,0.831520778940023,-0.217114785719352,0.151133755029187,-0.0725819926371556,-2.52801144020528,-1.1801704846014,0.622723994264275,2.46859542247142,-0.837337429692738,-1.13920401724319,-0.717182294175547,-1.15826737482416,-0.683327683728581,-0.683157805725902,1.51430909432481,-1.35859507908142,0.135636544986764,-0.454273190615499,-0.30534460466618,1.56509658561071,-2.91835137031162,-0.126942158935382,-1.48209630635076,-1.45282835736752,-0.0778777504537393,0.555584905306792,-1.65516395420932,-0.610035605139937,0.637322085524477,0.24898384690402,0.656806784308974,0.647158086369759,-0.0953493021023851,-0.126828915493662,1.06289683811644,0.549184864945823,1.88692955688174,2.38946769738652,-0.986836582484963,1.46313887031672,-0.897626506132364,1.16330902666892,1.16605718788149,-0.73043458404551,2.35686359544441,-1.21732952483958,-0.300873225089564],"y":[1.02225682712968,-1.35478769728682,-0.261178035576738,-0.899657465715974,0.29924513167356,-3.06233897347867,-2.50731566245988,1.12024950241642,0.325906315844479,1.30693935349613,1.14206757229357,-0.302616014299613,0.940485848376186,0.29144567556333,1.06311511592986,-1.4245133132832,1.12141010413186,0.387215078404384,2.2303902994038,-1.1093240209534,1.63798849098782,1.20957927011478,0.349128915988667,0.89107988427999,1.67487784092057,0.123372236036536,0.396727211627447,0.259889575263039,2.47700500704708,0.123139132762005,0.0118018496958355,-1.39209724122721,-0.742228256616817,-0.11726756662026,0.638824788409789,0.440992915632791,-0.577955019179707,-0.81203789630782,-0.89101629170648,-0.678347363807576,0.234656769868212,0.484009627836799,0.734792078277369,-1.27237860516069,0.348337968530163,0.513443856125749,-1.2781106716318,-1.57366183147252,0.529352131809671,0.17543155432113,-0.895783396186339,-0.849291167205412,0.811068167315539,-1.15223545386532,1.40834353992355,0.333786068049334,-1.59766185662938,0.604444645093171,0.132593168720971,-1.43895166454947,-0.70607536678187,-0.150793323278274,-0.507757783575379,-0.240011580444643],"z":[-1.42615647591519,0.534558965522391,0.649813738821004,0.159167085297262,0.0602935111094406,-0.198410671454465,-0.507664953808432,-1.79186390454442,0.325632797486289,-0.522018006411209,-0.375901151517707,1.0286036952873,0.285587224348484,0.610312541082637,-0.0412762192535328,0.543343258967797,-1.80195411627067,-0.381708588152502,1.74975164486155,0.149621576872129,-0.978265847735144,0.245081720271789,-1.22972984538683,0.903064159886119,-1.01856162848163,1.66819452130792,-0.323017729363423,-0.589371643144708,-0.950859996804572,-0.827720497172255,1.27698760764162,1.40094872848819,-0.807247026791789,-0.867052586066774,1.9644258316753,0.793251366266266,-0.930959678735651,-0.873437405320347,-0.112676264537699,-1.55363997043599,1.99302279664982,0.207961432334192,-0.454969947355022,-1.10158590792931,0.532723786503872,-1.40975115459819,0.622953758674089,-0.0221001130715073,-0.371844465602423,0.581649192196669,0.409010646150889,-1.36254027086187,0.556105373760012,0.224997827054568,1.38449403251437,2.23549755626393,1.13679415649086,0.966523289772126,-0.331563947445046,-1.79848218279214,0.0533779029828014,0.117423838671644,0.572945664993856,-0.981789033246729],"mode":"markers+text","marker":{"colorbar":{"title":"","ticklen":2},"cmin":-1.80195411627067,"cmax":2.23549755626393,"colorscale":[["0","rgba(68,1,84,1)"],["0.0416666666666667","rgba(70,19,97,1)"],["0.0833333333333334","rgba(72,32,111,1)"],["0.125","rgba(71,45,122,1)"],["0.166666666666667","rgba(68,58,128,1)"],["0.208333333333333","rgba(64,70,135,1)"],["0.25","rgba(60,82,138,1)"],["0.291666666666667","rgba(56,93,140,1)"],["0.333333333333333","rgba(49,104,142,1)"],["0.375","rgba(46,114,142,1)"],["0.416666666666667","rgba(42,123,142,1)"],["0.458333333333333","rgba(38,133,141,1)"],["0.5","rgba(37,144,140,1)"],["0.541666666666667","rgba(33,154,138,1)"],["0.583333333333333","rgba(39,164,133,1)"],["0.625","rgba(47,174,127,1)"],["0.666666666666667","rgba(53,183,121,1)"],["0.708333333333333","rgba(79,191,110,1)"],["0.75","rgba(98,199,98,1)"],["0.791666666666667","rgba(119,207,85,1)"],["0.833333333333333","rgba(147,214,70,1)"],["0.875","rgba(172,220,52,1)"],["0.916666666666667","rgba(199,225,42,1)"],["0.958333333333333","rgba(226,228,40,1)"],["1","rgba(253,231,37,1)"]],"showscale":false,"color":[1.02225682712968,-1.35478769728682,-0.261178035576738,-0.899657465715974,0.29924513167356,-3.06233897347867,-2.50731566245988,1.12024950241642,0.325906315844479,1.30693935349613,1.14206757229357,-0.302616014299613,0.940485848376186,0.29144567556333,1.06311511592986,-1.4245133132832,1.12141010413186,0.387215078404384,2.2303902994038,-1.1093240209534,1.63798849098782,1.20957927011478,0.349128915988667,0.89107988427999,1.67487784092057,0.123372236036536,0.396727211627447,0.259889575263039,2.47700500704708,0.123139132762005,0.0118018496958355,-1.39209724122721,-0.742228256616817,-0.11726756662026,0.638824788409789,0.440992915632791,-0.577955019179707,-0.81203789630782,-0.89101629170648,-0.678347363807576,0.234656769868212,0.484009627836799,0.734792078277369,-1.27237860516069,0.348337968530163,0.513443856125749,-1.2781106716318,-1.57366183147252,0.529352131809671,0.17543155432113,-0.895783396186339,-0.849291167205412,0.811068167315539,-1.15223545386532,1.40834353992355,0.333786068049334,-1.59766185662938,0.604444645093171,0.132593168720971,-1.43895166454947,-0.70607536678187,-0.150793323278274,-0.507757783575379,-0.240011580444643],"size":10,"line":{"colorbar":{"title":"","ticklen":2},"cmin":-1.80195411627067,"cmax":2.23549755626393,"colorscale":[["0","rgba(68,1,84,1)"],["0.0416666666666667","rgba(70,19,97,1)"],["0.0833333333333334","rgba(72,32,111,1)"],["0.125","rgba(71,45,122,1)"],["0.166666666666667","rgba(68,58,128,1)"],["0.208333333333333","rgba(64,70,135,1)"],["0.25","rgba(60,82,138,1)"],["0.291666666666667","rgba(56,93,140,1)"],["0.333333333333333","rgba(49,104,142,1)"],["0.375","rgba(46,114,142,1)"],["0.416666666666667","rgba(42,123,142,1)"],["0.458333333333333","rgba(38,133,141,1)"],["0.5","rgba(37,144,140,1)"],["0.541666666666667","rgba(33,154,138,1)"],["0.583333333333333","rgba(39,164,133,1)"],["0.625","rgba(47,174,127,1)"],["0.666666666666667","rgba(53,183,121,1)"],["0.708333333333333","rgba(79,191,110,1)"],["0.75","rgba(98,199,98,1)"],["0.791666666666667","rgba(119,207,85,1)"],["0.833333333333333","rgba(147,214,70,1)"],["0.875","rgba(172,220,52,1)"],["0.916666666666667","rgba(199,225,42,1)"],["0.958333333333333","rgba(226,228,40,1)"],["1","rgba(253,231,37,1)"]],"showscale":false,"color":[-1.42615647591519,0.534558965522391,0.649813738821004,0.159167085297262,0.0602935111094406,-0.198410671454465,-0.507664953808432,-1.79186390454442,0.325632797486289,-0.522018006411209,-0.375901151517707,1.0286036952873,0.285587224348484,0.610312541082637,-0.0412762192535328,0.543343258967797,-1.80195411627067,-0.381708588152502,1.74975164486155,0.149621576872129,-0.978265847735144,0.245081720271789,-1.22972984538683,0.903064159886119,-1.01856162848163,1.66819452130792,-0.323017729363423,-0.589371643144708,-0.950859996804572,-0.827720497172255,1.27698760764162,1.40094872848819,-0.807247026791789,-0.867052586066774,1.9644258316753,0.793251366266266,-0.930959678735651,-0.873437405320347,-0.112676264537699,-1.55363997043599,1.99302279664982,0.207961432334192,-0.454969947355022,-1.10158590792931,0.532723786503872,-1.40975115459819,0.622953758674089,-0.0221001130715073,-0.371844465602423,0.581649192196669,0.409010646150889,-1.36254027086187,0.556105373760012,0.224997827054568,1.38449403251437,2.23549755626393,1.13679415649086,0.966523289772126,-0.331563947445046,-1.79848218279214,0.0533779029828014,0.117423838671644,0.572945664993856,-0.981789033246729]}},"text":[2,5,6,7,8,9,10,11,13,14,20,21,23,24,26,27,28,29,31,35,36,37,39,40,41,42,43,45,46,47,49,50,51,52,53,55,58,59,60,64,66,67,68,69,70,71,72,73,75,76,78,79,81,83,84,86,87,89,91,93,94,96,99,100],"textposition":["top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center","top center"],"type":"scatter3d","frame":null},{"x":[-2.91835137031162,2.46859542247142],"y":[-3.06233897347867,2.47700500704708],"type":"scatter3d","mode":"markers","opacity":0,"hoverinfo":"none","showlegend":false,"marker":{"colorbar":{"title":"","ticklen":2,"len":0.5,"lenmode":"fraction","y":1,"yanchor":"top"},"cmin":-1.80195411627067,"cmax":2.23549755626393,"colorscale":[["0","rgba(68,1,84,1)"],["0.0416666666666667","rgba(70,19,97,1)"],["0.0833333333333334","rgba(72,32,111,1)"],["0.125","rgba(71,45,122,1)"],["0.166666666666667","rgba(68,58,128,1)"],["0.208333333333333","rgba(64,70,135,1)"],["0.25","rgba(60,82,138,1)"],["0.291666666666667","rgba(56,93,140,1)"],["0.333333333333333","rgba(49,104,142,1)"],["0.375","rgba(46,114,142,1)"],["0.416666666666667","rgba(42,123,142,1)"],["0.458333333333333","rgba(38,133,141,1)"],["0.5","rgba(37,144,140,1)"],["0.541666666666667","rgba(33,154,138,1)"],["0.583333333333333","rgba(39,164,133,1)"],["0.625","rgba(47,174,127,1)"],["0.666666666666667","rgba(53,183,121,1)"],["0.708333333333333","rgba(79,191,110,1)"],["0.75","rgba(98,199,98,1)"],["0.791666666666667","rgba(119,207,85,1)"],["0.833333333333333","rgba(147,214,70,1)"],["0.875","rgba(172,220,52,1)"],["0.916666666666667","rgba(199,225,42,1)"],["0.958333333333333","rgba(226,228,40,1)"],["1","rgba(253,231,37,1)"]],"showscale":true,"color":[-1.80195411627067,2.23549755626393],"line":{"color":"rgba(255,127,14,1)"}},"z":[-1.80195411627067,2.23549755626393],"frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<p>Dado que las 3 componentes principales tienen mucha información, no podemos realizar un agrupamiento de los datos como es debido, deberíamos realizar otros estudios para ello.</p>
+</section>
+<section id="conclusiones" class="level1">
+<h1>Conclusiones</h1>
+<p>El dataset tiene muchas observaciones, y los datos no estan muy bien agrupados, no es un buen dataset para realizar un estudio de clustering y ACP. A diferencia de el estudio de correlaciones, dónde si obtuvimos muchas conclusiones, en éste estudio no podemos hacerlo. Si quisiésemos seguir con este estudio deberíamos cambiar el dataset.</p>
 </section>
 
 </main>
