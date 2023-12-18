@@ -76,13 +76,7 @@ heartdisease_categoric <- heartdisease %>%
 
 ##K-means
 
-```{r}
-mat_dist <- dist(x = heartdisease_numeric, method = "euclidean")
-```
 
-```{r}
-#mat_dist <- get_dist(x = heartdisease_numeric, method = "pearson")
-```
 
 ```{r}
 datos_temp <- as_tibble(heartdisease_numeric)
@@ -142,11 +136,19 @@ theme_bw() +
 theme(legend.position = "right")
 ```
 
-#K−medoids
+# K−medoids
 
 ```{r}
-dist_manhattan <- get_dist(x = datos_2, method = "manhattan")
-fviz_dist(dist.obj = dist_manhattan, lab_size = 5) +
+mat_dist <- dist(x = datos_2, method = "euclidean")
+```
+
+```{r}
+#mat_dist <- get_dist(x = datos_2, method = "pearson")
+```
+
+```{r}
+
+fviz_dist(dist.obj = mat_dist, lab_size = 5) +
  theme(legend.position = "right")
 ```
 
