@@ -72,7 +72,9 @@ heartdisease_categoric <- heartdisease %>%
   select(where(is.factor))
 ```
 
-#Partitioning Clustering ##K-means
+#Partitioning Clustering 
+
+##K-means
 
 ```{r}
 mat_dist <- dist(x = heartdisease_numeric, method = "euclidean")
@@ -166,7 +168,7 @@ fviz_nbclust(x = datos_2, FUNcluster = pam, method = "gap_stat", nboot = 50,
 ```
 
 ```{r}
-pam_clusters <- pam(x = datos_2, k = 4, metric = "manhattan")
+pam_clusters <- pam(x = datos_2, k = 2, metric = "manhattan")
 
 fviz_cluster(object = pam_clusters, data = datos_2, ellipse.type = "t",
             repel = TRUE) +
@@ -240,7 +242,7 @@ theme_bw()
 ```{r,warning=FALSE}
 hc_centroid <- hclust(d=mat_dist,method="centroid")
 
-fviz_dend(x = hc_centroid, k = 2, cex = 0.6)
+fviz_dend(x = hc_centroid, k = 2, cex = 0.6,show_labels = FALSE)
 ```
 
 ```{r}
